@@ -24,7 +24,8 @@
         </activity>
         <activity
             android:name=".CameraView"
-            android:label="@string/title_activity_camera_view" >
+            android:label="@string/title_activity_camera_view"
+            android:screenOrientation="fullSensor">
         </activity>
         
     </application>
