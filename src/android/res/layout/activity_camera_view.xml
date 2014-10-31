@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.geneanet.testcustomcamera.CameraView" >
+    tools:context="org.geneanet.customcamera.CameraView" >
     
     <FrameLayout
     android:id="@+id/camera_preview"

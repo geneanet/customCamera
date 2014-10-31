@@ -1,4 +1,4 @@
-package org.geneanet.testcustomcamera.utils;
+package org.geneanet.customcamera.utils;
 
 import android.hardware.Camera;
 
