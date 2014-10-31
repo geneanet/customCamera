@@ -4,6 +4,5 @@
 
 bin/*
 gen/*
-!gen/.gitkeep
 libs/*
 !libs/.gitkeep
