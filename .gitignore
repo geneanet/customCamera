@@ -1,0 +1,10 @@
+.settings
+.project
+.classpath
+
+bin/*
+!bin/.gitkeep
+gen/*
+!gen/.gitkeep
+libs/*
+!libs/.gitkeep
