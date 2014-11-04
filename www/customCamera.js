@@ -11,8 +11,8 @@ var customCameraExport = function() {
 };
 
 // add method.
-customCameraExport.prototype.jesaispasquoionverra = function() {
-    
+customCameraExport.prototype.getPicture = function() {
+    alert("Oh yeah !");
 };
 
 module.exports = new customCameraExport();

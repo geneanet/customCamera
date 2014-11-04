@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin 
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="org.geneanet.customCamera"
+    version="0.0.1"
+>
+    <name>customCamera</name>
+    <description>customCamera by Geneanet</description>
+    <license>undefined</license>
+    <keywords>custom,camera,geneanet</keywords>
+    <js-module src="www/customCamera.js" name="customCamera">
+        <clobbers target="customCamera" />
+    </js-module>
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="CustomCamera">
+                <param name="android-package" value="org.geneanet.customCamera"/>
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.CAMERA" />
+        </config-file>
+    </platform>
+</plugin>
