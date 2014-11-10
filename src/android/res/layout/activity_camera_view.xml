@@ -2,28 +2,122 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="0dp"
+    android:paddingTop="0dp"
     tools:context="org.geneanet.customcamera.CameraView" >
     
     <FrameLayout
     android:id="@+id/camera_preview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
+
     </FrameLayout>
 
-    <ImageView
-        android:id="@+id/imageView2"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.5"
-        android:contentDescription="@string/sss"
-        android:src="@drawable/labs" />
+        android:orientation="horizontal" >
 
-	<Button
-		android:id="@+id/button_capture"
-	    android:text="@string/capture"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_gravity="center"
-	    />
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+
+            <ImageView
+                android:id="@+id/normal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:alpha="0.2"
+                android:contentDescription="@string/descImage"
+                android:scaleType="fitXY"
+                android:src="@drawable/normal" />
+
+            <ImageView
+                android:id="@+id/colorise"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:alpha="0"
+                android:contentDescription="@string/descImage"
+                android:scaleType="fitXY"
+                android:src="@drawable/colorise" />
+
+            <ImageView
+                android:id="@+id/paysage"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:alpha="0"
+                android:contentDescription="@string/descImage"
+                android:rotation="90"
+                android:src="@drawable/paysage" />
+
+            <ImageView
+                android:id="@+id/couthenans"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:alpha="0"
+                android:contentDescription="@string/descImage"
+                android:rotation="90"
+                android:src="@drawable/couthenans" />
+
+            <ImageView
+                android:id="@+id/hericourt"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:alpha="0"
+                android:contentDescription="@string/descImage"
+                android:rotation="90"
+                android:src="@drawable/hericourt" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentTop="false"
+        android:layout_centerHorizontal="false"
+        android:layout_centerInParent="false"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/Miniature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:contentDescription="@string/BoutonMiniature"
+            android:onClick="showMiniature"
+            android:text="@string/Miniature" />
+
+        <Button
+            android:id="@+id/capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_weight="150"
+            android:minWidth="0dp"
+            android:text="@string/PHOTO" />
+
+        <org.geneanet.customcamera.utils.VerticalSeekBar
+            android:id="@+id/switchOpacity"
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="30dp"
+            android:layout_weight="0"
+
+            android:maxHeight="13dp"
+            android:minHeight="0dp"
+            android:progress="0"
+            android:max="7"
+            android:secondaryProgress="7"
+            android:thumb="@drawable/thumb"
+            android:progressDrawable="@drawable/custom_opacity_bar"
+            android:alpha="0.6" />
+
+    </LinearLayout>
 
 </RelativeLayout>

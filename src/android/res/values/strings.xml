@@ -9,5 +9,8 @@
     <string name="capture">Capture</string>
     <string name="todo">TODO</string>
     <string name="sss">sss</string>
-
+    <string name="Miniature">Miniature</string>
+    <string name="PHOTO">Photo</string>
+    <string name="BoutonMiniature">Ceci est le bouton permettant d\'afficher une miniature</string>
+	<string name="descImage">Il s\'agit de l\'image de fond de l\'appareil photo</string>
 </resources>
