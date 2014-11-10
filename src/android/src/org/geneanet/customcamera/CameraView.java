@@ -1,8 +1,8 @@
 package org.geneanet.customcamera;
 
+import org.geneanet.customcamera.R;
 import org.geneanet.customcamera.utils.CameraPreview;
 import org.geneanet.customcamera.utils.CustomCamera;
-import org.geneanet.testcustomcamera.R;
 
 import android.app.Activity;
 import android.content.res.Configuration;

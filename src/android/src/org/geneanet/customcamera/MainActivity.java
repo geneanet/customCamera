@@ -1,6 +1,6 @@
 package org.geneanet.customcamera;
 
-import org.geneanet.testcustomcamera.R;
+import org.geneanet.customcamera.R;
 
 import android.app.Activity;
 import android.content.Context;
