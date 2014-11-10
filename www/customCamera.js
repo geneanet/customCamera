@@ -25,7 +25,7 @@ customCameraExport.prototype.startCamera = function() {
             console.log("fail");
             console.log(result);
         },
-        "CameraLauncher",
+        "CustomCamera",
         "customCamera",
         []
     );
