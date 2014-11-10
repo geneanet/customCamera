@@ -15,7 +15,7 @@
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CustomCamera">
-                <param name="android-package" value="org.geneanet.customCamera"/>
+                <param name="android-package" value="org.geneanet.customCamera.CameraLauncher"/>
             </feature>
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/*">

@@ -16,7 +16,7 @@ customCameraExport.prototype.getPicture = function() {
 };
 
 customCameraExport.prototype.startCamera = function() {
-    cordova.exec(
+    exec(
         function(result) {
             console.log("success");
             console.log(result);
