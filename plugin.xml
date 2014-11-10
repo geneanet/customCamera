@@ -15,13 +15,13 @@
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CustomCamera">
-                <param name="android-package" value="org.geneanet.customCamera.CameraLauncher"/>
+                <param name="android-package" value="org.geneanet.customcamera.CameraLauncher"/>
             </feature>
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/*">
             <uses-permission android:name="android.permission.CAMERA" />
         </config-file>
 
-        <source-file src="src/android/src/org/geneanet/customcamera/CameraLauncher.java" target-dir="src/org/geneanet/customCamera" />
+        <source-file src="src/android/src/org/geneanet/customcamera/CameraLauncher.java" target-dir="src/org/geneanet/customcamera" />
     </platform>
 </plugin>
