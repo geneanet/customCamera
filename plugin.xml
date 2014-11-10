@@ -22,22 +22,10 @@
             <uses-permission android:name="android.permission.CAMERA" />
         </config-file>
 
+        <source-file src="src/android/CustomCamera.jar" target-dir="libs" framework="true" />
         <source-file
-            src="src/android/src/org/geneanet/customcamera/CameraLauncher.java"
+            src="src/android/CameraLauncher.java"
             target-dir="src/org/geneanet/customcamera"
-        />
-        <source-file
-            src="src/android/src/org/geneanet/customcamera/CameraView.java"
-            target-dir="src/org/geneanet/customcamera"
-        />
-
-        <source-file
-            src="src/android/src/org/geneanet/customcamera/utils/CameraPreview.java"
-            target-dir="src/org/geneanet/customcamera/utils"
-        />
-        <source-file
-            src="src/android/src/org/geneanet/customcamera/utils/CustomCamera.java"
-            target-dir="src/org/geneanet/customcamera/utils"
         />
     </platform>
 </plugin>
