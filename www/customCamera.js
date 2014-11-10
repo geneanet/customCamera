@@ -26,7 +26,7 @@ customCameraExport.prototype.startCamera = function() {
             console.log(result);
         },
         "CustomCamera",
-        "customCamera",
+        "testAction",
         []
     );
 };

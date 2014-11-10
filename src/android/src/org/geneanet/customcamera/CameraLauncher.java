@@ -14,4 +14,9 @@ public class CameraLauncher extends CordovaPlugin {
 		
         return true;
     }
+	
+	public void testAction()
+	{
+		
+	}
 }
