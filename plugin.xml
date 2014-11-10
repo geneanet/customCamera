@@ -21,5 +21,7 @@
         <config-file target="AndroidManifest.xml" parent="/*">
             <uses-permission android:name="android.permission.CAMERA" />
         </config-file>
+
+        <source-file src="src/org/geneanet/customCamera/CameraLauncher.java" target-dir="src/org/geneanet/customCamera/CustomCamera" />
     </platform>
 </plugin>

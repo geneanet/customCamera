@@ -15,4 +15,20 @@ customCameraExport.prototype.getPicture = function() {
     alert("Oh yeah !");
 };
 
+customCameraExport.prototype.startCamera = function() {
+    cordova.exec(
+        function(result) {
+            console.log("success");
+            console.log(result);
+        },
+        function(result) {
+            console.log("fail");
+            console.log(result);
+        },
+        "CameraLauncher",
+        "customCamera",
+        []
+    );
+};
+
 module.exports = new customCameraExport();
