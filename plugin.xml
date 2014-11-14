@@ -12,6 +12,9 @@
     <js-module src="www/customCamera.js" name="customCamera">
         <clobbers target="customCamera" />
     </js-module>
+
+    <hook type="after_plugin_install" src="hooks/after_plugin_install/npminstall.js" />
+
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CustomCamera">
@@ -22,10 +25,10 @@
             <uses-permission android:name="android.permission.CAMERA" />
         </config-file>
 
-        <source-file src="src/android/CustomCamera.jar" target-dir="libs" framework="true" />
-        <source-file
-            src="src/android/CameraLauncher.java"
-            target-dir="src/org/geneanet/customcamera"
-        />
+        <source-file src="src/android/CameraLauncher.java" target-dir="src/org/geneanet/customcamera" />
+        <source-file src="src/android/customCamera/src/org/geneanet/customcamera/CustomCamera.java" target-dir="src/org/geneanet/customcamera" />
+        <source-file src="src/android/customCamera/src/org/geneanet/customcamera/CameraPreview.java" target-dir="src/org/geneanet/customcamera" />
+
+        <hook type="before_build" src="hooks/before_build/generateActivity.js" />
     </platform>
 </plugin>

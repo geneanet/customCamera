@@ -1,5 +1,6 @@
 package org.geneanet.customcamera;
 
+import XXX_NAME_CURRENT_PACKAGE_XXX.CameraView;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
@@ -9,14 +10,9 @@ import android.content.Intent;
 
 public class CameraLauncher extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        Intent intent = new Intent("org.geneanet.customcamera.CameraView");
-        cordova.startActivityForResult((CordovaPlugin) this, intent, 1111111);
-        
+        Intent intent = new Intent(this.cordova.getActivity(), CameraView.class);
+        cordova.getActivity().startActivity(intent);
+
         return true;
-    }
-    
-    public void testAction()
-    {
-        
     }
 }

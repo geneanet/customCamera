@@ -1,23 +1,15 @@
 package org.geneanet.customcamera;
 
-import org.geneanet.customcamera.R;
-import org.geneanet.customcamera.utils.CameraPreview;
-import org.geneanet.customcamera.utils.CustomCamera;
+import org.geneanet.customcamera.CameraPreview;
+import org.geneanet.customcamera.CustomCamera;
 
 import android.app.Activity;
-import android.content.res.Configuration;
-import android.graphics.Matrix;
-import android.graphics.Point;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 
 public class CameraView extends Activity {
 	
@@ -32,7 +24,7 @@ public class CameraView extends Activity {
 	    this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    //Remove notification bar
 	    this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+
 		setContentView(R.layout.activity_camera_view);
 		
 		// Récupère les infos sur le device.
