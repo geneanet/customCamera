@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin 
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="org.geneanet.customCamera"
+    version="0.0.1"
+>
+    <name>customCamera</name>
+    <description>customCamera by Geneanet</description>
+    <license>undefined</license>
+    <keywords>custom,camera,geneanet</keywords>
+    <js-module src="www/customCamera.js" name="customCamera">
+        <clobbers target="customCamera" />
+    </js-module>
+
+    <hook type="after_plugin_install" src="hooks/after_plugin_install/npminstall.js" />
+
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="CustomCamera">
+                <param name="android-package" value="org.geneanet.customcamera.CameraLauncher"/>
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.CAMERA" />
+        </config-file>
+
+        <source-file src="src/android/CameraLauncher.java" target-dir="src/org/geneanet/customcamera" />
+        <source-file src="src/android/customCamera/src/org/geneanet/customcamera/CustomCamera.java" target-dir="src/org/geneanet/customcamera" />
+        <source-file src="src/android/customCamera/src/org/geneanet/customcamera/CameraPreview.java" target-dir="src/org/geneanet/customcamera" />
+
+        <hook type="before_build" src="hooks/before_build/generateActivity.js" />
+    </platform>
+</plugin>

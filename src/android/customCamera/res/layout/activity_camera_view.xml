@@ -27,7 +27,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:alpha="0.2"
-                android:contentDescription="@string/descImage"
                 android:scaleType="fitXY"
                 android:src="@drawable/normal" />
 
@@ -36,7 +35,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:alpha="0"
-                android:contentDescription="@string/descImage"
                 android:scaleType="fitXY"
                 android:src="@drawable/colorise" />
 
@@ -45,7 +43,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:alpha="0"
-                android:contentDescription="@string/descImage"
                 android:rotation="90"
                 android:src="@drawable/paysage" />
 
@@ -54,7 +51,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:alpha="0"
-                android:contentDescription="@string/descImage"
                 android:rotation="90"
                 android:src="@drawable/couthenans" />
 
@@ -63,7 +59,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:alpha="0"
-                android:contentDescription="@string/descImage"
                 android:rotation="90"
                 android:src="@drawable/hericourt" />
 
@@ -86,7 +81,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:contentDescription="@string/BoutonMiniature"
             android:onClick="showMiniature"
             android:text="@string/Miniature" />
 
@@ -99,7 +93,7 @@
             android:minWidth="0dp"
             android:text="@string/PHOTO" />
 
-        <org.geneanet.customcamera.utils.VerticalSeekBar
+        <org.geneanet.customcamera.VerticalSeekBar
             android:id="@+id/switchOpacity"
             android:layout_width="wrap_content"
             android:layout_height="300dp"

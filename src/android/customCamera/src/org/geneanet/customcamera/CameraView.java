@@ -1,22 +1,16 @@
 package org.geneanet.customcamera;
 
+import org.geneanet.customcamera.*;
+
 import java.util.List;
 import java.lang.Math;
 
-import org.geneanet.customcamera.utils.CameraPreview;
-import org.geneanet.customcamera.utils.CustomCamera;
-import org.geneanet.testcustomcamera.R;
-
 import android.app.Activity;
-
 import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -50,7 +44,7 @@ public class CameraView extends Activity {
 	    
 	    /* Remove notification bar */
 	    this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+
 		setContentView(R.layout.activity_camera_view);
 		
 		/* Get informations about the device */

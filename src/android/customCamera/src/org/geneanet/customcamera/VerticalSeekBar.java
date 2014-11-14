@@ -1,4 +1,4 @@
-package org.geneanet.customcamera.utils;
+package org.geneanet.customcamera;
 
 import android.content.Context;
 import android.graphics.Canvas;
