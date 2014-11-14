@@ -8,13 +8,15 @@ import org.geneanet.customcamera.utils.CustomCamera;
 import org.geneanet.testcustomcamera.R;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -28,13 +30,19 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 public class CameraView extends Activity {
 	
     private float mDist;
-    private Camera mCamera;
     private int modeMiniature = 0;
     private CameraPreview mPreview;
+    static boolean clickOn = false;
+    private static Camera mCamera = null;
     public static final int MEDIA_TYPE_IMAGE = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		
+		
+		System.out.println("ON RENTRE DANS L'APPLICATION");
+		
+		
 		super.onCreate(savedInstanceState);
 		
 		/* Remove title bar */
@@ -51,21 +59,23 @@ public class CameraView extends Activity {
 		/* Get object which use the camera and orient it in function of the screen */
 		mCamera = CustomCamera.getCameraInstance();
 		
-		switch (display.getRotation()) {
-			case CustomCamera.LANDSCAPE:
-				mCamera.setDisplayOrientation(0);
-				break;
-			case CustomCamera.PORTRAIT:
-				mCamera.setDisplayOrientation(90);
-				break;
-			case CustomCamera.LANDSCAPE_INVERSED:
-				mCamera.setDisplayOrientation(180);
-				break;
-			case CustomCamera.PORTRAIT_INVERSED:
-				mCamera.setDisplayOrientation(270);
-				break;
+		if (getResources().getConfiguration().orientation == 0){
+			switch (display.getRotation()) {
+				case CustomCamera.LANDSCAPE:
+					mCamera.setDisplayOrientation(0);
+					break;
+				case CustomCamera.PORTRAIT:
+					mCamera.setDisplayOrientation(90);
+					break;
+				case CustomCamera.LANDSCAPE_INVERSED:
+					mCamera.setDisplayOrientation(180);
+					break;
+				case CustomCamera.PORTRAIT_INVERSED:
+					mCamera.setDisplayOrientation(270);
+					break;
+			}
 		}
-		
+			
 		/* Assign the render to the view */
 		mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
@@ -120,23 +130,21 @@ public class CameraView extends Activity {
 	/*******************************************************/
 	/** BLOCK THE ROTATION IN FUNCTION OF THE POSTAL CARD **/
 	/*******************************************************/
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus){
-		ImageView imageView = (ImageView) findViewById(R.id.normal);
-	    int widthImage=imageView.getWidth();
-	    int heightImage=imageView.getHeight();
-	    
-	    System.out.println("Largeur : "+widthImage);
-	    System.out.println("Hauteur : "+heightImage);
-		
-	    if(heightImage < widthImage || imageView.getRotation() != 0){
-	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-	    	imageView.setRotation(0);
-	    }
-	    else{
-	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-	    }
-	}
+//	@Override
+//	public void onWindowFocusChanged(boolean hasFocus){
+//		
+//		ImageView imageView = (ImageView) findViewById(R.id.normal);
+//	    int widthImage=imageView.getWidth();
+//	    int heightImage=imageView.getHeight();
+//	   
+//	    if(heightImage < widthImage || imageView.getRotation() != 0){
+//	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//	    	imageView.setRotation(0);
+//	    }
+//	    else{
+//	    	this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//	    }
+//	}
 	
 	/******************/
 	/** FOR THE ZOOM **/
@@ -241,5 +249,29 @@ public class CameraView extends Activity {
                 }
 			});
 		}
+	}
+	
+	/****************************************************/
+	/** METHODE POUR DETRUIRE LA VUE (ICI, l'ACTIVITE) **/
+	/****************************************************/
+	protected void onDestroy(){
+		System.out.println("onDestroy -> JE DETRUIS LA VUE ! ");
+		super.onDestroy();
+		if(mCamera!=null){
+			System.out.println("onDestroy -> LA CAMERA N'EST PAS NULL ");
+			mCamera.stopPreview();
+		    mCamera = null;
+		    System.out.println("onDestroy -> DESTRUCTION TERMINEE ");
+		}
+	}
+	
+	/********************************************************/
+	/** METHODE POUR METTRE LA NOUVELLE VUE APRES ROTATION **/
+	/********************************************************/
+	protected void onResume(){
+		System.out.println("onResume -> JE REMET LA VUE ! ");
+		super.onResume();
+//		mPreview.getHolder().removeCallback(mPreview);
+		System.out.println("onResume -> test ");
 	}
 }

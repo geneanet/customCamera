@@ -26,19 +26,19 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void surfaceCreated(SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
-        try {
+    	try {
+    		mCamera.setPreviewCallback(null);
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
         } catch (IOException e) {
+        	mCamera.release();
+        	mCamera = null;
             Log.d("error", "Error setting camera preview: " + e.getMessage());
         }
     }
 
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in your activity.
-    }
-
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+    	System.out.println("surfaceChanged");
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
@@ -46,17 +46,19 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
           // preview surface does not exist
           return;
         }
-
+//  
         // stop preview before making changes
         try {
+        	System.out.println("SHIT");
+        	mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
         } catch (Exception e){
           // ignore: tried to stop a non-existent preview
         }
-
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
-
+//
+//        // set preview size and make any resize, rotate or
+//        // reformatting changes here
+//
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mHolder);
@@ -64,6 +66,21 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         } catch (Exception e){
             Log.d("error", "Error starting camera preview: " + e.getMessage());
+        }
+    }
+    
+    /********************************************/
+    /** POUR DETRUIRE LA SURFACE DE LA PREVIEW **/
+    /********************************************/
+    public void surfaceDestroyed(SurfaceHolder holder) {
+    	System.out.println("SURFACE DESTROYED");
+        if(mCamera!=null){
+        	System.out.println("surfaceDestroyed -> LA CAMERA N'EST PAS NULLE");
+        	mCamera.setPreviewCallback(null);
+        	mCamera.stopPreview();
+//        	mCamera.release();
+        	mCamera = null;
+        	System.out.println("surfaceDestroy -> DESTRUCTION TERMINEE ");
         }
     }
 }
