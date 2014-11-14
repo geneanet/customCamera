@@ -11,6 +11,7 @@ var pathConfigXml = "config.xml";
 var pathAndroidCordova = "platforms/android/";
 var pathResAndroidCordova = "platforms/android/res/";
 var pathAndroidPlugin = __dirname+"/../../src/android/";
+var pathResAndroidPlugin = pathAndroidPlugin+"customCamera/res/";
 var pathResPlugin = __dirname+"/../../res/";
 
 /**
@@ -120,9 +121,9 @@ var updateConfig = function() {
     var pathTranslations = pathResPlugin+"translations.json";
     if (fs.existsSync(pathTranslations)) {
         // get translations.
-        var translationsForApplications = fs.readFileSync(pathTranslations, {encoding: "utf8"});
-        translationsForApplications = JSON.parse(translationsForApplications);
-        for (lang in translationsForApplications) {
+        var translationsForApplication = fs.readFileSync(pathTranslations, {encoding: "utf8"});
+        translationsForApplication = JSON.parse(translationsForApplication);
+        for (lang in translationsForApplication) {
             var pathFileTranslate = pathResAndroidCordova+"values-"+lang+"/";
 
             var objToXml;
@@ -142,9 +143,9 @@ var updateConfig = function() {
             }
 
             // add message.
-            for (tag in translationsForApplications[lang]) {
+            for (tag in translationsForApplication[lang]) {
                 objToXml["resources"]["string"].push({
-                    _: translationsForApplications[lang][tag],
+                    _: translationsForApplication[lang][tag],
                     $: {
                         name: tag
                     }
@@ -161,6 +162,22 @@ var updateConfig = function() {
         console.error("File translations.json in plugin not found.");
         process.exit(1);
     }
+
+    var contentResAndroidPlugin = fs.readdirSync(pathResAndroidPlugin);
+    for (var i = contentResAndroidPlugin.length - 1; i >= 0; i--) {
+        var nameDirDrawable = contentResAndroidPlugin[i];
+        if (nameDirDrawable.match(/^drawable-.*$/)) {
+            var contentDrawableDir = fs.readdirSync(pathResAndroidPlugin+nameDirDrawable);
+            for (var j = contentDrawableDir.length - 1; j >= 0; j--) {
+                var nameFileInDrawable = contentDrawableDir[j];
+                var contentFileDrawable = fs.readFileSync(pathResAndroidPlugin+nameDirDrawable+"/"+nameFileInDrawable);
+                if (!fs.existsSync(pathResAndroidCordova+nameDirDrawable)) {
+                    fs.mkdirSync(pathResAndroidCordova+nameDirDrawable);
+                }
+                fs.writeFileSync(pathResAndroidCordova+nameDirDrawable+"/"+nameFileInDrawable, contentFileDrawable);
+            };
+        }
+    };
 }
 
 // Check if files required exist.
