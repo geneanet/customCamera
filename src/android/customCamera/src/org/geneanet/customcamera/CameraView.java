@@ -32,11 +32,6 @@ public class CameraView extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
-		
-		System.out.println("ON RENTRE DANS L'APPLICATION");
-		
-		
 		super.onCreate(savedInstanceState);
 		
 		/* Remove title bar */
@@ -165,9 +160,9 @@ public class CameraView extends Activity {
 	    return true;
 	}
 
-	/******************/
-	/** GERE LE ZOOM **/
-	/******************/
+	/*********************/
+	/** MANAGE THE ZOOM **/
+	/*********************/
 	private void handleZoom(MotionEvent event, Camera.Parameters params, float mDist) {
 	    int maxZoom = params.getMaxZoom();
 	    int zoom = params.getZoom();
@@ -187,9 +182,9 @@ public class CameraView extends Activity {
 		mCamera.setParameters(params);
 	}
 
-	/*******************/
-	/** GERE LE FOCUS **/
-	/*******************/
+	/**********************/
+	/** MANAGE THE FOCUS **/
+	/**********************/
 	public void handleFocus(MotionEvent event, Camera.Parameters params) {
 	    List<String> supportedFocusModes = params.getSupportedFocusModes();
 	    if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
@@ -201,7 +196,7 @@ public class CameraView extends Activity {
 	}
 
 	/*******************************************************/
-	/** DETERMINE L'ESPACE ENTRE LES DEUX PREMIERS DOIGTS **/
+	/** DETERMINE THE SPACE BETWEEN THE FIRST TWO FINGERS **/
 	/*******************************************************/
 	private float getFingerSpacing(MotionEvent event) {
 	    float x = event.getX(0) - event.getX(1);
@@ -210,7 +205,7 @@ public class CameraView extends Activity {
 	}
 	
 	/***************************/
-	/** AFFICHER LA MINIATURE **/
+	/** DISPLAY THE MINIATURE **/
 	/***************************/
 	public void showMiniature(View view){
 		ImageView imageView = (ImageView) findViewById(R.id.normal);
@@ -218,10 +213,8 @@ public class CameraView extends Activity {
 		
 		if(modeMiniature == 0){
 			FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
-			
 			paramsMiniature.gravity=Gravity.BOTTOM;
-			imageView.setAlpha(imageView.getAlpha());
-			
+			imageView.setAlpha(imageView.getAlpha());	
 			modeMiniature = 1;
 			
 			imageView.setLayoutParams(paramsMiniature);
@@ -245,27 +238,21 @@ public class CameraView extends Activity {
 		}
 	}
 	
-	/****************************************************/
-	/** METHODE POUR DETRUIRE LA VUE (ICI, l'ACTIVITE) **/
-	/****************************************************/
+	/*****************************************************/
+	/** METHOD TO DESTROY THE VIEW (HERE, THE ACTIVITY) **/
+	/*****************************************************/
 	protected void onDestroy(){
-		System.out.println("onDestroy -> JE DETRUIS LA VUE ! ");
 		super.onDestroy();
 		if(mCamera!=null){
-			System.out.println("onDestroy -> LA CAMERA N'EST PAS NULL ");
 			mCamera.stopPreview();
 		    mCamera = null;
-		    System.out.println("onDestroy -> DESTRUCTION TERMINEE ");
 		}
 	}
 	
-	/********************************************************/
-	/** METHODE POUR METTRE LA NOUVELLE VUE APRES ROTATION **/
-	/********************************************************/
+	/*************************************************/
+	/** METHOD TO APPLY THE NEW VIEW AFTER ROTATION **/
+	/*************************************************/
 	protected void onResume(){
-		System.out.println("onResume -> JE REMET LA VUE ! ");
 		super.onResume();
-//		mPreview.getHolder().removeCallback(mPreview);
-		System.out.println("onResume -> test ");
 	}
 }
