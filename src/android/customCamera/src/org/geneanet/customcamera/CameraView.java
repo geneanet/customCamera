@@ -6,11 +6,14 @@ import java.util.List;
 import java.lang.Math;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -47,24 +50,44 @@ public class CameraView extends Activity {
 		
 		/* Get object which use the camera and orient it in function of the screen */
 		mCamera = CustomCamera.getCameraInstance();
+				
+		/* Get the default orientation of the device */
+		int defaultOrientation = getDeviceDefaultOrientation();
 		
-		if (getResources().getConfiguration().orientation == 0){
-			switch (display.getRotation()) {
-				case CustomCamera.LANDSCAPE:
-					mCamera.setDisplayOrientation(0);
-					break;
-				case CustomCamera.PORTRAIT:
+		if (defaultOrientation == 1){	// We are in portrait orientation
+			switch(display.getRotation()){
+				case 0 :
 					mCamera.setDisplayOrientation(90);
 					break;
-				case CustomCamera.LANDSCAPE_INVERSED:
-					mCamera.setDisplayOrientation(180);
+				case 1 :
+					mCamera.setDisplayOrientation(0);
 					break;
-				case CustomCamera.PORTRAIT_INVERSED:
+				case 2 :
 					mCamera.setDisplayOrientation(270);
+					break;
+				case 3 :
+					mCamera.setDisplayOrientation(180);
 					break;
 			}
 		}
-			
+		
+		if (defaultOrientation == 2){	// We are in landscape orientation
+			switch(display.getRotation()){
+				case 0 :
+					mCamera.setDisplayOrientation(0);
+					break;
+				case 1 :
+					mCamera.setDisplayOrientation(270);
+					break;
+				case 2 :
+					mCamera.setDisplayOrientation(180);
+					break;
+				case 3 :
+					mCamera.setDisplayOrientation(90);
+					break;
+			}
+		}
+		
 		/* Assign the render to the view */
 		mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
@@ -254,5 +277,23 @@ public class CameraView extends Activity {
 	/*************************************************/
 	protected void onResume(){
 		super.onResume();
+	}
+	/**************************************************/
+	/** METHOD TO GET THE DEVICE DEFAULT ORIENTATION **/
+	/**************************************************/
+	public int getDeviceDefaultOrientation() {
+
+	    WindowManager windowManager =  (WindowManager) getSystemService(WINDOW_SERVICE);
+	    Configuration config = getResources().getConfiguration();
+	    int rotation = windowManager.getDefaultDisplay().getRotation();
+	
+	    if ( ((rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) &&
+	            config.orientation == Configuration.ORIENTATION_LANDSCAPE)
+	        || ((rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) &&    
+	            config.orientation == Configuration.ORIENTATION_PORTRAIT)) {
+	      return Configuration.ORIENTATION_LANDSCAPE;
+	    } else { 
+	      return Configuration.ORIENTATION_PORTRAIT;
+	    }
 	}
 }
