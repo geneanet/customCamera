@@ -91,6 +91,7 @@
             android:layout_gravity="bottom"
             android:layout_weight="150"
             android:minWidth="0dp"
+            android:onClick="takePhoto"
             android:text="@string/PHOTO" />
 
         <org.geneanet.customcamera.VerticalSeekBar

@@ -1,15 +1,21 @@
 package org.geneanet.customcamera;
 
-import org.geneanet.customcamera.*;
-
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
-import java.lang.Math;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -32,6 +38,8 @@ public class CameraView extends Activity {
     static boolean clickOn = false;
     private static Camera mCamera = null;
     public static final int MEDIA_TYPE_IMAGE = 1;
+    private SoundPool sounds;
+    private int sCri;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -278,6 +286,7 @@ public class CameraView extends Activity {
 	protected void onResume(){
 		super.onResume();
 	}
+	
 	/**************************************************/
 	/** METHOD TO GET THE DEVICE DEFAULT ORIENTATION **/
 	/**************************************************/
@@ -295,5 +304,43 @@ public class CameraView extends Activity {
 	    } else { 
 	      return Configuration.ORIENTATION_PORTRAIT;
 	    }
+	}
+	
+	/****************************/
+	/** METHOD TO TAKE PICTURE **/
+	/****************************/
+	public void takePhoto(View view){
+//		sounds = new SoundPool(10, AudioManager.STREAM_MUSIC,0);
+//		sCri = sounds.load(this.getApplicationContext(), R.raw.cri, 1);
+		/** Handles the moment where picture is taken **/
+		ShutterCallback shutterCallback = new ShutterCallback() {
+			public void onShutter() {
+//				sounds.play(sCri, 1.0f, 1.0f, 0, 0, 1.0f);
+			}
+		};
+
+		/** Handles data for raw picture **/
+		PictureCallback rawCallback = new PictureCallback() {
+            public void onPictureTaken(byte[] data, Camera camera) {}
+		};
+		
+		/** Handles data for jpeg picture **/
+		PictureCallback jpegCallback = new PictureCallback() {
+            public void onPictureTaken(byte[] data, Camera camera) {
+            	FileOutputStream outStream = null;
+            	mCamera.startPreview();
+                try {
+                	outStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + String.format(
+                                    "/%d.jpg", System.currentTimeMillis()));
+                    outStream.write(data);
+                    outStream.close(); 
+                } catch (FileNotFoundException e) {
+                	e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+		};
+        mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
 	}
 }
