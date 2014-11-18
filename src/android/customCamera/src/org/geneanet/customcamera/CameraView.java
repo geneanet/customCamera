@@ -32,7 +32,8 @@ public class CameraView extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+		Bundle currentBundle = this.getIntent().getExtras();
+        String imgBase64 = currentBundle.getString("imgBase64");
 		
 		System.out.println("ON RENTRE DANS L'APPLICATION");
 		

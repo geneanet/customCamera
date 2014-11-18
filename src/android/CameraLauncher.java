@@ -7,10 +7,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.content.Intent;
+import android.os.Bundle;
 
 public class CameraLauncher extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         Intent intent = new Intent(this.cordova.getActivity(), CameraView.class);
+
+        Bundle imgBase64 = new Bundle();
+        imgBase64.putString("imgBase64", "mon base 64");
+        intent.putExtras(imgBase64);
+
         cordova.getActivity().startActivity(intent);
 
         return true;
