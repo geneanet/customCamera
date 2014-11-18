@@ -1,6 +1,7 @@
 .settings
 .project
 .classpath
+project.properties
 
 bin/*
 gen/*
