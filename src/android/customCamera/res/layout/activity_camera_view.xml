@@ -115,4 +115,28 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/keepPhoto"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.6"
+        android:background="@color/black" >
+
+        <Button
+            android:id="@+id/refuser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="1"
+            android:text="Refuser" />
+
+        <Button
+            android:id="@+id/accepter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Accepter" />
+
+    </LinearLayout>
+
 </RelativeLayout>

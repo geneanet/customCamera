@@ -27,6 +27,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -39,7 +40,8 @@ public class CameraView extends Activity {
     private static Camera mCamera = null;
     public static final int MEDIA_TYPE_IMAGE = 1;
     private SoundPool sounds;
-    private int sCri;
+    private int sSound;
+    FileOutputStream outStream = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +60,11 @@ public class CameraView extends Activity {
 		
 		/* Get object which use the camera and orient it in function of the screen */
 		mCamera = CustomCamera.getCameraInstance();
-				
+		
+		/* Hide the accept/refuse photo interface */
+		LinearLayout keepPhoto = (LinearLayout)findViewById(R.id.keepPhoto);
+		keepPhoto.setVisibility(View.INVISIBLE);
+		
 		/* Get the default orientation of the device */
 		int defaultOrientation = getDeviceDefaultOrientation();
 		
@@ -310,37 +316,58 @@ public class CameraView extends Activity {
 	/** METHOD TO TAKE PICTURE **/
 	/****************************/
 	public void takePhoto(View view){
+		/** To custom sound when you shot with the camera - optionnal**/
 //		sounds = new SoundPool(10, AudioManager.STREAM_MUSIC,0);
-//		sCri = sounds.load(this.getApplicationContext(), R.raw.cri, 1);
+//		sSound = sounds.load(this.getApplicationContext(), R.raw.r2d2, 1);
 		/** Handles the moment where picture is taken **/
-		ShutterCallback shutterCallback = new ShutterCallback() {
+		final ShutterCallback shutterCallback = new ShutterCallback() {
 			public void onShutter() {
-//				sounds.play(sCri, 1.0f, 1.0f, 0, 0, 1.0f);
+//				sounds.play(sSound, 1.0f, 1.0f, 0, 0, 1.0f);
+//				sounds.setVolume(1, (float)0.4, (float)0.4);
 			}
 		};
 
 		/** Handles data for raw picture **/
-		PictureCallback rawCallback = new PictureCallback() {
+		final PictureCallback rawCallback = new PictureCallback() {
             public void onPictureTaken(byte[] data, Camera camera) {}
 		};
 		
 		/** Handles data for jpeg picture **/
-		PictureCallback jpegCallback = new PictureCallback() {
-            public void onPictureTaken(byte[] data, Camera camera) {
-            	FileOutputStream outStream = null;
-            	mCamera.startPreview();
-                try {
-                	outStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + String.format(
+		final PictureCallback jpegCallback = new PictureCallback() {
+
+            public void onPictureTaken(final byte[] data, Camera camera) {   	
+            	final LinearLayout keepPhoto = (LinearLayout)findViewById(R.id.keepPhoto);
+            	keepPhoto.setVisibility(View.VISIBLE);
+            	Button refuser = (Button)findViewById(R.id.refuser);
+            	Button accepter = (Button)findViewById(R.id.accepter);
+            	mCamera.stopPreview();
+            	
+            	accepter.setOnClickListener(new View.OnClickListener() {	
+					@Override
+					public void onClick(View v) {
+						try {	
+		                	outStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + String.format(
                                     "/%d.jpg", System.currentTimeMillis()));
-                    outStream.write(data);
-                    outStream.close(); 
-                } catch (FileNotFoundException e) {
-                	e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-		};
-        mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
-	}
+                        	outStream.write(data);
+                        	outStream.close(); 
+                        	keepPhoto.setVisibility(View.INVISIBLE);
+                        	mCamera.startPreview();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+            	});
+            	
+            	refuser.setOnClickListener(new View.OnClickListener() {	
+					@Override
+					public void onClick(View v) {
+						keepPhoto.setVisibility(View.INVISIBLE);
+                        mCamera.startPreview();
+					}
+            	});
+            };
+		}; 
+		mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+	}	
 }
+            
