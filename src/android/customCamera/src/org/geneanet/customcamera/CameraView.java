@@ -1,17 +1,24 @@
 package org.geneanet.customcamera;
 
-import org.geneanet.customcamera.*;
-
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
-import java.lang.Math;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
+//import android.media.AudioManager;
+//import android.media.MediaPlayer;
+//import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -19,6 +26,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -30,6 +38,9 @@ public class CameraView extends Activity {
     static boolean clickOn = false;
     private static Camera mCamera = null;
     public static final int MEDIA_TYPE_IMAGE = 1;
+//    private SoundPool sounds;
+//    private int sSound;
+    FileOutputStream outStream = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +51,8 @@ public class CameraView extends Activity {
                 .setTitle("Delete entry")
                 .setMessage(imgBackgroundBase64)
                 .show();
-        } else {
-            new AlertDialog.Builder(this)
-            .setTitle("que neni")
-            .setMessage("que neni")
-            .show();
         }
-		
-		System.out.println("ON RENTRE DANS L'APPLICATION");
-		
-		
+	
 		super.onCreate(savedInstanceState);
 		
 		/* Remove title bar */
@@ -66,23 +69,48 @@ public class CameraView extends Activity {
 		/* Get object which use the camera and orient it in function of the screen */
 		mCamera = CustomCamera.getCameraInstance();
 		
-		if (getResources().getConfiguration().orientation == 0){
-			switch (display.getRotation()) {
-				case CustomCamera.LANDSCAPE:
-					mCamera.setDisplayOrientation(0);
-					break;
-				case CustomCamera.PORTRAIT:
+		/* Hide the accept/refuse photo interface */
+		LinearLayout keepPhoto = (LinearLayout)findViewById(R.id.keepPhoto);
+		keepPhoto.setVisibility(View.INVISIBLE);
+		
+		/* Get the default orientation of the device */
+		int defaultOrientation = getDeviceDefaultOrientation();
+		
+		if (defaultOrientation == 1){	// We are in portrait orientation
+			System.out.println(display.getRotation());
+			switch(display.getRotation()){
+				case 0 :
 					mCamera.setDisplayOrientation(90);
 					break;
-				case CustomCamera.LANDSCAPE_INVERSED:
-					mCamera.setDisplayOrientation(180);
+				case 1 :
+					mCamera.setDisplayOrientation(0);
 					break;
-				case CustomCamera.PORTRAIT_INVERSED:
+				case 2 :
 					mCamera.setDisplayOrientation(270);
+					break;
+				case 3 :
+					mCamera.setDisplayOrientation(180);
 					break;
 			}
 		}
-			
+		
+		if (defaultOrientation == 2){	// We are in landscape orientation
+			switch(display.getRotation()){
+				case 0 :
+					mCamera.setDisplayOrientation(0);
+					break;
+				case 1 :
+					mCamera.setDisplayOrientation(270);
+					break;
+				case 2 :
+					mCamera.setDisplayOrientation(180);
+					break;
+				case 3 :
+					mCamera.setDisplayOrientation(90);
+					break;
+			}
+		}
+		
 		/* Assign the render to the view */
 		mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
@@ -98,32 +126,8 @@ public class CameraView extends Activity {
         		public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
         			progress = progresValue;
         			ImageView imageView = (ImageView) findViewById(R.id.normal);
-        			switch(progress){
-        			case 0 : 
-        				imageView.setAlpha((float)0.2);
-        				break;
-        			case 1 :
-        				imageView.setAlpha((float)0.3);
-        				break;
-        			case 2 :
-        				imageView.setAlpha((float)0.4);
-        				break;
-        			case 3 :
-        				imageView.setAlpha((float)0.5);
-        				break;
-        			case 4 :
-        				imageView.setAlpha((float)0.6);
-        				break;
-        			case 5 :
-        				imageView.setAlpha((float)0.7);
-        				break;
-        			case 6 :
-        				imageView.setAlpha((float)0.8);
-        				break;
-        			case 7 :
-        				imageView.setAlpha((float)0.9);
-        				break;
-        			}
+        			float newOpacity = (float) (0.2+progress*0.1);
+        			imageView.setAlpha(newOpacity);
         		}
 
         		@Override
@@ -178,9 +182,9 @@ public class CameraView extends Activity {
 	    return true;
 	}
 
-	/******************/
-	/** GERE LE ZOOM **/
-	/******************/
+	/*********************/
+	/** MANAGE THE ZOOM **/
+	/*********************/
 	private void handleZoom(MotionEvent event, Camera.Parameters params, float mDist) {
 	    int maxZoom = params.getMaxZoom();
 	    int zoom = params.getZoom();
@@ -200,9 +204,9 @@ public class CameraView extends Activity {
 		mCamera.setParameters(params);
 	}
 
-	/*******************/
-	/** GERE LE FOCUS **/
-	/*******************/
+	/**********************/
+	/** MANAGE THE FOCUS **/
+	/**********************/
 	public void handleFocus(MotionEvent event, Camera.Parameters params) {
 	    List<String> supportedFocusModes = params.getSupportedFocusModes();
 	    if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
@@ -214,7 +218,7 @@ public class CameraView extends Activity {
 	}
 
 	/*******************************************************/
-	/** DETERMINE L'ESPACE ENTRE LES DEUX PREMIERS DOIGTS **/
+	/** DETERMINE THE SPACE BETWEEN THE FIRST TWO FINGERS **/
 	/*******************************************************/
 	private float getFingerSpacing(MotionEvent event) {
 	    float x = event.getX(0) - event.getX(1);
@@ -223,18 +227,16 @@ public class CameraView extends Activity {
 	}
 	
 	/***************************/
-	/** AFFICHER LA MINIATURE **/
+	/** DISPLAY THE MINIATURE **/
 	/***************************/
 	public void showMiniature(View view){
 		ImageView imageView = (ImageView) findViewById(R.id.normal);
-		Button miniature = (Button) findViewById(R.id.Miniature);
-		
+		Button miniature = (Button) findViewById(R.id.miniature);
+	
 		if(modeMiniature == 0){
 			FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
-			
 			paramsMiniature.gravity=Gravity.BOTTOM;
-			imageView.setAlpha(imageView.getAlpha());
-			
+			imageView.setAlpha(imageView.getAlpha());	
 			modeMiniature = 1;
 			
 			imageView.setLayoutParams(paramsMiniature);
@@ -244,7 +246,7 @@ public class CameraView extends Activity {
 			imageView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                 	ImageView imageView = (ImageView) findViewById(R.id.normal);
-                	Button miniature = (Button) findViewById(R.id.Miniature);
+                	Button miniature = (Button) findViewById(R.id.miniature);
                 	LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
         			paramsReagrandissement.width = -1;
         			paramsReagrandissement.height = -1;
@@ -258,27 +260,104 @@ public class CameraView extends Activity {
 		}
 	}
 	
-	/****************************************************/
-	/** METHODE POUR DETRUIRE LA VUE (ICI, l'ACTIVITE) **/
-	/****************************************************/
+	/*****************************************************/
+	/** METHOD TO DESTROY THE VIEW (HERE, THE ACTIVITY) **/
+	/*****************************************************/
 	protected void onDestroy(){
-		System.out.println("onDestroy -> JE DETRUIS LA VUE ! ");
 		super.onDestroy();
 		if(mCamera!=null){
-			System.out.println("onDestroy -> LA CAMERA N'EST PAS NULL ");
 			mCamera.stopPreview();
 		    mCamera = null;
-		    System.out.println("onDestroy -> DESTRUCTION TERMINEE ");
 		}
 	}
 	
-	/********************************************************/
-	/** METHODE POUR METTRE LA NOUVELLE VUE APRES ROTATION **/
-	/********************************************************/
+	/*************************************************/
+	/** METHOD TO APPLY THE NEW VIEW AFTER ROTATION **/
+	/*************************************************/
 	protected void onResume(){
-		System.out.println("onResume -> JE REMET LA VUE ! ");
 		super.onResume();
-//		mPreview.getHolder().removeCallback(mPreview);
-		System.out.println("onResume -> test ");
 	}
+	
+	/**************************************************/
+	/** METHOD TO GET THE DEVICE DEFAULT ORIENTATION **/
+	/**************************************************/
+	public int getDeviceDefaultOrientation() {
+
+	    WindowManager windowManager =  (WindowManager) getSystemService(WINDOW_SERVICE);
+	    Configuration config = getResources().getConfiguration();
+	    int rotation = windowManager.getDefaultDisplay().getRotation();
+	
+	    if ( ((rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) &&
+	            config.orientation == Configuration.ORIENTATION_LANDSCAPE)
+	        || ((rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) &&    
+	            config.orientation == Configuration.ORIENTATION_PORTRAIT)) {
+	      return Configuration.ORIENTATION_LANDSCAPE;
+	    } else { 
+	      return Configuration.ORIENTATION_PORTRAIT;
+	    }
+	}
+	
+	/****************************/
+	/** METHOD TO TAKE PICTURE **/
+	/****************************/
+	public void takePhoto(View view){
+		/** To custom sound when you shot with the camera - optionnal**/
+//		sounds = new SoundPool(10, AudioManager.STREAM_MUSIC,0);
+//		sSound = sounds.load(this.getApplicationContext(), R.raw.r2d2, 1);
+		/** Handles the moment where picture is taken **/
+		final ShutterCallback shutterCallback = new ShutterCallback() {
+			public void onShutter() {
+//				sounds.play(sSound, 1.0f, 1.0f, 0, 0, 1.0f);
+//				sounds.setVolume(1, (float)0.4, (float)0.4);
+			}
+		};
+
+		/** Handles data for raw picture **/
+		final PictureCallback rawCallback = new PictureCallback() {
+            public void onPictureTaken(byte[] data, Camera camera) {}
+		};
+		
+		/** Handles data for jpeg picture **/
+		final PictureCallback jpegCallback = new PictureCallback() {
+
+            public void onPictureTaken(final byte[] data, Camera camera) {   	
+            	final LinearLayout keepPhoto = (LinearLayout)findViewById(R.id.keepPhoto);
+            	keepPhoto.setVisibility(View.VISIBLE);
+            	Button refuser = (Button)findViewById(R.id.refuser);
+            	Button accepter = (Button)findViewById(R.id.accepter);
+            	final Button photo = (Button)findViewById(R.id.capture);
+//            	Button miniature = (Button)findViewById(R.id.miniature);
+            	photo.setVisibility(View.INVISIBLE);
+            	mCamera.stopPreview();
+            	
+            	accepter.setOnClickListener(new View.OnClickListener() {	
+					@Override
+					public void onClick(View v) {
+						try {	
+		                	outStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + String.format(
+                                    "/%d.jpg", System.currentTimeMillis()));
+                        	outStream.write(data);
+                        	outStream.close(); 
+                        	keepPhoto.setVisibility(View.INVISIBLE);
+                        	photo.setVisibility(View.VISIBLE);
+                        	mCamera.startPreview();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+            	});
+            	
+            	refuser.setOnClickListener(new View.OnClickListener() {	
+					@Override
+					public void onClick(View v) {
+						keepPhoto.setVisibility(View.INVISIBLE);
+						photo.setVisibility(View.VISIBLE);
+                        mCamera.startPreview();
+					}
+            	});
+            };
+		}; 
+		mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+	}	
 }
+            
