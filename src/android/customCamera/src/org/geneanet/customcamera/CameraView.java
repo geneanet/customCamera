@@ -1,10 +1,12 @@
 package org.geneanet.customcamera;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -67,6 +69,7 @@ public class CameraView extends Activity {
 		int defaultOrientation = getDeviceDefaultOrientation();
 		
 		if (defaultOrientation == 1){	// We are in portrait orientation
+			System.out.println(display.getRotation());
 			switch(display.getRotation()){
 				case 0 :
 					mCamera.setDisplayOrientation(90);
@@ -220,8 +223,8 @@ public class CameraView extends Activity {
 	/***************************/
 	public void showMiniature(View view){
 		ImageView imageView = (ImageView) findViewById(R.id.normal);
-		Button miniature = (Button) findViewById(R.id.Miniature);
-		
+		Button miniature = (Button) findViewById(R.id.miniature);
+	
 		if(modeMiniature == 0){
 			FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
 			paramsMiniature.gravity=Gravity.BOTTOM;
@@ -235,7 +238,7 @@ public class CameraView extends Activity {
 			imageView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                 	ImageView imageView = (ImageView) findViewById(R.id.normal);
-                	Button miniature = (Button) findViewById(R.id.Miniature);
+                	Button miniature = (Button) findViewById(R.id.miniature);
                 	LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
         			paramsReagrandissement.width = -1;
         			paramsReagrandissement.height = -1;
@@ -314,6 +317,9 @@ public class CameraView extends Activity {
             	keepPhoto.setVisibility(View.VISIBLE);
             	Button refuser = (Button)findViewById(R.id.refuser);
             	Button accepter = (Button)findViewById(R.id.accepter);
+            	final Button photo = (Button)findViewById(R.id.capture);
+            	Button miniature = (Button)findViewById(R.id.miniature);
+            	photo.setVisibility(View.INVISIBLE);
             	mCamera.stopPreview();
             	
             	accepter.setOnClickListener(new View.OnClickListener() {	
@@ -325,6 +331,7 @@ public class CameraView extends Activity {
                         	outStream.write(data);
                         	outStream.close(); 
                         	keepPhoto.setVisibility(View.INVISIBLE);
+                        	photo.setVisibility(View.VISIBLE);
                         	mCamera.startPreview();
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -336,6 +343,7 @@ public class CameraView extends Activity {
 					@Override
 					public void onClick(View v) {
 						keepPhoto.setVisibility(View.INVISIBLE);
+						photo.setVisibility(View.VISIBLE);
                         mCamera.startPreview();
 					}
             	});
