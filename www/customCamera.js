@@ -10,16 +10,10 @@ var exec = require('cordova/exec');
 var customCameraExport = function() {
 };
 
-customCameraExport.prototype.startCamera = function(imgBackgroundBase64) {
+customCameraExport.prototype.startCamera = function(imgBackgroundBase64, successFct, failFct) {
     exec(
-        function(result) {
-            console.log("success");
-            console.log(result);
-        },
-        function(result) {
-            console.log("fail");
-            console.log(result);
-        },
+        successFct,
+        failFct,
         "CustomCamera",
         "startCamera",
         [imgBackgroundBase64]
