@@ -1,8 +1,8 @@
+'use strict';
 /**
  * Permet de faire l'interface entre phonegap et l'application customcamera en java.
  */
 
-'use strict';
 
 var exec = require('cordova/exec');
 
@@ -10,24 +10,13 @@ var exec = require('cordova/exec');
 var customCameraExport = function() {
 };
 
-// add method.
-customCameraExport.prototype.getPicture = function() {
-    alert("Oh yeah !");
-};
-
-customCameraExport.prototype.startCamera = function() {
+customCameraExport.prototype.startCamera = function(imgBackgroundBase64, successFct, failFct) {
     exec(
-        function(result) {
-            console.log("success");
-            console.log(result);
-        },
-        function(result) {
-            console.log("fail");
-            console.log(result);
-        },
+        successFct,
+        failFct,
         "CustomCamera",
-        "testAction",
-        []
+        "startCamera",
+        [imgBackgroundBase64]
     );
 };
 
