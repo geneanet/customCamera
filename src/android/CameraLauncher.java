@@ -3,6 +3,7 @@ package org.geneanet.customcamera;
 import XXX_NAME_CURRENT_PACKAGE_XXX.CameraView;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -11,14 +12,21 @@ import android.os.Bundle;
 
 public class CameraLauncher extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        Intent intent = new Intent(this.cordova.getActivity(), CameraView.class);
+        if (action.equals("startCamera")) {
+            Intent intent = new Intent(this.cordova.getActivity(), CameraView.class);
 
-        Bundle imgBase64 = new Bundle();
-        imgBase64.putString("imgBase64", "mon base 64");
-        intent.putExtras(imgBase64);
+            Bundle imgBackgroundBase64 = new Bundle();
+            imgBackgroundBase64.putString("imgBackgroundBase64", args.getString(0));
+            intent.putExtras(imgBackgroundBase64);
 
-        cordova.getActivity().startActivity(intent);
+            cordova.getActivity().startActivity(intent);
 
-        return true;
+            PluginResult r = new PluginResult(PluginResult.Status.OK, "base64retour");
+            callbackContext.sendPluginResult(r);
+
+            return true;
+        }
+
+        return false;
     }
 }

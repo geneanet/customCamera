@@ -6,6 +6,7 @@ import java.util.List;
 import java.lang.Math;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.Display;
@@ -33,7 +34,18 @@ public class CameraView extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Bundle currentBundle = this.getIntent().getExtras();
-        String imgBase64 = currentBundle.getString("imgBase64");
+        if (currentBundle != null) {
+            String imgBackgroundBase64 = currentBundle.getString("imgBackgroundBase64");
+            new AlertDialog.Builder(this)
+                .setTitle("Delete entry")
+                .setMessage(imgBackgroundBase64)
+                .show();
+        } else {
+            new AlertDialog.Builder(this)
+            .setTitle("que neni")
+            .setMessage("que neni")
+            .show();
+        }
 		
 		System.out.println("ON RENTRE DANS L'APPLICATION");
 		
