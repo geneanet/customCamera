@@ -120,7 +120,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:alpha="0.6"
-        android:background="@color/black" >
+        android:background="@color/black"
+        android:gravity="bottom" >
 
         <Button
             android:id="@+id/refuser"

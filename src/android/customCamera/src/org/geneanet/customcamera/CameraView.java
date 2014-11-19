@@ -1,12 +1,10 @@
 package org.geneanet.customcamera;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -117,32 +115,8 @@ public class CameraView extends Activity {
         		public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
         			progress = progresValue;
         			ImageView imageView = (ImageView) findViewById(R.id.normal);
-        			switch(progress){
-        			case 0 : 
-        				imageView.setAlpha((float)0.2);
-        				break;
-        			case 1 :
-        				imageView.setAlpha((float)0.3);
-        				break;
-        			case 2 :
-        				imageView.setAlpha((float)0.4);
-        				break;
-        			case 3 :
-        				imageView.setAlpha((float)0.5);
-        				break;
-        			case 4 :
-        				imageView.setAlpha((float)0.6);
-        				break;
-        			case 5 :
-        				imageView.setAlpha((float)0.7);
-        				break;
-        			case 6 :
-        				imageView.setAlpha((float)0.8);
-        				break;
-        			case 7 :
-        				imageView.setAlpha((float)0.9);
-        				break;
-        			}
+        			float newOpacity = (float) (0.2+progress*0.1);
+        			imageView.setAlpha(newOpacity);
         		}
 
         		@Override
