@@ -33,4 +33,12 @@ public class CustomCamera {
 	    
 	    return c; // returns null if camera is unavailable
 	}
+
+	public static void clearCameraAccess() {
+		if (CustomCamera.mCamera != null) {
+			CustomCamera.mCamera.stopPreview();
+            // CustomCamera.mCamera.release();
+            CustomCamera.mCamera = null;
+		}
+	}
 }

@@ -15,6 +15,7 @@ import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.content.Intent;
 //import android.media.AudioManager;
 //import android.media.MediaPlayer;
 //import android.media.SoundPool;
@@ -268,12 +269,9 @@ public class CameraView extends Activity {
 	/*****************************************************/
 	/** METHOD TO DESTROY THE VIEW (HERE, THE ACTIVITY) **/
 	/*****************************************************/
-	protected void onDestroy(){
+	protected void onDestroy() {
 		super.onDestroy();
-		if(mCamera!=null){
-			mCamera.stopPreview();
-		    mCamera = null;
-		}
+		CustomCamera.clearCameraAccess();
 	}
 	
 	/*************************************************/
@@ -306,6 +304,7 @@ public class CameraView extends Activity {
 	/** METHOD TO TAKE PICTURE **/
 	/****************************/
 	public void takePhoto(View view){
+        final CameraView cameraViewCurrent = this;
 		/** To custom sound when you shot with the camera - optionnal**/
 //		sounds = new SoundPool(10, AudioManager.STREAM_MUSIC,0);
 //		sSound = sounds.load(this.getApplicationContext(), R.raw.r2d2, 1);
@@ -333,20 +332,19 @@ public class CameraView extends Activity {
             	final Button photo = (Button)findViewById(R.id.capture);
 //            	Button miniature = (Button)findViewById(R.id.miniature);
             	photo.setVisibility(View.INVISIBLE);
-            	mCamera.stopPreview();
+                mCamera.stopPreview();
             	
             	accepter.setOnClickListener(new View.OnClickListener() {	
 					@Override
 					public void onClick(View v) {
 						try {
-							String pathImg = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
-                            pathImg = pathImg+String.format("%d.jpeg", System.currentTimeMillis());
-		                	outStream = new FileOutputStream(pathImg);
+							String pathPicture = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
+                            pathPicture = pathPicture+String.format("%d.jpeg", System.currentTimeMillis());
+		                	outStream = new FileOutputStream(pathPicture);
                         	outStream.write(data);
-                        	outStream.close(); 
-                        	keepPhoto.setVisibility(View.INVISIBLE);
-                        	photo.setVisibility(View.VISIBLE);
-                        	mCamera.startPreview();
+                        	outStream.close();
+                            cameraViewCurrent.setResult(1, new Intent().putExtra("pathPicture", pathPicture));
+                            cameraViewCurrent.finish();
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
