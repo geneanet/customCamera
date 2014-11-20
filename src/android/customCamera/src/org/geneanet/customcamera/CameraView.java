@@ -1,5 +1,9 @@
 package org.geneanet.customcamera;
 
+// Don't delete this line
+import org.geneanet.customcamera.*;
+
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
