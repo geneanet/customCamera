@@ -10,6 +10,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -337,9 +338,10 @@ public class CameraView extends Activity {
             	accepter.setOnClickListener(new View.OnClickListener() {	
 					@Override
 					public void onClick(View v) {
-						try {	
-		                	outStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + String.format(
-                                    "/%d.jpg", System.currentTimeMillis()));
+						try {
+							String pathImg = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
+                            pathImg = pathImg+String.format("%d.jpeg", System.currentTimeMillis());
+		                	outStream = new FileOutputStream(pathImg);
                         	outStream.write(data);
                         	outStream.close(); 
                         	keepPhoto.setVisibility(View.INVISIBLE);
@@ -362,6 +364,6 @@ public class CameraView extends Activity {
             };
 		}; 
 		mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
-	}	
+	}
 }
             
