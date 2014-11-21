@@ -31,14 +31,14 @@ var generatePathFrompackageName = function(packageName) {
  * @param {string} packageName Package name of the current application.
  */
 var createClasses = function(packageName) {
-    var pathCameraView = pathAndroidPlugin+"customCamera/src/org/geneanet/customcamera/CameraView.java";
+    var pathCameraActivity = pathAndroidPlugin+"customCamera/src/org/geneanet/customcamera/CameraActivity.java";
     var pathCameraLauncher = pathAndroidPlugin+"CameraLauncher.java";
 
-    if (fs.existsSync(pathCameraView) && fs.existsSync(pathCameraLauncher)) {
-        // Rewrite package of CameraView class.
-        var contentCameraView = fs.readFileSync(pathCameraView, {encoding: "utf8"});
-        contentCameraView = contentCameraView.replace(/^package\s[^;]*/,"package "+packageName);
-        fs.writeFileSync(pathAndroidCordova+"src/"+generatePathFrompackageName(packageName)+"/CameraView.java", contentCameraView);
+    if (fs.existsSync(pathCameraActivity) && fs.existsSync(pathCameraLauncher)) {
+        // Rewrite package of CameraActivity class.
+        var contentCameraActivity = fs.readFileSync(pathCameraActivity, {encoding: "utf8"});
+        contentCameraActivity = contentCameraActivity.replace(/^package\s[^;]*/,"package "+packageName);
+        fs.writeFileSync(pathAndroidCordova+"src/"+generatePathFrompackageName(packageName)+"/CameraActivity.java", contentCameraActivity);
 
         // Rewrite import of CameraLauncher class.
         var contentCameraLauncher = fs.readFileSync(pathCameraLauncher, {encoding: "utf8"});
@@ -48,7 +48,7 @@ var createClasses = function(packageName) {
             contentCameraLauncher
         );
     } else {
-        console.error("File CameraView.java or/and CameraLauncher.java not found.");
+        console.error("File CameraActivity.java or/and CameraLauncher.java not found.");
         process.exit(1);
     }
 }
@@ -71,15 +71,15 @@ var updateAndroidManifest = function(packageName) {
         var needAddActivity = true;
         var currentActivities = contentAndroidManifest["manifest"]["application"][0]["activity"];
         for (var i = currentActivities.length - 1; i >= 0; i--) {
-            if (currentActivities[i]["$"]["android:name"] == "CameraView") {
+            if (currentActivities[i]["$"]["android:name"] == "CameraActivity") {
                 needAddActivity = false;
             }
         };
         if (needAddActivity) {
             contentAndroidManifest["manifest"]["application"][0]["activity"].push({
                 $: {
-                    "android:name": "CameraView",
-                    "android:label": "CameraView",
+                    "android:name": "CameraActivity",
+                    "android:label": "CameraActivity",
                 }
             })
             var newXmlAndroidManifest = builder.buildObject(contentAndroidManifest);
@@ -100,7 +100,7 @@ var updateAndroidManifest = function(packageName) {
 var updateConfig = function() {
     var pathLayoutCordova = pathResAndroidCordova+"layout/";
     var pathLayoutPlugin = pathAndroidPlugin+"customCamera/res/layout/";
-    var pathLayoutCameraView = pathLayoutPlugin+"activity_camera_view.xml";
+    var pathLayoutCameraActivity = pathLayoutPlugin+"activity_camera_view.xml";
 
     // create directory layout in cordova if it doesn't exist.
     if (!fs.existsSync(pathLayoutCordova)) {
@@ -108,10 +108,10 @@ var updateConfig = function() {
     }
 
     // "copy" layout for camera.
-    if (fs.existsSync(pathLayoutCameraView)) {
-        var layoutCameraViewContent = fs.readFileSync(pathLayoutCameraView, {encoding: "utf8"});
+    if (fs.existsSync(pathLayoutCameraActivity)) {
+        var layoutCameraActivityContent = fs.readFileSync(pathLayoutCameraActivity, {encoding: "utf8"});
 
-        fs.writeFileSync(pathLayoutCordova+"activity_camera_view.xml", layoutCameraViewContent);
+        fs.writeFileSync(pathLayoutCordova+"activity_camera_view.xml", layoutCameraActivityContent);
     } else {
         console.error("File activity_camera_view.xml in plugin not found.");
         process.exit(1);

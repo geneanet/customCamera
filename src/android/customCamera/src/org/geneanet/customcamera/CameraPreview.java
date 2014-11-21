@@ -8,62 +8,73 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * Interface between the view and the camera.
+ */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+
     private SurfaceHolder mHolder;
     private Camera mCamera;
 
+    /**
+     * Constructor
+     * @override
+     */
     public CameraPreview(Context context, Camera camera) {
         super(context);
+        // assign camera
         mCamera = camera;
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    /******************************/
-    /** WHEN THE VIEW IS CREATED **/
-    /******************************/
+    /**
+     * When the view is created.
+     * @param SurfaceHolder holder
+     */
     public void surfaceCreated(SurfaceHolder holder) {
-    	try {
-    		mCamera.setPreviewCallback(null);
+        try {
+            // Reset preview start camera.
+            mCamera.setPreviewCallback(null);
             mCamera.setPreviewDisplay(holder);
+            // Start link between the view and the camera.
             mCamera.startPreview();
         } catch (IOException e) {
-        	mCamera.release();
-        	mCamera = null;
-            Log.d("error", "Error setting camera preview: " + e.getMessage());
+            mCamera.release();
+            mCamera = null;
+            Log.e("customCamera", "Error setting camera preview: " + e.getMessage());
         }
     }
-    
-    /******************************/
-    /** WHEN THE VIEW IS CHANGED **/
-    /******************************/
+
+    /**
+     * When the view is changed.
+     * @override.
+     */
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        // check if the surface exist.
         if (mHolder.getSurface() == null){
-          return;
+            return;
         }
 
         try {
-        	mCamera.setPreviewCallback(null);
+            // stop current instance.
+            mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
-        } catch (Exception e){}
+        } catch (Exception e) {}
 
         try {
+            // Start new link between the view and the camera.
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.d("error", "Error starting camera preview: " + e.getMessage());
         }
     }
-    
-    /*******************************************/
-    /** TO DESTROY THE SURFACE OF THE PREVIEW **/
-    /*******************************************/
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        if(mCamera!=null){
-        	mCamera.setPreviewCallback(null);
-        	mCamera.stopPreview();
-        	mCamera = null;
-        }
-    }
+
+    /**
+     * To destroy the surface of the preview.
+     * @override
+     */
+    public void surfaceDestroyed(SurfaceHolder holder) {}
 }
