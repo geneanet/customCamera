@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:onClick="showMiniature"
-                android:text="Miniature" />
+                android:text="@string/miniature" />
 
             <Button
                 android:id="@+id/capture"
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_weight="0.74"
-                android:text="PHOTO"
+                android:text="@string/capture"
                 android:onClick="takePhoto" />
 
             <org.geneanet.customcamera.VerticalSeekBar
@@ -91,14 +91,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Accepter photo" />
+                android:text="@string/acceptePicture" />
 
             <Button
                 android:id="@+id/decline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Refuser Photo" />
+                android:text="@string/declinePicture" />
 
         </LinearLayout>
 
