@@ -63,6 +63,32 @@ public class CameraActivity extends Activity {
             String imgBackgroundBase64 = currentBundle.getString("imgBackgroundBase64");
         }
         
+        // The opacity bar
+        SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
+        
+        // Event on change opacity.
+        switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            int progress = 0;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
+                progress = progresValue;
+                ImageView imageView = (ImageView) findViewById(R.id.normal);
+                float newOpacity = (float) (0.2+progress*0.1);
+                imageView.setAlpha(newOpacity);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+     }
+    
+    @Override
+    protected void onStart() {
+        super.onStart();
         // Get informations about the default display for the device
         Display defaultDisplay = getWindowManager().getDefaultDisplay();
         
@@ -101,30 +127,18 @@ public class CameraActivity extends Activity {
         CameraPreview mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
-        
-        // The opacity bar
-        SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
-        
-        // Event on change opacity.
-        switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            int progress = 0;
+    }
 
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
-                progress = progresValue;
-                ImageView imageView = (ImageView) findViewById(R.id.normal);
-                float newOpacity = (float) (0.2+progress*0.1);
-                imageView.setAlpha(newOpacity);
-            }
+    /**
+     * Method to pause the activity.
+     */
+    protected void onPause() {
+        super.onPause();
+        ManagerCamera.clearCameraAccess();
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.removeAllViews();
+    }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-     }
-    
     // Event on touch screen to call the manager of the zoom & the auto focus.
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -247,21 +261,6 @@ public class CameraActivity extends Activity {
                 }
             });
         }
-    }
-
-    /**
-     * Method to destroy the view (here, the activity).
-     */
-    protected void onDestroy() {
-        super.onDestroy();
-        ManagerCamera.clearCameraAccess();
-    }
-    
-    /**
-     * Method to apply the new view after rotation.
-     */
-    protected void onResume(){
-        super.onResume();
     }
     
     /**
