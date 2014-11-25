@@ -1,10 +1,14 @@
 {
     "fr": {
-        "Miniature": "Miniature",
-        "PHOTO": "Photo"
+        "miniature": "Miniature",
+        "capture": "Photo",
+        "acceptePicture": "Accepter la photo",
+        "declinePicture": "Refuser la photo"
     },
     "en": {
-        "Miniature": "Miniature",
-        "PHOTO": "Photo"
+        "miniature": "Miniature",
+        "capture": "Capture",
+        "acceptePicture": "Valid the picture",
+        "declinePicture": "Decline the picture"
     }
 }
