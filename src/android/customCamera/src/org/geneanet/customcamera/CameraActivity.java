@@ -7,8 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import android.util.Log;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -29,6 +27,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -320,6 +319,7 @@ public class CameraActivity extends Activity {
              */
             public void onPictureTaken(final byte[] data, Camera camera) {
                 // Show buttons to accept or decline the picture.
+
                 final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
                 keepPhoto.setVisibility(View.VISIBLE);
                 Button accept = (Button)findViewById(R.id.accept);
@@ -328,6 +328,13 @@ public class CameraActivity extends Activity {
                 // Hide the capture button.
                 final Button photo = (Button)findViewById(R.id.capture);
                 photo.setVisibility(View.INVISIBLE);
+
+                // Put button miniature at the top of the page
+                Button miniature = (Button)findViewById(R.id.miniature);
+                LayoutParams params = (RelativeLayout.LayoutParams)miniature.getLayoutParams();
+                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                miniature.setLayoutParams(params);
 
                 // Stop link between view and camera to start the preview picture.
                 mCamera.stopPreview();
