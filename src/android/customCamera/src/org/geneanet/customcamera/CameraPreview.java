@@ -22,6 +22,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      */
     public CameraPreview(Context context, Camera camera) {
         super(context);
+
         // assign camera
         mCamera = camera;
         mHolder = getHolder();
@@ -31,7 +32,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     /**
      * When the view is created.
-     * @param SurfaceHolder holder
+     * @override.
      */
     public void surfaceCreated(SurfaceHolder holder) {
         try {
@@ -41,9 +42,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             // Start link between the view and the camera.
             mCamera.startPreview();
         } catch (IOException e) {
-            mCamera.release();
-            mCamera = null;
-            Log.e("customCamera", "Error setting camera preview: " + e.getMessage());
+            Log.e("customCamera", "Error setting camera preview to create surface: " + e.getMessage());
         }
     }
 
@@ -61,14 +60,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             // stop current instance.
             mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            Log.e("customCamera", "Error setting camera preview at null: " + e.getMessage());
+        }
 
         try {
             // Start new link between the view and the camera.
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
         } catch (Exception e) {
-            Log.d("error", "Error starting camera preview: " + e.getMessage());
+            Log.e("error", "Error starting camera preview with mHolder: " + e.getMessage());
         }
     }
 

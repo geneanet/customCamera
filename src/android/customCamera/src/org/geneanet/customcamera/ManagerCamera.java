@@ -19,19 +19,18 @@ public class ManagerCamera {
      * A safe way to get an instance of the Camera object.
      * @return Camera | null
      */
-    public static Camera getCameraInstance(){
+    public static Camera getCameraInstance() {
         // If camera is already instanced and available, return this resource.
         if (ManagerCamera.mCamera != null) {
-            return mCamera;
+            return ManagerCamera.mCamera;
         }
 
         // Start back camera.
         Camera c = null;
         try {
             c = Camera.open(0);
-        }
-        catch (RuntimeException e) {
-            Log.d("customCamera", "Can't open the camera.");
+        } catch (RuntimeException e) {
+            Log.e("customCamera", "Can't open the camera back.");
         }
         
         ManagerCamera.mCamera = c;
