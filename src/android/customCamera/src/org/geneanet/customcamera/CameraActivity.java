@@ -41,9 +41,19 @@ public class CameraActivity extends Activity {
     private boolean modeMiniature = false;
 
     /**
+     * Enable when a photo is taken
+     */
+    private boolean photoTaken = false;
+
+    /**
      * Camera resource.
      */
     private Camera mCamera = null;
+
+    /**
+     * Paramètres de la miniature
+     */
+    private FrameLayout.LayoutParams paramsMiniature;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,8 +245,14 @@ public class CameraActivity extends Activity {
             modeMiniature = true;
 
             // Set new size for miniature layout.
-            FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
-            paramsMiniature.gravity = Gravity.BOTTOM;
+            // FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
+            paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
+            if (!photoTaken){
+            	paramsMiniature.gravity = Gravity.BOTTOM;
+            }
+            else {
+            	paramsMiniature.gravity = Gravity.TOP;
+            }
             imageView.setLayoutParams(paramsMiniature);
 
             // Set current opacity for the miniature.
@@ -330,11 +346,20 @@ public class CameraActivity extends Activity {
                 photo.setVisibility(View.INVISIBLE);
 
                 // Put button miniature at the top of the page
-                Button miniature = (Button)findViewById(R.id.miniature);
-                LayoutParams params = (RelativeLayout.LayoutParams)miniature.getLayoutParams();
+                final Button miniature = (Button)findViewById(R.id.miniature);
+                final LayoutParams params = (RelativeLayout.LayoutParams)miniature.getLayoutParams();
                 ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
                 ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
                 miniature.setLayoutParams(params);
+  
+                if(modeMiniature){
+                	System.out.println("mode miniature = true");
+                	ImageView imageView = (ImageView) findViewById(R.id.normal);
+                	paramsMiniature.gravity = Gravity.TOP;
+                	imageView.setLayoutParams(paramsMiniature);
+                }
+                
+                photoTaken = true;
 
                 // Stop link between view and camera to start the preview picture.
                 mCamera.stopPreview();
@@ -344,6 +369,7 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         try {
+                        	photoTaken = false;
                             // Get path picture to storage.
                             String pathPicture = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
                             pathPicture = pathPicture+String.format("%d.jpeg", System.currentTimeMillis());
@@ -366,9 +392,16 @@ public class CameraActivity extends Activity {
                 decline.setOnClickListener(new View.OnClickListener() {    
                     @Override
                     public void onClick(View v) {
-                        keepPhoto.setVisibility(View.INVISIBLE);
-                        photo.setVisibility(View.VISIBLE);
-                        mCamera.startPreview();
+                    	photoTaken = false;
+                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                    	miniature.setLayoutParams(params);
+                    	ImageView imageView = (ImageView) findViewById(R.id.normal);
+                    	paramsMiniature.gravity = Gravity.BOTTOM;
+                    	imageView.setLayoutParams(paramsMiniature);
+                    	keepPhoto.setVisibility(View.INVISIBLE);
+                    	photo.setVisibility(View.VISIBLE);
+                    	mCamera.startPreview();
                     }
                 });
             };
