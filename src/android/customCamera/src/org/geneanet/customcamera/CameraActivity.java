@@ -352,8 +352,8 @@ public class CameraActivity extends Activity {
                 ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
                 miniature.setLayoutParams(params);
   
+                // If miniature mode when photo is taken, the miniature goes to the top
                 if(modeMiniature){
-                	System.out.println("mode miniature = true");
                 	ImageView imageView = (ImageView) findViewById(R.id.normal);
                 	paramsMiniature.gravity = Gravity.TOP;
                 	imageView.setLayoutParams(paramsMiniature);
@@ -396,9 +396,14 @@ public class CameraActivity extends Activity {
                     	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
                     	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
                     	miniature.setLayoutParams(params);
-                    	ImageView imageView = (ImageView) findViewById(R.id.normal);
-                    	paramsMiniature.gravity = Gravity.BOTTOM;
-                    	imageView.setLayoutParams(paramsMiniature);
+                    	
+                    	// If mode miniature and photo is declined, the miniature goes back to the bottom
+                    	if(modeMiniature) {
+                    		ImageView imageView = (ImageView) findViewById(R.id.normal);
+                        	paramsMiniature.gravity = Gravity.BOTTOM;
+                        	imageView.setLayoutParams(paramsMiniature);
+                    	}
+                    	
                     	keepPhoto.setVisibility(View.INVISIBLE);
                     	photo.setVisibility(View.VISIBLE);
                     	mCamera.startPreview();
