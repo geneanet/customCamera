@@ -7,8 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import android.util.Log;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -29,6 +27,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -42,9 +41,19 @@ public class CameraActivity extends Activity {
     private boolean modeMiniature = false;
 
     /**
+     * Enable when a photo is taken
+     */
+    private boolean photoTaken = false;
+
+    /**
      * Camera resource.
      */
     private Camera mCamera = null;
+
+    /**
+     * Paramètres de la miniature
+     */
+    private FrameLayout.LayoutParams paramsMiniature;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -236,8 +245,14 @@ public class CameraActivity extends Activity {
             modeMiniature = true;
 
             // Set new size for miniature layout.
-            FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
-            paramsMiniature.gravity = Gravity.BOTTOM;
+            // FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
+            paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
+            if (!photoTaken){
+            	paramsMiniature.gravity = Gravity.BOTTOM;
+            }
+            else {
+            	paramsMiniature.gravity = Gravity.TOP;
+            }
             imageView.setLayoutParams(paramsMiniature);
 
             // Set current opacity for the miniature.
@@ -320,6 +335,7 @@ public class CameraActivity extends Activity {
              */
             public void onPictureTaken(final byte[] data, Camera camera) {
                 // Show buttons to accept or decline the picture.
+
                 final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
                 keepPhoto.setVisibility(View.VISIBLE);
                 Button accept = (Button)findViewById(R.id.accept);
@@ -329,6 +345,22 @@ public class CameraActivity extends Activity {
                 final Button photo = (Button)findViewById(R.id.capture);
                 photo.setVisibility(View.INVISIBLE);
 
+                // Put button miniature at the top of the page
+                final Button miniature = (Button)findViewById(R.id.miniature);
+                final LayoutParams params = (RelativeLayout.LayoutParams)miniature.getLayoutParams();
+                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                miniature.setLayoutParams(params);
+  
+                // If miniature mode when photo is taken, the miniature goes to the top
+                if(modeMiniature){
+                	ImageView imageView = (ImageView) findViewById(R.id.normal);
+                	paramsMiniature.gravity = Gravity.TOP;
+                	imageView.setLayoutParams(paramsMiniature);
+                }
+                
+                photoTaken = true;
+
                 // Stop link between view and camera to start the preview picture.
                 mCamera.stopPreview();
                 
@@ -337,6 +369,7 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         try {
+                        	photoTaken = false;
                             // Get path picture to storage.
                             String pathPicture = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
                             pathPicture = pathPicture+String.format("%d.jpeg", System.currentTimeMillis());
@@ -359,9 +392,21 @@ public class CameraActivity extends Activity {
                 decline.setOnClickListener(new View.OnClickListener() {    
                     @Override
                     public void onClick(View v) {
-                        keepPhoto.setVisibility(View.INVISIBLE);
-                        photo.setVisibility(View.VISIBLE);
-                        mCamera.startPreview();
+                    	photoTaken = false;
+                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                    	miniature.setLayoutParams(params);
+                    	
+                    	// If mode miniature and photo is declined, the miniature goes back to the bottom
+                    	if(modeMiniature) {
+                    		ImageView imageView = (ImageView) findViewById(R.id.normal);
+                        	paramsMiniature.gravity = Gravity.BOTTOM;
+                        	imageView.setLayoutParams(paramsMiniature);
+                    	}
+                    	
+                    	keepPhoto.setVisibility(View.INVISIBLE);
+                    	photo.setVisibility(View.VISIBLE);
+                    	mCamera.startPreview();
                     }
                 });
             };
