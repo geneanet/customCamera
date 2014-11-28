@@ -50,11 +50,6 @@ public class CameraActivity extends Activity {
      */
     private Camera mCamera = null;
 
-    /**
-     * Paramètres de la miniature
-     */
-    private FrameLayout.LayoutParams paramsMiniature;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -236,27 +231,15 @@ public class CameraActivity extends Activity {
      */
     public void showMiniature(View view) {
         // Picture for the background.
-        final ImageView imageView = (ImageView) findViewById(R.id.normal);
+        ImageView imageView = (ImageView) findViewById(R.id.normal);
         // Button for show miniature picture.
         final Button miniature = (Button) view;
     
         // if it's not miniature mode.
         if (!modeMiniature) {
             modeMiniature = true;
-
             // Set new size for miniature layout.
-            // FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
-            paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth()/4, imageView.getHeight()/4);
-            if (!photoTaken){
-            	paramsMiniature.gravity = Gravity.BOTTOM;
-            }
-            else {
-            	paramsMiniature.gravity = Gravity.TOP;
-            }
-            imageView.setLayoutParams(paramsMiniature);
-
-            // Set current opacity for the miniature.
-            // imageView.setAlpha(imageView.getAlpha());
+            setParamsMiniature(imageView, true);
             
             // Hide the miniature button.
             miniature.setVisibility(View.INVISIBLE);
@@ -264,7 +247,7 @@ public class CameraActivity extends Activity {
             imageView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     modeMiniature = false;
-
+                    ImageView imageView = (ImageView) findViewById(R.id.normal);
                     // resize miniature.
                     LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
                     paramsReagrandissement.width = -1;
@@ -352,14 +335,13 @@ public class CameraActivity extends Activity {
                 ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
                 miniature.setLayoutParams(params);
   
+                photoTaken = true;
+                
                 // If miniature mode when photo is taken, the miniature goes to the top
                 if(modeMiniature){
                 	ImageView imageView = (ImageView) findViewById(R.id.normal);
-                	paramsMiniature.gravity = Gravity.TOP;
-                	imageView.setLayoutParams(paramsMiniature);
-                }
-                
-                photoTaken = true;
+                    setParamsMiniature(imageView, false);
+                }               
 
                 // Stop link between view and camera to start the preview picture.
                 mCamera.stopPreview();
@@ -400,8 +382,7 @@ public class CameraActivity extends Activity {
                     	// If mode miniature and photo is declined, the miniature goes back to the bottom
                     	if(modeMiniature) {
                     		ImageView imageView = (ImageView) findViewById(R.id.normal);
-                        	paramsMiniature.gravity = Gravity.BOTTOM;
-                        	imageView.setLayoutParams(paramsMiniature);
+                            setParamsMiniature(imageView, false);
                     	}
                     	
                     	keepPhoto.setVisibility(View.INVISIBLE);
@@ -411,7 +392,6 @@ public class CameraActivity extends Activity {
                 });
             };
         };
-
         // Start capture picture.
         mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
     }
@@ -434,10 +414,34 @@ public class CameraActivity extends Activity {
 
         return true;
     }
-
+    
+    /**
+     * When the back button is pressed
+     */
     @Override
     public void onBackPressed() {
         this.setResult(3);
         this.finish();
+    }
+    
+    /**
+     * Set the size and the gravity of the miniature function of photo is taken or not.
+     * 
+     * @param ImageView imageView  Reference to the background image.
+     * @param Boolean   Resize     Should we resize or not ? Only when click on "miniature"
+     */
+    public void setParamsMiniature(ImageView imageView, boolean resize){
+        FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());	
+        if (resize == true){
+            paramsMiniature.width = imageView.getWidth()/4;
+            paramsMiniature.height = imageView.getHeight()/4;
+        }
+        if (!photoTaken){
+            paramsMiniature.gravity = Gravity.BOTTOM;
+        }
+        else {
+            paramsMiniature.gravity = Gravity.TOP;
+        }
+        imageView.setLayoutParams(paramsMiniature);   	
     }
 }
