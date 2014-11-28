@@ -17,12 +17,11 @@
         android:layout_height="fill_parent" >
 
         <ImageView
-            android:id="@+id/normal"
+            android:id="@+id/background"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:alpha="0.2"
-            android:scaleType="fitXY"
-            android:src="@drawable/normal" />
+            android:scaleType="fitXY" />
 
     </FrameLayout>
 

@@ -12,11 +12,14 @@ import android.util.Log;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -57,11 +60,7 @@ public class CameraActivity extends Activity {
 
         setContentView(R.layout.activity_camera_view);
 
-        // Get the base64 picture for the background only if it's exist.
-        Bundle currentBundle = this.getIntent().getExtras();
-        if (currentBundle != null) {
-            String imgBackgroundBase64 = currentBundle.getString("imgBackgroundBase64");
-        }
+        setBackground();
         
         // The opacity bar
         SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
@@ -73,7 +72,7 @@ public class CameraActivity extends Activity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
                 progress = progresValue;
-                ImageView imageView = (ImageView) findViewById(R.id.normal);
+                ImageView imageView = (ImageView) findViewById(R.id.background);
                 float newOpacity = (float) (0.2+progress*0.1);
                 imageView.setAlpha(newOpacity);
             }
@@ -227,7 +226,7 @@ public class CameraActivity extends Activity {
      */
     public void showMiniature(View view) {
         // Picture for the background.
-        final ImageView imageView = (ImageView) findViewById(R.id.normal);
+        final ImageView imageView = (ImageView) findViewById(R.id.background);
         // Button for show miniature picture.
         final Button miniature = (Button) view;
     
@@ -251,10 +250,7 @@ public class CameraActivity extends Activity {
                     modeMiniature = false;
 
                     // resize miniature.
-                    LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
-                    paramsReagrandissement.width = -1;
-                    paramsReagrandissement.height = -1;
-                    imageView.setLayoutParams(paramsReagrandissement);
+                    setBackground();
 
                     // imageView.setAlpha(imageView.getAlpha());
                     miniature.setVisibility(View.VISIBLE);
@@ -394,5 +390,57 @@ public class CameraActivity extends Activity {
     public void onBackPressed() {
         this.setResult(3);
         this.finish();
+    }
+
+    /**
+     * To set background in the view.
+     */
+    protected void setBackground() {
+        // Get the base64 picture for the background only if it's exist.
+        Bundle currentBundle = this.getIntent().getExtras();
+        if (currentBundle != null) {
+            // Get picture.
+            byte[] imgBackgroundBase64 = currentBundle.getByteArray("imgBackgroundBase64");
+            Bitmap imgBackgroundBitmap = BitmapFactory.decodeByteArray(imgBackgroundBase64, 0, imgBackgroundBase64.length);
+
+            // Get sizes screen.
+            Display defaultDisplay = getWindowManager().getDefaultDisplay();
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            defaultDisplay.getMetrics(displayMetrics);
+            int displayWidthPx = (int) displayMetrics.widthPixels;
+            int displayHeightPx = (int) displayMetrics.heightPixels;
+
+            // Get sizes picture.
+            int widthBackground = (int) (imgBackgroundBitmap.getWidth() * displayMetrics.density);
+            int heightBackground = (int) (imgBackgroundBitmap.getHeight() * displayMetrics.density);
+
+            // Change size ImageView.
+            FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(widthBackground, heightBackground);
+            if (heightBackground > displayHeightPx && widthBackground < displayWidthPx) {
+                // Picture's height greater than device's height AND device's width greater than picture's width.
+                paramsMiniature.width = (int) (displayHeightPx * widthBackground / heightBackground);
+                paramsMiniature.height = (int) displayHeightPx;                
+            } else if (heightBackground < displayHeightPx && widthBackground > displayWidthPx) {
+                // Picture's width greater than device's width AND device's height greater than picture's height.
+                paramsMiniature.width = (int) displayWidthPx;
+                paramsMiniature.height = (int) (displayWidthPx * heightBackground / widthBackground);
+            } else if (heightBackground > displayHeightPx && widthBackground > displayWidthPx) {
+                // Picture's width & Picture's height greater than device's width & device's height.
+                if (heightBackground > widthBackground) {
+                    // Picture's height greater than Picture's width.
+                    paramsMiniature.width = (int) (displayHeightPx * widthBackground / heightBackground);
+                    paramsMiniature.height = (int) displayHeightPx;
+                } else {
+                    // Picture's width greater than Picture's height.
+                    paramsMiniature.width = (int) displayWidthPx;
+                    paramsMiniature.height = (int) (displayWidthPx * heightBackground / widthBackground);
+                }
+            }
+
+            // set image at the view.
+            ImageView imageView = (ImageView) findViewById(R.id.background);
+            imageView.setImageBitmap(imgBackgroundBitmap);
+            imageView.setLayoutParams(paramsMiniature); 
+        }
     }
 }
