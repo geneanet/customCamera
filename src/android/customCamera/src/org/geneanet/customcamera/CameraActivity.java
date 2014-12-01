@@ -27,7 +27,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -190,7 +189,7 @@ public class CameraActivity extends Activity {
             //zoom out
             if (zoom > 0)
                 zoom-=2;
-            }
+        }
         distanceBetweenFingers = newDist;
         params.setZoom(zoom);
         mCamera.setParameters(params);
@@ -203,12 +202,16 @@ public class CameraActivity extends Activity {
      * @param Parameters  params Camera's parameter.
      */
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
-        List<String> supportedFocusModes = params.getSupportedFocusModes();
-        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean b, Camera camera) {}
-            });
+        try {
+	        List<String> supportedFocusModes = params.getSupportedFocusModes();
+	        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+	            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+	                @Override
+	                public void onAutoFocus(boolean b, Camera camera) {}
+	            });
+	        }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -253,8 +256,6 @@ public class CameraActivity extends Activity {
                     paramsReagrandissement.width = -1;
                     paramsReagrandissement.height = -1;
                     imageView.setLayoutParams(paramsReagrandissement);
-
-                    // imageView.setAlpha(imageView.getAlpha());
                     miniature.setVisibility(View.VISIBLE);
                 }
             });
@@ -318,7 +319,6 @@ public class CameraActivity extends Activity {
              */
             public void onPictureTaken(final byte[] data, Camera camera) {
                 // Show buttons to accept or decline the picture.
-
                 final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
                 keepPhoto.setVisibility(View.VISIBLE);
                 Button accept = (Button)findViewById(R.id.accept);
@@ -330,9 +330,8 @@ public class CameraActivity extends Activity {
 
                 // Put button miniature at the top of the page
                 final Button miniature = (Button)findViewById(R.id.miniature);
-                final LayoutParams params = (RelativeLayout.LayoutParams)miniature.getLayoutParams();
-                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                final LayoutParams params = (LinearLayout.LayoutParams)miniature.getLayoutParams();
+                ((LinearLayout.LayoutParams) params).gravity = Gravity.TOP;
                 miniature.setLayoutParams(params);
   
                 photoTaken = true;
@@ -375,8 +374,7 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                     	photoTaken = false;
-                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                        ((LinearLayout.LayoutParams) params).gravity = Gravity.BOTTOM;
                     	miniature.setLayoutParams(params);
                     	
                     	// If mode miniature and photo is declined, the miniature goes back to the bottom
