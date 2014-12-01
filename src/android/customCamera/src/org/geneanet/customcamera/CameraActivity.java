@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
@@ -318,7 +319,6 @@ public class CameraActivity extends Activity {
              */
             public void onPictureTaken(final byte[] data, Camera camera) {
                 // Show buttons to accept or decline the picture.
-
                 final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
                 keepPhoto.setVisibility(View.VISIBLE);
                 Button accept = (Button)findViewById(R.id.accept);
@@ -330,10 +330,22 @@ public class CameraActivity extends Activity {
 
                 // Put button miniature at the top of the page
                 final Button miniature = (Button)findViewById(R.id.miniature);
-                final LayoutParams params = (RelativeLayout.LayoutParams)miniature.getLayoutParams();
-                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-                ((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                final LayoutParams params = (LinearLayout.LayoutParams)miniature.getLayoutParams();
+                ((LinearLayout.LayoutParams) params).gravity = Gravity.TOP;
                 miniature.setLayoutParams(params);
+                
+                try {
+                    Camera.Parameters test = mCamera.getParameters();             
+                    test.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
+                    test.setSceneMode(Parameters.SCENE_MODE_AUTO);
+                     int index = test.getExposureCompensation ();
+                     // to set maximum Exposure
+                     test.setExposureCompensation(test.getMaxExposureCompensation());
+
+                     mCamera.setParameters(test);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
   
                 photoTaken = true;
                 
@@ -375,8 +387,7 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                     	photoTaken = false;
-                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-                    	((RelativeLayout.LayoutParams) params).addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                        ((LinearLayout.LayoutParams) params).gravity = Gravity.BOTTOM;
                     	miniature.setLayoutParams(params);
                     	
                     	// If mode miniature and photo is declined, the miniature goes back to the bottom
