@@ -13,7 +13,9 @@
 
     <FrameLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" >
 
         <ImageView
             android:id="@+id/normal"
@@ -24,69 +26,58 @@
             android:src="@drawable/normal" />
     </FrameLayout>
 
-    <GridLayout
+    <LinearLayout
+        android:id="@+id/beforePhoto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:columnCount="4" >
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="bottom" >
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal" >
+        <Button
+            android:id="@+id/miniature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:onClick="showMiniature"
+            android:text="@string/miniature" />
 
-            <RelativeLayout
-                android:id="@+id/miniature_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" >
+        <Button
+            android:id="@+id/capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="takePhoto"
+            android:text="@string/capture" />
 
-                <Button
-                    android:id="@+id/miniature"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_gravity="bottom"
-                    android:onClick="showMiniature"
-                    android:text="@string/miniature" />
+        <org.geneanet.customcamera.VerticalSeekBar
+            android:id="@+id/switchOpacity"
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:alpha="0.6"
+            android:max="7"
+            android:maxHeight="13dp"
+            android:minHeight="0dp"
+            android:progress="0"
+            android:progressDrawable="@drawable/custom_opacity_bar"
+            android:secondaryProgress="7"
+            android:thumb="@drawable/thumb"
+            android:thumbOffset="-0.9px" />
+    </LinearLayout>
 
-            </RelativeLayout>
-
-            <Button
-                android:id="@+id/capture"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_weight="0.74"
-                android:text="@string/capture"
-                android:onClick="takePhoto" />
-
-            <org.geneanet.customcamera.VerticalSeekBar
-                android:id="@+id/switchOpacity"
-                android:layout_width="wrap_content"
-                android:layout_height="300dp"
-                android:layout_gravity="center_vertical|right"
-                android:layout_weight="0"
-                android:alpha="0.6"
-                android:max="7"
-                android:maxHeight="13dp"
-                android:minHeight="0dp"
-                android:progress="0"
-                android:progressDrawable="@drawable/custom_opacity_bar"
-                android:secondaryProgress="7"
-                android:thumb="@drawable/thumb" />
-        </LinearLayout>
-    </GridLayout>
-
-    <GridLayout
+    <FrameLayout
+        android:id="@+id/afterPhoto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:columnCount="2" >
+        android:layout_height="match_parent" >
 
         <LinearLayout
             android:id="@+id/keepPhoto"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:alpha="0.6"
+            android:alpha="0.8"
             android:background="@color/black"
             android:visibility="invisible" >
 
@@ -96,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/acceptePicture" />
-
+            
             <Button
                 android:id="@+id/decline"
                 android:layout_width="wrap_content"
@@ -104,6 +95,5 @@
                 android:layout_weight="1"
                 android:text="@string/declinePicture" />
         </LinearLayout>
-    </GridLayout>
-
+    </FrameLayout>
 </RelativeLayout>
