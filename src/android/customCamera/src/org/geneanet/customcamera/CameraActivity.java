@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
@@ -28,7 +27,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -191,7 +189,7 @@ public class CameraActivity extends Activity {
             //zoom out
             if (zoom > 0)
                 zoom-=2;
-            }
+        }
         distanceBetweenFingers = newDist;
         params.setZoom(zoom);
         mCamera.setParameters(params);
@@ -204,12 +202,16 @@ public class CameraActivity extends Activity {
      * @param Parameters  params Camera's parameter.
      */
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
-        List<String> supportedFocusModes = params.getSupportedFocusModes();
-        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean b, Camera camera) {}
-            });
+        try {
+	        List<String> supportedFocusModes = params.getSupportedFocusModes();
+	        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+	            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+	                @Override
+	                public void onAutoFocus(boolean b, Camera camera) {}
+	            });
+	        }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -254,8 +256,6 @@ public class CameraActivity extends Activity {
                     paramsReagrandissement.width = -1;
                     paramsReagrandissement.height = -1;
                     imageView.setLayoutParams(paramsReagrandissement);
-
-                    // imageView.setAlpha(imageView.getAlpha());
                     miniature.setVisibility(View.VISIBLE);
                 }
             });
@@ -333,19 +333,6 @@ public class CameraActivity extends Activity {
                 final LayoutParams params = (LinearLayout.LayoutParams)miniature.getLayoutParams();
                 ((LinearLayout.LayoutParams) params).gravity = Gravity.TOP;
                 miniature.setLayoutParams(params);
-                
-                try {
-                    Camera.Parameters test = mCamera.getParameters();             
-                    test.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
-                    test.setSceneMode(Parameters.SCENE_MODE_AUTO);
-                     int index = test.getExposureCompensation ();
-                     // to set maximum Exposure
-                     test.setExposureCompensation(test.getMaxExposureCompensation());
-
-                     mCamera.setParameters(test);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
   
                 photoTaken = true;
                 
