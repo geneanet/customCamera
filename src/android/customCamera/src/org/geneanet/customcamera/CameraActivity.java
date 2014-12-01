@@ -183,12 +183,14 @@ public class CameraActivity extends Activity {
         
         if (newDist > distanceBetweenFingers) {
             //zoom in
-            if (zoom < maxZoom/2)
+            if (zoom < maxZoom/2) {
                 zoom+=2;
+            }
         } else if (newDist < distanceBetweenFingers) {
             //zoom out
-            if (zoom > 0)
+            if (zoom > 0) {
                 zoom-=2;
+            }
         }
         distanceBetweenFingers = newDist;
         params.setZoom(zoom);
@@ -202,7 +204,7 @@ public class CameraActivity extends Activity {
      * @param Parameters  params Camera's parameter.
      */
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
-        try {
+        if (photoTaken == false) {
 	        List<String> supportedFocusModes = params.getSupportedFocusModes();
 	        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 	            mCamera.autoFocus(new Camera.AutoFocusCallback() {
@@ -210,8 +212,6 @@ public class CameraActivity extends Activity {
 	                public void onAutoFocus(boolean b, Camera camera) {}
 	            });
 	        }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
