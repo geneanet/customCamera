@@ -235,6 +235,12 @@ public class CameraActivity extends Activity {
     public void showMiniature(View view) {
         // Picture for the background.
         ImageView imageView = (ImageView) findViewById(R.id.normal);
+        if (!photoTaken) {
+            imageView.setScaleType(ImageView.ScaleType.FIT_END);
+        }
+        else {
+            imageView.setScaleType(ImageView.ScaleType.FIT_START);
+        }
         // Button for show miniature picture.
         final Button miniature = (Button) view;
     
@@ -251,6 +257,7 @@ public class CameraActivity extends Activity {
                 public void onClick(View v) {
                     modeMiniature = false;
                     ImageView imageView = (ImageView) findViewById(R.id.normal);
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     // resize miniature.
                     LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
                     paramsReagrandissement.width = -1;
@@ -338,7 +345,8 @@ public class CameraActivity extends Activity {
                 
                 // If miniature mode when photo is taken, the miniature goes to the top
                 if(modeMiniature){
-                	ImageView imageView = (ImageView) findViewById(R.id.normal);
+                    ImageView imageView = (ImageView) findViewById(R.id.normal);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_START);
                     setParamsMiniature(imageView, false);
                 }               
 
@@ -379,7 +387,8 @@ public class CameraActivity extends Activity {
                     	
                     	// If mode miniature and photo is declined, the miniature goes back to the bottom
                     	if(modeMiniature) {
-                    		ImageView imageView = (ImageView) findViewById(R.id.normal);
+                            ImageView imageView = (ImageView) findViewById(R.id.normal);
+                            imageView.setScaleType(ImageView.ScaleType.FIT_END);
                             setParamsMiniature(imageView, false);
                     	}
                     	
