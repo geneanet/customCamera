@@ -48,6 +48,11 @@ public class CameraActivity extends Activity {
      * Camera resource.
      */
     private Camera mCamera = null;
+    
+    /**
+     * Distance between fingers for the zoom
+     */
+    private static float distanceBetweenFingers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +134,36 @@ public class CameraActivity extends Activity {
         // Assign the render camera to the view 
         CameraPreview mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
+        preview.addView(mPreview);    
+        
+        // The zoom bar progress
+        final Camera.Parameters params = mCamera.getParameters();
+        final SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);
+        int maxZoom = params.getMaxZoom();
+        final int zoom = params.getZoom();
+        niveauZoom.setMax(maxZoom);
+        niveauZoom.setProgress(zoom);
+        niveauZoom.setVisibility(View.VISIBLE);     
+        
+        // Event on change zoom with the bar.
+        niveauZoom.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            int progress = 0;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
+                progress = progresValue;
+                int newZoom = (int)(zoom+progress);
+                niveauZoom.setProgress(newZoom);
+                params.setZoom(newZoom);
+                mCamera.setParameters(params);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     /**
@@ -145,25 +179,39 @@ public class CameraActivity extends Activity {
     // Event on touch screen to call the manager of the zoom & the auto focus.
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Camera.Parameters params = mCamera.getParameters();
-        int action = event.getAction();
- 
-        if (event.getPointerCount() > 1) {
-            // If we touch with more than one finger
-            float distanceBetweenFingers = 0;
-            if (action == MotionEvent.ACTION_POINTER_UP) {
-                distanceBetweenFingers = getFingerSpacing(event);
-            } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
-                mCamera.cancelAutoFocus();
-                handleZoom(event, params, distanceBetweenFingers);
-            }
-        } else {
-            // If we touch with one finger -> auto-focus
-            if (action == MotionEvent.ACTION_UP) {
-                handleFocus(event, params);
-            }
+        if (!photoTaken) {
+	        Camera.Parameters params = mCamera.getParameters();
+	        int action = event.getAction();
+	 
+	        if (event.getPointerCount() > 1) {
+	            // If we touch with more than one finger
+	            if (action == MotionEvent.ACTION_POINTER_2_DOWN) {
+	                distanceBetweenFingers = getFingerSpacing(event);
+	            } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
+	                mCamera.cancelAutoFocus();
+	                handleZoom(event, params, distanceBetweenFingers);
+	            }
+	        } else {
+	            // If we touch with one finger -> auto-focus
+	            if (action == MotionEvent.ACTION_UP) {          
+	                handleFocus(event, params);
+	            }
+	        }
         }
         return true;
+    }
+    
+    /**
+     * Determine the space between the first two fingers.
+     * 
+     * @param MotionEvent event  Current event which start this calculation.
+     * 
+     * @return float
+     */
+    private float getFingerSpacing(MotionEvent event) {
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        return (float) Math.sqrt(x * x + y * y);
     }
 
     /**
@@ -178,23 +226,37 @@ public class CameraActivity extends Activity {
         int maxZoom = params.getMaxZoom();
         // current value for the zoom.
         int zoom = params.getZoom();
+        setZoomProgress(maxZoom, zoom);
         // new distance between fingers.
         float newDist = getFingerSpacing(event);
         
         if (newDist > distanceBetweenFingers) {
             //zoom in
-            if (zoom < maxZoom/2) {
-                zoom+=2;
+            if (zoom < maxZoom) {
+                zoom++;
             }
         } else if (newDist < distanceBetweenFingers) {
             //zoom out
             if (zoom > 0) {
-                zoom-=2;
+                zoom--;
             }
         }
         distanceBetweenFingers = newDist;
         params.setZoom(zoom);
         mCamera.setParameters(params);
+    }
+    
+    /**
+     * To set the seekBar zoom with the pinchZoom
+     * 
+     * @param maxZoom int the max zoom of the device
+     * @param zoom    int the current zoom
+     */
+    private void setZoomProgress(int maxZoom, int zoom){    
+        SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);   
+        niveauZoom.setMax(maxZoom);
+        niveauZoom.setProgress(zoom*2);
+        niveauZoom.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -214,20 +276,7 @@ public class CameraActivity extends Activity {
 	        }
         }
     }
-
-    /**
-     * Determine the space between the first two fingers.
-     * 
-     * @param MotionEvent event  Current event which start this calculation.
-     * 
-     * @return float
-     */
-    private float getFingerSpacing(MotionEvent event) {
-        float x = event.getX(0) - event.getX(1);
-        float y = event.getY(0) - event.getY(1);
-        return (float) Math.sqrt(x * x + y * y);
-    }
-
+    
     /**
      * Display the miniature.
      * @param View view Current view.
@@ -260,6 +309,7 @@ public class CameraActivity extends Activity {
                     imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     // resize miniature.
                     LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
+                    imageView.setClickable(false);
                     paramsReagrandissement.width = -1;
                     paramsReagrandissement.height = -1;
                     imageView.setLayoutParams(paramsReagrandissement);
@@ -267,6 +317,27 @@ public class CameraActivity extends Activity {
                 }
             });
         }
+    }
+    
+    /**
+     * Set the size and the gravity of the miniature function of photo is taken or not.
+     * 
+     * @param ImageView imageView  Reference to the background image.
+     * @param Boolean   Resize     Should we resize or not ? Only when click on "miniature"
+     */
+    public void setParamsMiniature(ImageView imageView, boolean resize){
+        FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());	
+        if (resize == true){
+            paramsMiniature.width = imageView.getWidth()/4;
+            paramsMiniature.height = imageView.getHeight()/4;
+        }
+        if (!photoTaken){
+            paramsMiniature.gravity = Gravity.BOTTOM;
+        }
+        else {
+            paramsMiniature.gravity = Gravity.TOP;
+        }
+        imageView.setLayoutParams(paramsMiniature);   	
     }
     
     /**
@@ -334,6 +405,10 @@ public class CameraActivity extends Activity {
                 // Hide the capture button.
                 final Button photo = (Button)findViewById(R.id.capture);
                 photo.setVisibility(View.INVISIBLE);
+                
+                // Hide the zoom progressBar
+                final SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);
+                niveauZoom.setVisibility(View.INVISIBLE);
 
                 // Put button miniature at the top of the page
                 final Button miniature = (Button)findViewById(R.id.miniature);
@@ -394,6 +469,7 @@ public class CameraActivity extends Activity {
                     	
                     	keepPhoto.setVisibility(View.INVISIBLE);
                     	photo.setVisibility(View.VISIBLE);
+                        niveauZoom.setVisibility(View.VISIBLE);
                     	mCamera.startPreview();
                     }
                 });
@@ -429,26 +505,5 @@ public class CameraActivity extends Activity {
     public void onBackPressed() {
         this.setResult(3);
         this.finish();
-    }
-    
-    /**
-     * Set the size and the gravity of the miniature function of photo is taken or not.
-     * 
-     * @param ImageView imageView  Reference to the background image.
-     * @param Boolean   Resize     Should we resize or not ? Only when click on "miniature"
-     */
-    public void setParamsMiniature(ImageView imageView, boolean resize){
-        FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());	
-        if (resize == true){
-            paramsMiniature.width = imageView.getWidth()/4;
-            paramsMiniature.height = imageView.getHeight()/4;
-        }
-        if (!photoTaken){
-            paramsMiniature.gravity = Gravity.BOTTOM;
-        }
-        else {
-            paramsMiniature.gravity = Gravity.TOP;
-        }
-        imageView.setLayoutParams(paramsMiniature);   	
     }
 }
