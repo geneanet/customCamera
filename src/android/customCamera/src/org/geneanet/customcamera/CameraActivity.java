@@ -28,6 +28,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -110,7 +111,7 @@ public class CameraActivity extends Activity {
         // Change camera orientation function of the device's default orientation.
         if (defaultOrientation == 1 || defaultOrientation == 2) {
             int orientation;
-            switch(defaultDisplay.getRotation()){
+            switch (defaultDisplay.getRotation()) {
                 case 0 :
                     orientation = (defaultOrientation == 1) ? 90 : 0;
                     mCamera.setDisplayOrientation(orientation);
@@ -179,23 +180,23 @@ public class CameraActivity extends Activity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!photoTaken) {
-	        Camera.Parameters params = mCamera.getParameters();
-	        int action = event.getAction();
-	 
-	        if (event.getPointerCount() > 1) {
-	            // If we touch with more than one finger
-	            if (action == MotionEvent.ACTION_POINTER_2_DOWN) {
-	                distanceBetweenFingers = getFingerSpacing(event);
-	            } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
-	                mCamera.cancelAutoFocus();
-	                handleZoom(event, params, distanceBetweenFingers);
-	            }
-	        } else {
-	            // If we touch with one finger -> auto-focus
-	            if (action == MotionEvent.ACTION_UP) {          
-	                handleFocus(event, params);
-	            }
-	        }
+            Camera.Parameters params = mCamera.getParameters();
+            int action = event.getAction();
+     
+            if (event.getPointerCount() > 1) {
+                // If we touch with more than one finger
+                if (action == MotionEvent.ACTION_POINTER_2_DOWN) {
+                    distanceBetweenFingers = getFingerSpacing(event);
+                } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
+                    mCamera.cancelAutoFocus();
+                    handleZoom(event, params, distanceBetweenFingers);
+                }
+            } else {
+                // If we touch with one finger -> auto-focus
+                if (action == MotionEvent.ACTION_UP) {          
+                    handleFocus(event, params);
+                }
+            }
         }
         return true;
     }
@@ -251,7 +252,7 @@ public class CameraActivity extends Activity {
      * @param maxZoom int the max zoom of the device
      * @param zoom    int the current zoom
      */
-    private void setZoomProgress(int maxZoom, int zoom){    
+    private void setZoomProgress(int maxZoom, int zoom) {    
         SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);   
         niveauZoom.setMax(maxZoom);
         niveauZoom.setProgress(zoom*2);
@@ -266,13 +267,13 @@ public class CameraActivity extends Activity {
      */
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
         if (photoTaken == false) {
-	        List<String> supportedFocusModes = params.getSupportedFocusModes();
-	        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-	            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-	                @Override
-	                public void onAutoFocus(boolean b, Camera camera) {}
-	            });
-	        }
+            List<String> supportedFocusModes = params.getSupportedFocusModes();
+            if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                    @Override
+                    public void onAutoFocus(boolean b, Camera camera) {}
+                });
+            }
         }
     }
     
@@ -283,12 +284,6 @@ public class CameraActivity extends Activity {
     public void showMiniature(View view) {
         // Picture for the background.
         ImageView imageView = (ImageView) findViewById(R.id.background);
-        if (!photoTaken) {
-            imageView.setScaleType(ImageView.ScaleType.FIT_END);
-        }
-        else {
-            imageView.setScaleType(ImageView.ScaleType.FIT_START);
-        }
         // Button for show miniature picture.
         final Button miniature = (Button) view;
     
@@ -305,15 +300,9 @@ public class CameraActivity extends Activity {
                 public void onClick(View v) {
                     modeMiniature = false;
                     ImageView imageView = (ImageView) findViewById(R.id.background);
-                    imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     // resize miniature.
-                    setBackground();
-
-                    LayoutParams paramsReagrandissement = (LayoutParams) imageView.getLayoutParams();
                     imageView.setClickable(false);
-                    paramsReagrandissement.width = -1;
-                    paramsReagrandissement.height = -1;
-                    imageView.setLayoutParams(paramsReagrandissement);
+                    setBackground();
 
                     miniature.setVisibility(View.VISIBLE);
                 }
@@ -327,19 +316,18 @@ public class CameraActivity extends Activity {
      * @param ImageView imageView  Reference to the background image.
      * @param Boolean   Resize     Should we resize or not ? Only when click on "miniature"
      */
-    public void setParamsMiniature(ImageView imageView, boolean resize){
-        FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());	
-        if (resize == true){
+    public void setParamsMiniature(ImageView imageView, boolean resize) {
+        RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());    
+        if (resize == true) {
             paramsMiniature.width = imageView.getWidth()/4;
             paramsMiniature.height = imageView.getHeight()/4;
         }
-        if (!photoTaken){
-            paramsMiniature.gravity = Gravity.BOTTOM;
+        if (!photoTaken) {
+            paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        }else {
+            paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         }
-        else {
-            paramsMiniature.gravity = Gravity.TOP;
-        }
-        imageView.setLayoutParams(paramsMiniature);   	
+        imageView.setLayoutParams(paramsMiniature);       
     }
     
     /**
@@ -421,9 +409,8 @@ public class CameraActivity extends Activity {
                 photoTaken = true;
                 
                 // If miniature mode when photo is taken, the miniature goes to the top
-                if(modeMiniature){
+                if (modeMiniature) {
                     ImageView imageView = (ImageView) findViewById(R.id.background);
-                    imageView.setScaleType(ImageView.ScaleType.FIT_START);
                     setParamsMiniature(imageView, false);
                 }               
 
@@ -435,7 +422,7 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         try {
-                        	photoTaken = false;
+                            photoTaken = false;
                             // Get path picture to storage.
                             String pathPicture = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
                             pathPicture = pathPicture+String.format("%d.jpeg", System.currentTimeMillis());
@@ -458,21 +445,20 @@ public class CameraActivity extends Activity {
                 decline.setOnClickListener(new View.OnClickListener() {    
                     @Override
                     public void onClick(View v) {
-                    	photoTaken = false;
+                        photoTaken = false;
                         ((LinearLayout.LayoutParams) params).gravity = Gravity.BOTTOM;
-                    	miniature.setLayoutParams(params);
-                    	
-                    	// If mode miniature and photo is declined, the miniature goes back to the bottom
-                    	if(modeMiniature) {
+                        miniature.setLayoutParams(params);
+                        
+                        // If mode miniature and photo is declined, the miniature goes back to the bottom
+                        if (modeMiniature) {
                             ImageView imageView = (ImageView) findViewById(R.id.background);
-                            imageView.setScaleType(ImageView.ScaleType.FIT_END);
                             setParamsMiniature(imageView, false);
-                    	}
-                    	
-                    	keepPhoto.setVisibility(View.INVISIBLE);
-                    	photo.setVisibility(View.VISIBLE);
+                        }
+                        
+                        keepPhoto.setVisibility(View.INVISIBLE);
+                        photo.setVisibility(View.VISIBLE);
                         niveauZoom.setVisibility(View.VISIBLE);
-                    	mCamera.startPreview();
+                        mCamera.startPreview();
                     }
                 });
             };
@@ -532,7 +518,7 @@ public class CameraActivity extends Activity {
             int heightBackground = (int) (imgBackgroundBitmap.getHeight() * displayMetrics.density);
 
             // Change size ImageView.
-            FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(widthBackground, heightBackground);
+            RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(widthBackground, heightBackground);
             if (heightBackground > displayHeightPx && widthBackground < displayWidthPx) {
                 // Picture's height greater than device's height AND device's width greater than picture's width.
                 paramsMiniature.width = (int) (displayHeightPx * widthBackground / heightBackground);
@@ -557,7 +543,8 @@ public class CameraActivity extends Activity {
             // set image at the view.
             ImageView imageView = (ImageView) findViewById(R.id.background);
             imageView.setImageBitmap(imgBackgroundBitmap);
-            imageView.setLayoutParams(paramsMiniature); 
+            paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            imageView.setLayoutParams(paramsMiniature);
         }
     }
 }
