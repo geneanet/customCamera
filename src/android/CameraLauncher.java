@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Base64;
 
 public class CameraLauncher extends CordovaPlugin {
@@ -35,9 +34,20 @@ public class CameraLauncher extends CordovaPlugin {
 
             Intent intent = new Intent(this.cordova.getActivity(), CameraActivity.class);
 
-            Bundle imgBackgroundBase64 = new Bundle();
-            imgBackgroundBase64.putString("imgBackgroundBase64", args.getString(0));
-            intent.putExtras(imgBackgroundBase64);
+            byte[] imgBackgroundBase64;
+            try {
+                imgBackgroundBase64 = Base64.decode(args.getString(0), Base64.NO_WRAP);
+            } catch (IllegalArgumentException e) {
+                this.callbackContext.error(
+                    generateError(
+                        CameraLauncher.RESULT_ERROR,
+                        "Error decode base64 picture."
+                    )
+                );
+
+                return false;
+            }
+            TransferBigData.setImgBackgroundBase64(imgBackgroundBase64);
 
             cordova.startActivityForResult((CordovaPlugin) this, intent, CameraLauncher.REQUEST_CODE);
 
