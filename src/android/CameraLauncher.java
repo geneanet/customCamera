@@ -16,9 +16,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Base64;
-import android.util.Log;
 
 public class CameraLauncher extends CordovaPlugin {
 
@@ -49,10 +47,7 @@ public class CameraLauncher extends CordovaPlugin {
 
                 return false;
             }
-
-            Bundle imgBackground = new Bundle();
-            imgBackground.putByteArray("imgBackgroundBase64", imgBackgroundBase64);
-            intent.putExtras(imgBackground);
+            TransferBigData.setImgBackgroundBase64(imgBackgroundBase64);
 
             cordova.startActivityForResult((CordovaPlugin) this, intent, CameraLauncher.REQUEST_CODE);
 

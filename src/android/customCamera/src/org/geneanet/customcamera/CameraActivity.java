@@ -500,10 +500,9 @@ public class CameraActivity extends Activity {
      */
     protected void setBackground() {
         // Get the base64 picture for the background only if it's exist.
-        Bundle currentBundle = this.getIntent().getExtras();
-        if (currentBundle != null) {
+        byte[] imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
+        if (imgBackgroundBase64 != null) {
             // Get picture.
-            byte[] imgBackgroundBase64 = currentBundle.getByteArray("imgBackgroundBase64");
             Bitmap imgBackgroundBitmap = BitmapFactory.decodeByteArray(imgBackgroundBase64, 0, imgBackgroundBase64.length);
 
             // Get sizes screen.
@@ -519,30 +518,20 @@ public class CameraActivity extends Activity {
 
             // Change size ImageView.
             RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(widthBackground, heightBackground);
-            if (heightBackground > displayHeightPx && widthBackground < displayWidthPx) {
-                // Picture's height greater than device's height AND device's width greater than picture's width.
-                paramsMiniature.width = (int) (displayHeightPx * widthBackground / heightBackground);
-                paramsMiniature.height = (int) displayHeightPx;                
-            } else if (heightBackground < displayHeightPx && widthBackground > displayWidthPx) {
-                // Picture's width greater than device's width AND device's height greater than picture's height.
+            float ratioX = (float) displayWidthPx / (float) widthBackground;
+            float ratioY = (float) displayHeightPx / (float) heightBackground;
+            if (ratioX < ratioY && ratioX < 1) {
                 paramsMiniature.width = (int) displayWidthPx;
-                paramsMiniature.height = (int) (displayWidthPx * heightBackground / widthBackground);
-            } else if (heightBackground > displayHeightPx && widthBackground > displayWidthPx) {
-                // Picture's width & Picture's height greater than device's width & device's height.
-                if (heightBackground > widthBackground) {
-                    // Picture's height greater than Picture's width.
-                    paramsMiniature.width = (int) (displayHeightPx * widthBackground / heightBackground);
-                    paramsMiniature.height = (int) displayHeightPx;
-                } else {
-                    // Picture's width greater than Picture's height.
-                    paramsMiniature.width = (int) displayWidthPx;
-                    paramsMiniature.height = (int) (displayWidthPx * heightBackground / widthBackground);
-                }
+                paramsMiniature.height = (int) (ratioX * heightBackground);
+            } else if (ratioX >= ratioY && ratioY < 1) {
+                paramsMiniature.width = (int) (ratioY * widthBackground);
+                paramsMiniature.height = (int) displayHeightPx;
             }
 
             // set image at the view.
             ImageView imageView = (ImageView) findViewById(R.id.background);
             imageView.setImageBitmap(imgBackgroundBitmap);
+
             paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
             imageView.setLayoutParams(paramsMiniature);
         }
