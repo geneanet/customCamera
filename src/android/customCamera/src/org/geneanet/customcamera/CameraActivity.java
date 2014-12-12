@@ -3,6 +3,7 @@ package org.geneanet.customcamera;
 // DON'T DELETE THIS LINE, IT'S NECESSARY FOR THE CORDOVA PLUGIN.
 import org.geneanet.customcamera.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -10,9 +11,16 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Display;
@@ -180,23 +188,23 @@ public class CameraActivity extends Activity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!photoTaken) {
-	        Camera.Parameters params = mCamera.getParameters();
-	        int action = event.getAction();
-	 
-	        if (event.getPointerCount() > 1) {
-	            // If we touch with more than one finger
-	            if (action == MotionEvent.ACTION_POINTER_2_DOWN) {
-	                distanceBetweenFingers = getFingerSpacing(event);
-	            } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
-	                mCamera.cancelAutoFocus();
-	                handleZoom(event, params, distanceBetweenFingers);
-	            }
-	        } else {
-	            // If we touch with one finger -> auto-focus
-	            if (action == MotionEvent.ACTION_UP) {          
-	                handleFocus(event, params);
-	            }
-	        }
+            Camera.Parameters params = mCamera.getParameters();
+            int action = event.getAction();
+     
+            if (event.getPointerCount() > 1) {
+                // If we touch with more than one finger
+                if (action == MotionEvent.ACTION_POINTER_2_DOWN) {
+                    distanceBetweenFingers = getFingerSpacing(event);
+                } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
+                    mCamera.cancelAutoFocus();
+                    handleZoom(event, params, distanceBetweenFingers);
+                }
+            } else {
+                // If we touch with one finger -> auto-focus
+                if (action == MotionEvent.ACTION_UP) {          
+                    handleFocus(event, params);
+                }
+            }
         }
         return true;
     }
@@ -267,13 +275,13 @@ public class CameraActivity extends Activity {
      */
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
         if (photoTaken == false) {
-	        List<String> supportedFocusModes = params.getSupportedFocusModes();
-	        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-	            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-	                @Override
-	                public void onAutoFocus(boolean b, Camera camera) {}
-	            });
-	        }
+            List<String> supportedFocusModes = params.getSupportedFocusModes();
+            if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                    @Override
+                    public void onAutoFocus(boolean b, Camera camera) {}
+                });
+            }
         }
     }
     
@@ -326,7 +334,7 @@ public class CameraActivity extends Activity {
      * @param Boolean   Resize     Should we resize or not ? Only when click on "miniature"
      */
     public void setParamsMiniature(ImageView imageView, boolean resize){
-        FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());	
+        FrameLayout.LayoutParams paramsMiniature = new FrameLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());    
         if (resize == true){
             paramsMiniature.width = imageView.getWidth()/4;
             paramsMiniature.height = imageView.getHeight()/4;
@@ -337,7 +345,7 @@ public class CameraActivity extends Activity {
         else {
             paramsMiniature.gravity = Gravity.TOP;
         }
-        imageView.setLayoutParams(paramsMiniature);   	
+        imageView.setLayoutParams(paramsMiniature);       
     }
     
     /**
@@ -433,16 +441,46 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         try {
-                        	photoTaken = false;
+                            BitmapFactory.Options opt;
+                            opt = new BitmapFactory.Options();
+                            // Temp storage to use for decoding
+                            opt.inTempStorage = new byte[16 * 1024];
+                            Parameters parameters = mCamera.getParameters();
+                            Size size = parameters.getPictureSize();
+
+                            int height = size.height;
+                            int width = size.width;
+                            float res = (width * height) / 1024000;
+
+                            // Return a smaller image for now
+                            if (res > 4f)
+                                opt.inSampleSize = 4;
+                            else if (res > 3f)
+                                opt.inSampleSize = 2;
+
+                            // Preview from camera
+                            Bitmap storedBitmap = BitmapFactory.decodeByteArray(data, 0, data.length,opt); 
+                            
+                            // Matrix to perform rotation
+                            Matrix mat = new Matrix();  
+                            float redirect = redirectPhotoInGallery();
+                            mat.postRotate(redirect);
+                            
+                            // Creation of the bitmap
+                            storedBitmap = Bitmap.createBitmap(storedBitmap, 0, 0, storedBitmap.getWidth(), storedBitmap.getHeight(), mat, true);
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            storedBitmap.compress(CompressFormat.JPEG, 70, stream);
+                            
+                            photoTaken = false;
                             // Get path picture to storage.
                             String pathPicture = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
                             pathPicture = pathPicture+String.format("%d.jpeg", System.currentTimeMillis());
 
                             // Write data in file.
                             FileOutputStream outStream = new FileOutputStream(pathPicture);
-                            outStream.write(data);
+                            outStream.write(stream.toByteArray());
                             outStream.close();
-
+                            
                             // Return to success & finish current activity.
                             cameraActivityCurrent.setResult(1, new Intent().putExtra("pathPicture", pathPicture));
                             cameraActivityCurrent.finish();
@@ -456,27 +494,64 @@ public class CameraActivity extends Activity {
                 decline.setOnClickListener(new View.OnClickListener() {    
                     @Override
                     public void onClick(View v) {
-                    	photoTaken = false;
+                        photoTaken = false;
                         ((LinearLayout.LayoutParams) params).gravity = Gravity.BOTTOM;
-                    	miniature.setLayoutParams(params);
-                    	
-                    	// If mode miniature and photo is declined, the miniature goes back to the bottom
-                    	if(modeMiniature) {
+                        miniature.setLayoutParams(params);
+                        
+                        // If mode miniature and photo is declined, the miniature goes back to the bottom
+                        if(modeMiniature) {
                             ImageView imageView = (ImageView) findViewById(R.id.normal);
                             imageView.setScaleType(ImageView.ScaleType.FIT_END);
                             setParamsMiniature(imageView, false);
-                    	}
-                    	
-                    	keepPhoto.setVisibility(View.INVISIBLE);
-                    	photo.setVisibility(View.VISIBLE);
+                        }
+                        
+                        keepPhoto.setVisibility(View.INVISIBLE);
+                        photo.setVisibility(View.VISIBLE);
                         niveauZoom.setVisibility(View.VISIBLE);
-                    	mCamera.startPreview();
+                        mCamera.startPreview();
                     }
                 });
             };
         };
         // Start capture picture.
         mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+    }
+    
+    /**
+     * To redirect (by rotation) the image stored in gallery
+     * 
+     * @return integer
+     */
+    public float redirectPhotoInGallery(){
+        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        int defaultOrientation = getDeviceDefaultOrientation();    
+        int redirect = 0;
+        int orientationCamera = getOrientationOfCamera();
+        
+        if (defaultOrientation == 1 || defaultOrientation == 2) {
+            switch(windowManager.getDefaultDisplay().getRotation()){
+                case 0 :
+                    redirect = (defaultOrientation == 1) ? 90 : 0;
+                    if (orientationCamera == 1 && defaultOrientation == 1) {
+                        redirect = 270;
+                    }
+                    break;
+                case 1 :
+                    redirect = (defaultOrientation == 1) ? 0 : 270;
+                    break;
+                case 2 :
+                    redirect = (defaultOrientation == 1) ? 270 : 180;
+                    if (orientationCamera == 1 && defaultOrientation == 1) {
+                        redirect = 90;
+                    }
+                    break;
+                case 3 :
+                    redirect = (defaultOrientation == 1) ? 180 : 90;
+                    break;
+            }
+        }
+        
+        return redirect;
     }
 
     /**
@@ -505,5 +580,25 @@ public class CameraActivity extends Activity {
     public void onBackPressed() {
         this.setResult(3);
         this.finish();
+    }
+    
+    /**
+     * Get the orientation of the current camera
+     * 
+     * @return The orientation of the current camera (FRONT OR BACK)
+     */
+    public int getOrientationOfCamera() {
+        CameraInfo info =new Camera.CameraInfo();
+        int nbCam = Camera.getNumberOfCameras();
+        
+        System.out.println("nbCam : " + nbCam);
+        Camera.getCameraInfo(0, info);
+        
+        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+            return CameraInfo.CAMERA_FACING_FRONT;
+        }
+        else {
+            return CameraInfo.CAMERA_FACING_BACK;
+        }
     }
 }
