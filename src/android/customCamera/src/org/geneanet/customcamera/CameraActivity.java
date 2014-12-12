@@ -532,6 +532,7 @@ public class CameraActivity extends Activity {
             switch(windowManager.getDefaultDisplay().getRotation()){
                 case 0 :
                     redirect = (defaultOrientation == 1) ? 90 : 0;
+                    // If the device is in front camera by default
                     if (orientationCamera == 1 && defaultOrientation == 1) {
                         redirect = 270;
                     }
@@ -541,6 +542,7 @@ public class CameraActivity extends Activity {
                     break;
                 case 2 :
                     redirect = (defaultOrientation == 1) ? 270 : 180;
+                    // If the device is in front camera by default
                     if (orientationCamera == 1 && defaultOrientation == 1) {
                         redirect = 90;
                     }
@@ -552,6 +554,19 @@ public class CameraActivity extends Activity {
         }
         
         return redirect;
+    }
+    
+    /**
+     * Get the orientation of the current camera
+     * 
+     * @return The orientation of the current camera (FRONT OR BACK)
+     */
+    public int getOrientationOfCamera() {
+        CameraInfo info =new Camera.CameraInfo();
+        // Get info of the default camera (which is called by default)
+        Camera.getCameraInfo(0, info);
+        
+        return info.facing;
     }
 
     /**
@@ -580,25 +595,5 @@ public class CameraActivity extends Activity {
     public void onBackPressed() {
         this.setResult(3);
         this.finish();
-    }
-    
-    /**
-     * Get the orientation of the current camera
-     * 
-     * @return The orientation of the current camera (FRONT OR BACK)
-     */
-    public int getOrientationOfCamera() {
-        CameraInfo info =new Camera.CameraInfo();
-        int nbCam = Camera.getNumberOfCameras();
-        
-        System.out.println("nbCam : " + nbCam);
-        Camera.getCameraInfo(0, info);
-        
-        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
-            return CameraInfo.CAMERA_FACING_FRONT;
-        }
-        else {
-            return CameraInfo.CAMERA_FACING_BACK;
-        }
     }
 }
