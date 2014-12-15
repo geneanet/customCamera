@@ -11,20 +11,14 @@
         android:layout_alignParentTop="true" >
     </FrameLayout>
 
-    <FrameLayout
+    <ImageView
+        android:id="@+id/background"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
-
-        <ImageView
-            android:id="@+id/normal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:alpha="0.2"
-            android:scaleType="centerInside"
-            android:src="@drawable/normal" />
-    </FrameLayout>
+        android:layout_alignParentTop="true" 
+        android:alpha="0.2"
+        android:scaleType="fitXY" />
 
     <LinearLayout
         android:id="@+id/beforePhoto"
