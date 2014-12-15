@@ -3,6 +3,7 @@ package org.geneanet.customcamera;
 // DON'T DELETE THIS LINE, IT'S NECESSARY FOR THE CORDOVA PLUGIN.
 import org.geneanet.customcamera.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -11,10 +12,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
@@ -422,6 +428,36 @@ public class CameraActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         try {
+                            BitmapFactory.Options opt;
+                            opt = new BitmapFactory.Options();
+                            // Temp storage to use for decoding
+                            opt.inTempStorage = new byte[16 * 1024];
+                            Parameters parameters = mCamera.getParameters();
+                            Size size = parameters.getPictureSize();
+
+                            int height = size.height;
+                            int width = size.width;
+                            float res = (width * height) / 1024000;
+
+                            // Return a smaller image for now
+                            if (res > 4f)
+                                opt.inSampleSize = 4;
+                            else if (res > 3f)
+                                opt.inSampleSize = 2;
+
+                            // Preview from camera
+                            Bitmap storedBitmap = BitmapFactory.decodeByteArray(data, 0, data.length,opt); 
+                            
+                            // Matrix to perform rotation
+                            Matrix mat = new Matrix();  
+                            float redirect = redirectPhotoInGallery();
+                            mat.postRotate(redirect);
+                            
+                            // Creation of the bitmap
+                            storedBitmap = Bitmap.createBitmap(storedBitmap, 0, 0, storedBitmap.getWidth(), storedBitmap.getHeight(), mat, true);
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            storedBitmap.compress(CompressFormat.JPEG, 70, stream);
+                            
                             photoTaken = false;
                             // Get path picture to storage.
                             String pathPicture = Environment.getExternalStorageDirectory().getPath()+"/"+Environment.DIRECTORY_DCIM+"/Camera/";
@@ -429,9 +465,9 @@ public class CameraActivity extends Activity {
 
                             // Write data in file.
                             FileOutputStream outStream = new FileOutputStream(pathPicture);
-                            outStream.write(data);
+                            outStream.write(stream.toByteArray());
                             outStream.close();
-
+                            
                             // Return to success & finish current activity.
                             cameraActivityCurrent.setResult(1, new Intent().putExtra("pathPicture", pathPicture));
                             cameraActivityCurrent.finish();
@@ -465,6 +501,58 @@ public class CameraActivity extends Activity {
         };
         // Start capture picture.
         mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+    }
+    
+    /**
+     * To redirect (by rotation) the image stored in gallery
+     * 
+     * @return integer
+     */
+    public float redirectPhotoInGallery(){
+        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        int defaultOrientation = getDeviceDefaultOrientation();    
+        int redirect = 0;
+        int orientationCamera = getOrientationOfCamera();
+        
+        if (defaultOrientation == 1 || defaultOrientation == 2) {
+            switch(windowManager.getDefaultDisplay().getRotation()){
+                case 0 :
+                    redirect = (defaultOrientation == 1) ? 90 : 0;
+                    // If the device is in front camera by default
+                    if (orientationCamera == 1 && defaultOrientation == 1) {
+                        redirect = 270;
+                    }
+                    break;
+                case 1 :
+                    redirect = (defaultOrientation == 1) ? 0 : 270;
+                    break;
+                case 2 :
+                    redirect = (defaultOrientation == 1) ? 270 : 180;
+                    // If the device is in front camera by default
+                    if (orientationCamera == 1 && defaultOrientation == 1) {
+                        redirect = 90;
+                    }
+                    break;
+                case 3 :
+                    redirect = (defaultOrientation == 1) ? 180 : 90;
+                    break;
+            }
+        }
+        
+        return redirect;
+    }
+    
+    /**
+     * Get the orientation of the current camera
+     * 
+     * @return The orientation of the current camera (FRONT OR BACK)
+     */
+    public int getOrientationOfCamera() {
+        CameraInfo info =new Camera.CameraInfo();
+        // Get info of the default camera (which is called by default)
+        Camera.getCameraInfo(0, info);
+        
+        return info.facing;
     }
 
     /**
