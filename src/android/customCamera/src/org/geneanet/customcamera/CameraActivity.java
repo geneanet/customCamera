@@ -63,6 +63,21 @@ public class CameraActivity extends Activity {
      * Distance between fingers for the zoom
      */
     private static float distanceBetweenFingers;
+    
+    /**
+     * The seekBar for the opacity
+     */
+    private SeekBar switchOpacity;
+    
+    /**
+     * The seekBar for the zoom
+     */
+    private SeekBar zoomLevel;
+    
+    /**
+     * Parameters of the camera
+     */
+    private Camera.Parameters params;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,11 +89,11 @@ public class CameraActivity extends Activity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_camera_view);
-
+        
         setBackground();
         
         // The opacity bar
-        SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
+        switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
         
         // Event on change opacity.
         switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -143,23 +158,23 @@ public class CameraActivity extends Activity {
         preview.addView(mPreview);    
         
         // The zoom bar progress
-        final Camera.Parameters params = mCamera.getParameters();
-        final SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);
+        params = mCamera.getParameters();
+        zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
         int maxZoom = params.getMaxZoom();
         final int zoom = params.getZoom();
-        niveauZoom.setMax(maxZoom);
-        niveauZoom.setProgress(zoom);
-        niveauZoom.setVisibility(View.VISIBLE);     
+        zoomLevel.setMax(maxZoom);
+        zoomLevel.setProgress(zoom);
+        zoomLevel.setVisibility(View.VISIBLE);     
         
         // Event on change zoom with the bar.
-        niveauZoom.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        zoomLevel.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             int progress = 0;
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
                 progress = progresValue;
                 int newZoom = (int)(zoom+progress);
-                niveauZoom.setProgress(newZoom);
+                zoomLevel.setProgress(newZoom);
                 params.setZoom(newZoom);
                 mCamera.setParameters(params);
             }
@@ -186,7 +201,7 @@ public class CameraActivity extends Activity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!photoTaken) {
-            Camera.Parameters params = mCamera.getParameters();
+            params = mCamera.getParameters();
             int action = event.getAction();
      
             if (event.getPointerCount() > 1) {
@@ -259,10 +274,10 @@ public class CameraActivity extends Activity {
      * @param zoom    int the current zoom
      */
     private void setZoomProgress(int maxZoom, int zoom) {    
-        SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);   
-        niveauZoom.setMax(maxZoom);
-        niveauZoom.setProgress(zoom*2);
-        niveauZoom.setVisibility(View.VISIBLE);
+        zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);   
+        zoomLevel.setMax(maxZoom);
+        zoomLevel.setProgress(zoom*2);
+        zoomLevel.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -403,8 +418,8 @@ public class CameraActivity extends Activity {
                 photo.setVisibility(View.INVISIBLE);
                 
                 // Hide the zoom progressBar
-                final SeekBar niveauZoom = (SeekBar) findViewById(R.id.niveauZoom);
-                niveauZoom.setVisibility(View.INVISIBLE);
+                zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+                zoomLevel.setVisibility(View.INVISIBLE);
 
                 // Put button miniature at the top of the page
                 final Button miniature = (Button)findViewById(R.id.miniature);
@@ -493,7 +508,7 @@ public class CameraActivity extends Activity {
                         
                         keepPhoto.setVisibility(View.INVISIBLE);
                         photo.setVisibility(View.VISIBLE);
-                        niveauZoom.setVisibility(View.VISIBLE);
+                        zoomLevel.setVisibility(View.VISIBLE);
                         mCamera.startPreview();
                     }
                 });
@@ -623,5 +638,17 @@ public class CameraActivity extends Activity {
             paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
             imageView.setLayoutParams(paramsMiniature);
         }
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	// TODO Auto-generated method stub
+    	super.onSaveInstanceState(outState);
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    	// TODO Auto-generated method stub
+    	super.onRestoreInstanceState(savedInstanceState);
     }
 }

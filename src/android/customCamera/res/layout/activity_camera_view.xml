@@ -93,7 +93,7 @@
     </FrameLayout>
 
     <SeekBar
-        android:id="@+id/niveauZoom"
+        android:id="@+id/zoomLevel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="visible" />
