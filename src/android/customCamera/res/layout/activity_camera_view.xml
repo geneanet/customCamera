@@ -12,6 +12,11 @@
     </FrameLayout>
 
     <ImageView
+        android:id="@+id/photoResized"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
         android:id="@+id/background"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

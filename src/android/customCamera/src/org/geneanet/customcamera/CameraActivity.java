@@ -78,7 +78,27 @@ public class CameraActivity extends Activity {
      * Parameters of the camera
      */
     private Camera.Parameters params;
+    
+    /**
+     * The image in the background
+     */
+    private static ImageView imageView;
+    
+    /**
+     * The button for the miniature
+     */
+    private Button miniature;
+    
+    /**
+     * The image in Bitmap format of the preview photo
+     */
+    private Bitmap storedBitmap;
 
+    /**
+     * The layout for the preview
+     */
+    private FrameLayout preview;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +109,7 @@ public class CameraActivity extends Activity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_camera_view);
+        miniature = (Button) findViewById(R.id.miniature);
         
         setBackground();
         
@@ -102,7 +123,7 @@ public class CameraActivity extends Activity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
                 progress = progresValue;
-                ImageView imageView = (ImageView) findViewById(R.id.background);
+                imageView = (ImageView) findViewById(R.id.background);
                 float newOpacity = (float) (0.2+progress*0.1);
                 imageView.setAlpha(newOpacity);
             }
@@ -152,10 +173,10 @@ public class CameraActivity extends Activity {
             }
         }
         
-        // Assign the render camera to the view 
+        // Assign the render camera to the view
         CameraPreview mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);    
+        preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
         
         // The zoom bar progress
         params = mCamera.getParameters();
@@ -164,7 +185,7 @@ public class CameraActivity extends Activity {
         final int zoom = params.getZoom();
         zoomLevel.setMax(maxZoom);
         zoomLevel.setProgress(zoom);
-        zoomLevel.setVisibility(View.VISIBLE);     
+        zoomLevel.setVisibility(View.VISIBLE);
         
         // Event on change zoom with the bar.
         zoomLevel.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -193,7 +214,7 @@ public class CameraActivity extends Activity {
     protected void onPause() {
         super.onPause();
         ManagerCamera.clearCameraAccess();
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.removeAllViews();
     }
 
@@ -304,9 +325,9 @@ public class CameraActivity extends Activity {
      */
     public void showMiniature(View view) {
         // Picture for the background.
-        ImageView imageView = (ImageView) findViewById(R.id.background);
+        imageView = (ImageView) findViewById(R.id.background);
         // Button for show miniature picture.
-        final Button miniature = (Button) view;
+        miniature = (Button) view;
     
         // if it's not miniature mode.
         if (!modeMiniature) {
@@ -320,7 +341,7 @@ public class CameraActivity extends Activity {
             imageView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     modeMiniature = false;
-                    ImageView imageView = (ImageView) findViewById(R.id.background);
+                    imageView = (ImageView) findViewById(R.id.background);
                     // resize miniature.
                     imageView.setClickable(false);
                     setBackground();
@@ -338,7 +359,7 @@ public class CameraActivity extends Activity {
      * @param Boolean   Resize     Should we resize or not ? Only when click on "miniature"
      */
     public void setParamsMiniature(ImageView imageView, boolean resize) {
-        RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());    
+        RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(imageView.getWidth(), imageView.getHeight());
         if (resize == true) {
             paramsMiniature.width = imageView.getWidth()/4;
             paramsMiniature.height = imageView.getHeight()/4;
@@ -422,47 +443,47 @@ public class CameraActivity extends Activity {
                 zoomLevel.setVisibility(View.INVISIBLE);
 
                 // Put button miniature at the top of the page
-                final Button miniature = (Button)findViewById(R.id.miniature);
+                miniature = (Button)findViewById(R.id.miniature);
                 final LayoutParams params = (LinearLayout.LayoutParams)miniature.getLayoutParams();
                 ((LinearLayout.LayoutParams) params).gravity = Gravity.TOP;
                 miniature.setLayoutParams(params);
-  
+
                 photoTaken = true;
-                
+
                 // If miniature mode when photo is taken, the miniature goes to the top
                 if (modeMiniature) {
-                    ImageView imageView = (ImageView) findViewById(R.id.background);
+                    imageView = (ImageView) findViewById(R.id.background);
                     setParamsMiniature(imageView, false);
                 }               
 
                 // Stop link between view and camera to start the preview picture.
                 mCamera.stopPreview();
+                BitmapFactory.Options opt;
+                opt = new BitmapFactory.Options();
+                
+                // Temp storage to use for decoding
+                opt.inTempStorage = new byte[16 * 1024];
+                Parameters parameters = mCamera.getParameters();
+                Size size = parameters.getPictureSize();
+                
+                int height = size.height;
+                int width = size.width;
+                float res = (width * height) / 1024000;
+
+                // Return a smaller image for now
+                if (res > 4f)
+                    opt.inSampleSize = 4;
+                else if (res > 3f)
+                    opt.inSampleSize = 2;
+
+                // Preview from camera
+                storedBitmap = BitmapFactory.decodeByteArray(data, 0, data.length,opt);
                 
                 // Event started after accept picture.
                 accept.setOnClickListener(new View.OnClickListener() {    
                     @Override
                     public void onClick(View v) {
-                        try {
-                            BitmapFactory.Options opt;
-                            opt = new BitmapFactory.Options();
-                            // Temp storage to use for decoding
-                            opt.inTempStorage = new byte[16 * 1024];
-                            Parameters parameters = mCamera.getParameters();
-                            Size size = parameters.getPictureSize();
-
-                            int height = size.height;
-                            int width = size.width;
-                            float res = (width * height) / 1024000;
-
-                            // Return a smaller image for now
-                            if (res > 4f)
-                                opt.inSampleSize = 4;
-                            else if (res > 3f)
-                                opt.inSampleSize = 2;
-
-                            // Preview from camera
-                            Bitmap storedBitmap = BitmapFactory.decodeByteArray(data, 0, data.length,opt); 
-                            
+                        try {    
                             // Matrix to perform rotation
                             Matrix mat = new Matrix();  
                             float redirect = redirectPhotoInGallery();
@@ -502,7 +523,7 @@ public class CameraActivity extends Activity {
                         
                         // If mode miniature and photo is declined, the miniature goes back to the bottom
                         if (modeMiniature) {
-                            ImageView imageView = (ImageView) findViewById(R.id.background);
+                            imageView = (ImageView) findViewById(R.id.background);
                             setParamsMiniature(imageView, false);
                         }
                         
@@ -632,7 +653,7 @@ public class CameraActivity extends Activity {
             }
 
             // set image at the view.
-            ImageView imageView = (ImageView) findViewById(R.id.background);
+            imageView = (ImageView) findViewById(R.id.background);
             imageView.setImageBitmap(imgBackgroundBitmap);
 
             paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
@@ -642,13 +663,77 @@ public class CameraActivity extends Activity {
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-    	// TODO Auto-generated method stub
-    	super.onSaveInstanceState(outState);
+        outState.putBoolean("modeMiniature", modeMiniature);
+        outState.putBoolean("photoTaken", photoTaken);
+        outState.putParcelable("storedBitmap", storedBitmap);
+        super.onSaveInstanceState(outState);
     }
     
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    	// TODO Auto-generated method stub
-    	super.onRestoreInstanceState(savedInstanceState);
+        // We get the last value of modeMiniature
+        modeMiniature = savedInstanceState.getBoolean("modeMiniature");
+        // We get the last value of photoTaken
+        photoTaken = savedInstanceState.getBoolean("photoTaken");
+        storedBitmap = savedInstanceState.getParcelable("storedBitmap");
+        
+        // If the miniature is on when we rotate
+        if (modeMiniature) {
+            imageView = (ImageView) findViewById(R.id.background);
+            setParamsMiniature(imageView, false);
+            modeMiniature = false;
+        }
+        
+        if (photoTaken) {
+            // Matrix to perform rotation
+            Matrix mat = new Matrix();  
+            mat.postRotate(270);
+            
+            // Creation of the bitmap
+            storedBitmap = Bitmap.createBitmap(storedBitmap, 0, 0, storedBitmap.getWidth(), storedBitmap.getHeight(), mat, true);
+            Bitmap newBitmap = resizeAfterRotate(storedBitmap);
+            ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
+            photoResized.setImageBitmap(newBitmap);
+            imageView = (ImageView) findViewById(R.id.background);
+            preview.setVisibility(View.INVISIBLE);
+        }
+        
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+    
+    /**
+     * Resize the bitmap saved when you rotate the device.
+     * 
+     * @param Bitmap bitmap The original bitmap
+     * 
+     * @return the new bitmap.
+     */
+    protected Bitmap resizeAfterRotate(Bitmap bitmap){
+        // Initialize the new bitmap resized
+        Bitmap newBitmap = null;
+        
+        // Get sizes screen.
+        Display defaultDisplay = getWindowManager().getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        defaultDisplay.getMetrics(displayMetrics);
+        int displayWidthPx = (int) displayMetrics.widthPixels;
+        int displayHeightPx = (int) displayMetrics.heightPixels;
+
+        // Get sizes picture.
+        int widthBackground = (int) (bitmap.getWidth() * displayMetrics.density);
+        int heightBackground = (int) (bitmap.getHeight() * displayMetrics.density);
+
+        // Change size ImageView.
+        float ratioX = (float) displayWidthPx / (float) widthBackground;
+        float ratioY = (float) displayHeightPx / (float) heightBackground;
+        if (ratioX < ratioY && ratioX < 1) {
+            System.out.println("OK");
+            newBitmap = Bitmap.createScaledBitmap(bitmap, (int) displayWidthPx, (int) (ratioX * heightBackground), false);
+        } else if (ratioX >= ratioY && ratioY < 1) {
+            System.out.println("OK2");
+            newBitmap = Bitmap.createScaledBitmap(bitmap, (int) (ratioY * widthBackground), (int) displayHeightPx, false);
+        }
+            
+        return newBitmap;
     }
 }
