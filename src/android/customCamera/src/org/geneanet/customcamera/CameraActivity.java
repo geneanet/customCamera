@@ -727,10 +727,8 @@ public class CameraActivity extends Activity {
         float ratioX = (float) displayWidthPx / (float) widthBackground;
         float ratioY = (float) displayHeightPx / (float) heightBackground;
         if (ratioX < ratioY && ratioX < 1) {
-            System.out.println("OK");
             newBitmap = Bitmap.createScaledBitmap(bitmap, (int) displayWidthPx, (int) (ratioX * heightBackground), false);
         } else if (ratioX >= ratioY && ratioY < 1) {
-            System.out.println("OK2");
             newBitmap = Bitmap.createScaledBitmap(bitmap, (int) (ratioY * widthBackground), (int) displayHeightPx, false);
         }
             
