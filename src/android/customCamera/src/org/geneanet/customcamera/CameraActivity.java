@@ -45,29 +45,19 @@ import java.util.List;
  * Activity to use customCamera.
  */
 public class CameraActivity extends Activity {
-  /**
-   * Camera resource.
-   */
-  private Camera mCamera = null;
+  // Camera resource.
+  private Camera customCamera = null;
 
-  /**
-   * Distance between fingers for the zoom
-   */
+  // Distance between fingers for the zoom.
   private static float distanceBetweenFingers;
 
-  /**
-   * Enable miniature mode.
-   */
+  // Enable miniature mode.
   private boolean modeMiniature = false;
 
-  /**
-   * Enable when a photo is taken
-   */
+  // Enable when a photo is taken.
   private boolean photoTaken = false;
 
-  /**
-   * The image in Bitmap format of the preview photo
-   */
+  // The image in Bitmap format of the preview photo.
   private Bitmap storedBitmap;
 
   @Override
@@ -129,33 +119,35 @@ public class CameraActivity extends Activity {
     if (defaultOrientation == 1 || defaultOrientation == 2) {
       int orientation;
       switch (defaultDisplay.getRotation()) {
-      case 0:
-        orientation = (defaultOrientation == 1) ? 90 : 0;
-        mCamera.setDisplayOrientation(orientation);
-        break;
-      case 1:
-        orientation = (defaultOrientation == 1) ? 0 : 270;
-        mCamera.setDisplayOrientation(orientation);
-        break;
-      case 2:
-        orientation = (defaultOrientation == 1) ? 270 : 180;
-        mCamera.setDisplayOrientation(orientation);
-        break;
-      case 3:
-        orientation = (defaultOrientation == 1) ? 180 : 90;
-        mCamera.setDisplayOrientation(orientation);
-        break;
+        case 0:
+          orientation = (defaultOrientation == 1) ? 90 : 0;
+          customCamera.setDisplayOrientation(orientation);
+          break;
+        case 1:
+          orientation = (defaultOrientation == 1) ? 0 : 270;
+          customCamera.setDisplayOrientation(orientation);
+          break;
+        case 2:
+          orientation = (defaultOrientation == 1) ? 270 : 180;
+          customCamera.setDisplayOrientation(orientation);
+          break;
+        case 3:
+          orientation = (defaultOrientation == 1) ? 180 : 90;
+          customCamera.setDisplayOrientation(orientation);
+          break;
+        default:
+          break;
       }
     }
 
     // Assign the render camera to the view
-    CameraPreview mPreview = new CameraPreview(this, mCamera);
+    CameraPreview myPreview = new CameraPreview(this, customCamera);
     FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-    preview.addView(mPreview);
+    preview.addView(myPreview);
 
     // The zoom bar progress
     final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    final Camera.Parameters paramsCamera = mCamera.getParameters();
+    final Camera.Parameters paramsCamera = customCamera.getParameters();
     final int zoom = paramsCamera.getZoom();
     int maxZoom = paramsCamera.getMaxZoom();
 
@@ -174,7 +166,7 @@ public class CameraActivity extends Activity {
         int newZoom = (int) (zoom + progress);
         zoomLevel.setProgress(newZoom);
         paramsCamera.setZoom(newZoom);
-        mCamera.setParameters(paramsCamera);
+        customCamera.setParameters(paramsCamera);
       }
 
       @Override
@@ -187,9 +179,7 @@ public class CameraActivity extends Activity {
     });
   }
 
-  /**
-   * Method to pause the activity.
-   */
+  /** Method to pause the activity. */
   protected void onPause() {
     super.onPause();
     ManagerCamera.clearCameraAccess();
@@ -197,11 +187,11 @@ public class CameraActivity extends Activity {
     preview.removeAllViews();
   }
 
-  // Event on touch screen to call the manager of the zoom & the auto focus.
+  /** Event on touch screen to call the manager of the zoom & the auto focus. */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (!photoTaken) {
-      Camera.Parameters paramsCamera = mCamera.getParameters();
+      Camera.Parameters paramsCamera = customCamera.getParameters();
       int action = event.getAction();
 
       if (event.getPointerCount() > 1) {
@@ -210,7 +200,7 @@ public class CameraActivity extends Activity {
           distanceBetweenFingers = getFingerSpacing(event);
         } else if (action == MotionEvent.ACTION_MOVE
             && paramsCamera.isZoomSupported()) {
-          mCamera.cancelAutoFocus();
+          customCamera.cancelAutoFocus();
           handleZoom(event, paramsCamera, distanceBetweenFingers);
         }
       } else {
@@ -226,25 +216,22 @@ public class CameraActivity extends Activity {
   /**
    * Determine the space between the first two fingers.
    * 
-   * @param MotionEvent
-   *          event Current event which start this calculation.
+   * @param MotionEvent event Current event which start this calculation.
    * 
    * @return float
    */
   private float getFingerSpacing(MotionEvent event) {
-    float x = event.getX(0) - event.getX(1);
-    float y = event.getY(0) - event.getY(1);
-    return (float) Math.sqrt(x * x + y * y);
+    float coordX = event.getX(0) - event.getX(1);
+    float coordY = event.getY(0) - event.getY(1);
+    return (float) Math.sqrt(coordX * coordX + coordY * coordY);
   }
 
   /**
    * Manage the zoom.
    * 
-   * @param MotionEvent
-   *          event Current event which start this action.
-   * @param Parameters
-   *          paramsCamera Camera's parameter.
-   * @param float distanceBetweenFingers Distance between two fingers.
+   * @param MotionEvent event                  Current event which start this action.
+   * @param Parameters  paramsCamera           Camera's parameter.
+   * @param float       distanceBetweenFingers Distance between two fingers.
    */
   private void handleZoom(MotionEvent event, Camera.Parameters paramsCamera,
       float distanceBetweenFingers) {
@@ -269,16 +256,14 @@ public class CameraActivity extends Activity {
     }
     distanceBetweenFingers = newDist;
     paramsCamera.setZoom(zoom);
-    mCamera.setParameters(paramsCamera);
+    customCamera.setParameters(paramsCamera);
   }
 
   /**
-   * To set the seekBar zoom with the pinchZoom
+   * To set the seekBar zoom with the pinchZoom.
    * 
-   * @param maxZoom
-   *          int the max zoom of the device
-   * @param zoom
-   *          int the current zoom
+   * @param int maxZoom The max zoom of the device.
+   * @param int zoom    The current zoom.
    */
   private void setZoomProgress(int maxZoom, int zoom) {
     SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
@@ -290,19 +275,17 @@ public class CameraActivity extends Activity {
   /**
    * Manage the focus.
    * 
-   * @param MotionEvent
-   *          event Current event which start this action.
-   * @param Parameters
-   *          paramsCamera Camera's parameter.
+   * @param event        Current event which start this action.
+   * @param paramsCamera Camera's parameter.
    */
   public void handleFocus(MotionEvent event, Camera.Parameters paramsCamera) {
     if (photoTaken == false) {
       List<String> supportedFocusModes = paramsCamera.getSupportedFocusModes();
       if (supportedFocusModes != null
           && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-        mCamera.autoFocus(new Camera.AutoFocusCallback() {
+        customCamera.autoFocus(new Camera.AutoFocusCallback() {
           @Override
-          public void onAutoFocus(boolean b, Camera camera) {
+          public void onAutoFocus(boolean bool, Camera camera) {
           }
         });
       }
@@ -312,8 +295,7 @@ public class CameraActivity extends Activity {
   /**
    * Display the miniature.
    * 
-   * @param View
-   *          view Current view.
+   * @param view Current view.
    */
   public void showMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
@@ -329,7 +311,7 @@ public class CameraActivity extends Activity {
       miniature.setVisibility(View.INVISIBLE);
       // Add event on click action for the miniature picture.
       background.setOnClickListener(new View.OnClickListener() {
-        public void onClick(View v) {
+        public void onClick(View view) {
           modeMiniature = false;
           ImageView background = (ImageView) findViewById(R.id.background);
           // resize miniature.
@@ -343,13 +325,10 @@ public class CameraActivity extends Activity {
   }
 
   /**
-   * Set the size and the gravity of the miniature function of photo is taken or
-   * not.
+   * Set the size and the gravity of the miniature function of photo is taken or not.
    * 
-   * @param ImageView
-   *          imageView Reference to the background image.
-   * @param Boolean
-   *          Resize Should we resize or not ? Only when click on "miniature"
+   * @param imageView Reference to the background image.
+   * @param resize    Should we resize or not ? Only when click on "miniature".
    */
   public void setParamsMiniature(ImageView imageView, boolean resize) {
     RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(
@@ -371,15 +350,22 @@ public class CameraActivity extends Activity {
   /**
    * Method to get the device default orientation.
    * 
-   * @return int
+   * @return int the device orientation.
    */
   public int getDeviceDefaultOrientation() {
     WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
     Configuration config = getResources().getConfiguration();
     int rotation = windowManager.getDefaultDisplay().getRotation();
 
-    if ((config.orientation == Configuration.ORIENTATION_LANDSCAPE && (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180))
-        || (config.orientation == Configuration.ORIENTATION_PORTRAIT && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270))) {
+    if (
+        (
+            config.orientation == Configuration.ORIENTATION_LANDSCAPE 
+            && (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180)
+        ) || (
+            config.orientation == Configuration.ORIENTATION_PORTRAIT
+            && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+        )
+    ) {
       return Configuration.ORIENTATION_LANDSCAPE;
     } else {
       return Configuration.ORIENTATION_PORTRAIT;
@@ -389,8 +375,7 @@ public class CameraActivity extends Activity {
   /**
    * Method to take picture.
    * 
-   * @param view
-   *          Current view.
+   * @param view Current view.
    */
   public void takePhoto(View view) {
 
@@ -413,8 +398,7 @@ public class CameraActivity extends Activity {
        * Event when picture is taken.
        * 
        * @param byte[] data Picture with byte format.
-       * @param Camera
-       *          camera Current resource camera.
+       * @param Camera camera Current resource camera.
        */
       public void onPictureTaken(final byte[] data, Camera camera) {
         // Show buttons to accept or decline the picture.
@@ -447,13 +431,13 @@ public class CameraActivity extends Activity {
 
         // Stop link between view and camera to start the preview
         // picture.
-        mCamera.stopPreview();
+        customCamera.stopPreview();
         BitmapFactory.Options opt;
         opt = new BitmapFactory.Options();
 
         // Temp storage to use for decoding
         opt.inTempStorage = new byte[16 * 1024];
-        Camera.Parameters paramsCamera = mCamera.getParameters();
+        Camera.Parameters paramsCamera = customCamera.getParameters();
         Size size = paramsCamera.getPictureSize();
 
         int height = size.height;
@@ -461,10 +445,11 @@ public class CameraActivity extends Activity {
         float res = (width * height) / 1024000;
 
         // Return a smaller image for now
-        if (res > 4f)
+        if (res > 4f) {
           opt.inSampleSize = 4;
-        else if (res > 3f)
+        } else if (res > 3f) {
           opt.inSampleSize = 2;
+        }
 
         // Preview from camera
         storedBitmap = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
@@ -474,19 +459,18 @@ public class CameraActivity extends Activity {
         // lockScreen(true);
 
         assignFunctionButtonAcceptAndDecline();
-
-      };
+      }
     };
     // Start capture picture.
-    mCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+    customCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
   }
-
+  
   /**
-   * To redirect (by rotation) the image stored in gallery
+   * To redirect (by rotation) the image stored in gallery.
    * 
-   * @return integer
+   * @return int 
    */
-  public float redirectPhotoInGallery() {
+  public int redirectPhotoInGallery() {
     WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
     int defaultOrientation = getDeviceDefaultOrientation();
     int redirect = 0;
@@ -494,26 +478,28 @@ public class CameraActivity extends Activity {
 
     if (defaultOrientation == 1 || defaultOrientation == 2) {
       switch (windowManager.getDefaultDisplay().getRotation()) {
-      case 0:
-        redirect = (defaultOrientation == 1) ? 90 : 0;
-        // If the device is in front camera by default
-        if (orientationCamera == 1 && defaultOrientation == 1) {
-          redirect = 270;
-        }
-        break;
-      case 1:
-        redirect = (defaultOrientation == 1) ? 0 : 270;
-        break;
-      case 2:
-        redirect = (defaultOrientation == 1) ? 270 : 180;
-        // If the device is in front camera by default
-        if (orientationCamera == 1 && defaultOrientation == 1) {
-          redirect = 90;
-        }
-        break;
-      case 3:
-        redirect = (defaultOrientation == 1) ? 180 : 90;
-        break;
+        case 0:
+          redirect = (defaultOrientation == 1) ? 90 : 0;
+          // If the device is in front camera by default
+          if (orientationCamera == 1 && defaultOrientation == 1) {
+            redirect = 270;
+          }
+          break;
+        case 1:
+          redirect = (defaultOrientation == 1) ? 0 : 270;
+          break;
+        case 2:
+          redirect = (defaultOrientation == 1) ? 270 : 180;
+          // If the device is in front camera by default
+          if (orientationCamera == 1 && defaultOrientation == 1) {
+            redirect = 90;
+          }
+          break;
+        case 3:
+          redirect = (defaultOrientation == 1) ? 180 : 90;
+          break;
+        default:
+          break;
       }
     }
 
@@ -521,9 +507,9 @@ public class CameraActivity extends Activity {
   }
 
   /**
-   * Get the orientation of the current camera
+   * Get the orientation of the current camera.
    * 
-   * @return The orientation of the current camera (FRONT OR BACK)
+   * @return int The orientation of the current camera (FRONT OR BACK)
    */
   public int getOrientationOfCamera() {
     CameraInfo info = new Camera.CameraInfo();
@@ -539,9 +525,9 @@ public class CameraActivity extends Activity {
    * @return boolean
    */
   protected boolean initCameraResource() {
-    mCamera = ManagerCamera.getCameraInstance();
+    customCamera = ManagerCamera.getCameraInstance();
 
-    if (mCamera == null) {
+    if (customCamera == null) {
       this.setResult(2,
           new Intent().putExtra("errorMessage", "Camera is unavailable."));
       this.finish();
@@ -552,18 +538,14 @@ public class CameraActivity extends Activity {
     return true;
   }
 
-  /**
-   * When the back button is pressed
-   */
+  /** When the back button is pressed. */
   @Override
   public void onBackPressed() {
     this.setResult(3);
     this.finish();
   }
 
-  /**
-   * To set background in the view.
-   */
+  /** To set background in the view. */
   protected void setBackground() {
     // Get the base64 picture for the background only if it's exist.
     byte[] imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
@@ -606,9 +588,7 @@ public class CameraActivity extends Activity {
     }
   }
 
-  /**
-   * To save some contains of the activity
-   */
+  /** To save some contains of the activity. */
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     outState.putBoolean("photoTaken", photoTaken);
@@ -617,21 +597,19 @@ public class CameraActivity extends Activity {
     super.onSaveInstanceState(outState);
   }
 
-  /**
-   * To restore the contains saved on the method onSaveInstanceState()
-   */
+  /** To restore the contains saved on the method onSaveInstanceState(). */
   @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
     LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    LinearLayout buttonMiniatureAndPhoto = (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
+    LinearLayout buttonMiniatureAndPhoto = 
+        (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
     photoTaken = savedInstanceState.getBoolean("photoTaken");
     modeMiniature = savedInstanceState.getBoolean("modeMiniature");
     storedBitmap = savedInstanceState.getParcelable("storedBitmap");
 
     // If the photo is taken when we orient the device
     if (photoTaken) {
-
       // Matrix to perform rotation
       Matrix mat = new Matrix();
       mat.postRotate(90);
@@ -655,8 +633,7 @@ public class CameraActivity extends Activity {
   /**
    * Resize the bitmap saved when you rotate the device.
    * 
-   * @param Bitmap
-   *          bitmap The original bitmap
+   * @param Bitmap bitmap The original bitmap
    * 
    * @return the new bitmap.
    */
@@ -690,10 +667,9 @@ public class CameraActivity extends Activity {
   }
 
   /**
-   * Allow to lock the screen or not
+   * Allow to lock the screen or not.
    * 
-   * @param Do
-   *          we have to lock or not ?
+   * @param boolean lock Do we have to lock or not ?
    */
   protected void lockScreen(boolean lock) {
     if (lock == false) {
@@ -703,47 +679,50 @@ public class CameraActivity extends Activity {
       int defaultOrientation = this.getDeviceDefaultOrientation();
       if (defaultOrientation == Configuration.ORIENTATION_LANDSCAPE) {
         switch (defaultDisplay.getRotation()) {
-        case 0:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-          break;
-        case 1:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-          break;
-        case 2:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-          break;
-        case 3:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-          break;
+          case 0:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            break;
+          case 1:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+            break;
+          case 2:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+            break;
+          case 3:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            break;
+          default:
+            break;
         }
 
       } else if (defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
         switch (defaultDisplay.getRotation()) {
-        case 0:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-          break;
-        case 1:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-          break;
-        case 2:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-          break;
-        case 3:
-          this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-          break;
+          case 0:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            break;
+          case 1:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            break;
+          case 2:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+            break;
+          case 3:
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+            break;
+          default:
+            break;
         }
       }
 
     }
   }
 
-  /**
-   * Assign actions on button "accept" and "decline"
-   */
+  /** Assign actions on button "accept" and "decline". */
   protected void assignFunctionButtonAcceptAndDecline() {
     final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
     final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    final LinearLayout buttonMiniatureAndPhoto = (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
+    final LinearLayout buttonMiniatureAndPhoto = 
+        (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
     final Button miniature = (Button) findViewById(R.id.miniature);
     final Button accept = (Button) findViewById(R.id.accept);
     final Button decline = (Button) findViewById(R.id.decline);
@@ -753,7 +732,7 @@ public class CameraActivity extends Activity {
     // Event started after accept picture.
     accept.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(View v) {
+      public void onClick(View view) {
         try {
           // Matrix to perform rotation
           Matrix mat = new Matrix();
@@ -794,7 +773,7 @@ public class CameraActivity extends Activity {
     // Event started after decline picture.
     decline.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(View v) {
+      public void onClick(View view) {
         photoTaken = false;
         LayoutParams paramsLayoutAcceptDecline = (LinearLayout.LayoutParams) miniature
             .getLayoutParams();
@@ -813,7 +792,7 @@ public class CameraActivity extends Activity {
         zoomLevel.setVisibility(View.VISIBLE);
         ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
         photoResized.setVisibility(View.INVISIBLE);
-        mCamera.startPreview();
+        customCamera.startPreview();
         preview.setVisibility(View.VISIBLE);
         buttonMiniatureAndPhoto.setVisibility(View.VISIBLE);
 
