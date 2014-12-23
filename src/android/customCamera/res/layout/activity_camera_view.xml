@@ -19,9 +19,7 @@
     <ImageView
         android:id="@+id/background"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" 
+        android:layout_height="fill_parent" 
         android:alpha="0.2"
         android:scaleType="fitXY" />
 
@@ -45,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
-                android:onClick="showMiniature"
+                android:onClick="buttonMiniature"
                 android:text="@string/miniature" />
 
             <Button
@@ -94,6 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:onClick="acceptPhoto"
                 android:text="@string/acceptePicture" />
             
             <Button
@@ -101,6 +100,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:onClick="declinePhoto"
                 android:text="@string/declinePicture" />
         </LinearLayout>
 
