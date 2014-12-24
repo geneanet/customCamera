@@ -114,41 +114,30 @@ public class CameraActivity extends Activity {
   @Override
   protected void onStart() {
     super.onStart();
-    // Get informations about the default display for the device
-    Display defaultDisplay = getWindowManager().getDefaultDisplay();
 
     // Init camera resource.
     if (!initCameraResource()) {
       return;
     }
-
-    // Get the default orientation of the device
-    int defaultOrientation = getDeviceDefaultOrientation();
-
-    // Change camera orientation function of the device's default orientation.
-    if (defaultOrientation == 1 || defaultOrientation == 2) {
-      int orientation;
-      switch (defaultDisplay.getRotation()) {
-        case 0:
-          orientation = defaultOrientation == Configuration.ORIENTATION_PORTRAIT ? 90 : 0;
-          customCamera.setDisplayOrientation(orientation);
-          break;
-        case 1:
-          orientation = defaultOrientation == Configuration.ORIENTATION_PORTRAIT ? 0 : 270;
-          customCamera.setDisplayOrientation(orientation);
-          break;
-        case 2:
-          orientation = defaultOrientation == Configuration.ORIENTATION_PORTRAIT ? 270 : 180;
-          customCamera.setDisplayOrientation(orientation);
-          break;
-        case 3:
-          orientation = defaultOrientation == Configuration.ORIENTATION_PORTRAIT ? 180 : 90;
-          customCamera.setDisplayOrientation(orientation);
-          break;
-        default:
-          break;
-      }
+    
+    int orientation = 0;
+    switch (getCustomRotation()) {
+      case 0:
+        orientation = 90;
+        break;
+      case 1:
+        orientation = 0;
+        break;
+      case 2:
+        orientation = 270;
+        break;
+      case 3:
+        orientation = 180;
+        break;
+      default:
+        break;
     }
+    customCamera.setDisplayOrientation(orientation);
 
     // Assign the render camera to the view
     CameraPreview myPreview = new CameraPreview(this, customCamera);
@@ -220,6 +209,7 @@ public class CameraActivity extends Activity {
         }
       }
     }
+    
     return true;
   }
 
@@ -382,7 +372,6 @@ public class CameraActivity extends Activity {
     
     // Call the method to handle the position of the miniature.
     positioningMiniature(paramsMiniature);
-
     imageView.setLayoutParams(paramsMiniature);
   }
   
@@ -433,8 +422,7 @@ public class CameraActivity extends Activity {
       // Show/hide elements when a photo is not taken
       keepPhoto.setVisibility(View.INVISIBLE);
       photo.setVisibility(View.VISIBLE);
-      zoomLevel.setVisibility(View.VISIBLE);
-      
+      zoomLevel.setVisibility(View.VISIBLE);  
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -582,36 +570,34 @@ public class CameraActivity extends Activity {
    * @return int 
    */
   public int redirectPhotoInGallery() {
-    WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
     int defaultOrientation = getDeviceDefaultOrientation();
-    int redirect = 0;
     int orientationCamera = getOrientationOfCamera();
-
-    switch (windowManager.getDefaultDisplay().getRotation()) {
+    int redirect = 0;
+    switch (getCustomRotation()) {
       case 0:
-        redirect = (defaultOrientation == Configuration.ORIENTATION_PORTRAIT) ? 90 : 0;
+        redirect = 90;
         // If the device is in front camera by default
         if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
           redirect = 270;
         }
         break;
       case 1:
-        redirect = (defaultOrientation == Configuration.ORIENTATION_PORTRAIT) ? 0 : 270;
+        redirect = 0;
         break;
       case 2:
-        redirect = (defaultOrientation == Configuration.ORIENTATION_PORTRAIT) ? 270 : 180;
+        redirect = 270;
         // If the device is in front camera by default
         if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
           redirect = 90;
         }
         break;
       case 3:
-        redirect = (defaultOrientation == Configuration.ORIENTATION_PORTRAIT) ? 180 : 90;
+        redirect = 180;
         break;
       default:
         break;
     }
-
+    
     return redirect;
   }
   
@@ -636,10 +622,8 @@ public class CameraActivity extends Activity {
     final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
     ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
     
-    photoTaken = null;
-    
+    photoTaken = null;  
     displayAceptDeclineButtons();
-   
     photoResized.setVisibility(View.INVISIBLE);
     customCamera.startPreview();
     preview.setVisibility(View.VISIBLE);
@@ -671,7 +655,24 @@ public class CameraActivity extends Activity {
     if (photoTaken != null) {
       // Matrix to perform rotation
       Matrix mat = new Matrix();
-      mat.postRotate(90);
+      int orientation = 0;
+      switch (getCustomRotation()) {
+        case 0:
+          orientation = 270;
+          break;
+        case 1:
+          orientation = 90;
+          break;
+        case 2:
+          orientation = 0;
+          break;
+        case 3:
+          orientation = 180;
+          break;
+        default:
+          break;
+      }
+      mat.postRotate(orientation);
   
       // Creation of the bitmap
       photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
@@ -682,9 +683,7 @@ public class CameraActivity extends Activity {
       preview.setVisibility(View.INVISIBLE);
       
       displayAceptDeclineButtons();
-      
     }
-  
     super.onRestoreInstanceState(savedInstanceState);
   }
   
@@ -762,5 +761,21 @@ public class CameraActivity extends Activity {
      
       this.setRequestedOrientation(newOrientation);
     }
+  }
+  
+  /**
+   * To perform the rotation.
+   * @return the code of the rotation (0, 1, 2 , 3)
+   */
+  protected int getCustomRotation() {
+    WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+    int code = windowManager.getDefaultDisplay().getRotation();
+    int defaultOrientation = getDeviceDefaultOrientation();
+    if (defaultOrientation == 2) {
+      code ++;
+    }
+    code = code == 4 ? 0 : code;
+    
+    return code;
   }
 }
