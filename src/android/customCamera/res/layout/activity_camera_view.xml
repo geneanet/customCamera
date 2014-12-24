@@ -31,30 +31,21 @@
         android:layout_alignParentTop="true"
         android:gravity="bottom" >
 
-        <LinearLayout
-            android:id="@+id/buttonMiniatureAndPhoto"
+        <Button
+            android:id="@+id/miniature"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="0.2"
-            android:gravity="bottom" >
+            android:onClick="buttonMiniature"
+            android:text="@string/miniature" />
 
-            <Button
-                android:id="@+id/miniature"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.2"
-                android:onClick="buttonMiniature"
-                android:text="@string/miniature" />
-
-            <Button
-                android:id="@+id/capture"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="takePhoto"
-                android:text="@string/capture" />
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="takePhoto"
+            android:text="@string/capture" />
 
         <org.geneanet.customcamera.VerticalSeekBar
             android:id="@+id/switchOpacity"

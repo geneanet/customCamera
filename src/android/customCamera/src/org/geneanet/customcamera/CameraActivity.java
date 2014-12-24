@@ -2,6 +2,7 @@ package org.geneanet.customcamera;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -52,6 +53,25 @@ public class CameraActivity extends Activity {
   // The image in Bitmap format of the preview photo.
   private Bitmap photoTaken = null;
 
+  /**
+   * To get camera resource or stop this activity.
+   * 
+   * @return boolean
+   */
+  protected boolean initCameraResource() {
+    customCamera = ManagerCamera.getCameraInstance();
+
+    if (customCamera == null) {
+      this.setResult(2,
+          new Intent().putExtra("errorMessage", "Camera is unavailable."));
+      this.finish();
+
+      return false;
+    }
+
+    return true;
+  }
+  
   /** Method onCreate. Handle the opacity seekBar and general configuration. */
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -177,49 +197,6 @@ public class CameraActivity extends Activity {
     preview.removeAllViews();
   }
   
-  /** To set background in the view. */
-  protected void setBackground() {
-    // Get the base64 picture for the background only if it's exist.
-    byte[] imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
-    if (imgBackgroundBase64 != null) {
-      // Get picture.
-      Bitmap imgBackgroundBitmap = BitmapFactory.decodeByteArray(
-          imgBackgroundBase64, 0, imgBackgroundBase64.length);
-
-      // Get sizes screen.
-      Display defaultDisplay = getWindowManager().getDefaultDisplay();
-      DisplayMetrics displayMetrics = new DisplayMetrics();
-      defaultDisplay.getMetrics(displayMetrics);
-      int displayWidthPx = (int) displayMetrics.widthPixels;
-      int displayHeightPx = (int) displayMetrics.heightPixels;
-
-      // Get sizes picture.
-      int widthBackground = (int) (imgBackgroundBitmap.getWidth() * displayMetrics.density);
-      int heightBackground = (int) (imgBackgroundBitmap.getHeight() * displayMetrics.density);
-
-      // Change size ImageView.
-      RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(
-          widthBackground, heightBackground);
-      float ratioX = (float) displayWidthPx / (float) widthBackground;
-      float ratioY = (float) displayHeightPx / (float) heightBackground;
-      if (ratioX < ratioY && ratioX < 1) {
-        paramsMiniature.width = (int) displayWidthPx;
-        paramsMiniature.height = (int) (ratioX * heightBackground);
-      } else if (ratioX >= ratioY && ratioY < 1) {
-        paramsMiniature.width = (int) (ratioY * widthBackground);
-        paramsMiniature.height = (int) displayHeightPx;
-      }
-      
-      // set image at the view.
-      ImageView background = (ImageView) findViewById(R.id.background);
-      background.setImageBitmap(imgBackgroundBitmap);
-
-      paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
-          RelativeLayout.TRUE);
-      
-      background.setLayoutParams(paramsMiniature);
-    }
-  }
   /** Event on touch screen to call the manager of the zoom & the auto focus. */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
@@ -322,6 +299,50 @@ public class CameraActivity extends Activity {
     }
   }
 
+  /** To set background in the view. */
+  protected void setBackground() {
+    // Get the base64 picture for the background only if it's exist.
+    byte[] imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
+    if (imgBackgroundBase64 != null) {
+      // Get picture.
+      Bitmap imgBackgroundBitmap = BitmapFactory.decodeByteArray(
+          imgBackgroundBase64, 0, imgBackgroundBase64.length);
+
+      // Get sizes screen.
+      Display defaultDisplay = getWindowManager().getDefaultDisplay();
+      DisplayMetrics displayMetrics = new DisplayMetrics();
+      defaultDisplay.getMetrics(displayMetrics);
+      int displayWidthPx = (int) displayMetrics.widthPixels;
+      int displayHeightPx = (int) displayMetrics.heightPixels;
+
+      // Get sizes picture.
+      int widthBackground = (int) (imgBackgroundBitmap.getWidth() * displayMetrics.density);
+      int heightBackground = (int) (imgBackgroundBitmap.getHeight() * displayMetrics.density);
+
+      // Change size ImageView.
+      RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(
+          widthBackground, heightBackground);
+      float ratioX = (float) displayWidthPx / (float) widthBackground;
+      float ratioY = (float) displayHeightPx / (float) heightBackground;
+      if (ratioX < ratioY && ratioX < 1) {
+        paramsMiniature.width = (int) displayWidthPx;
+        paramsMiniature.height = (int) (ratioX * heightBackground);
+      } else if (ratioX >= ratioY && ratioY < 1) {
+        paramsMiniature.width = (int) (ratioY * widthBackground);
+        paramsMiniature.height = (int) displayHeightPx;
+      }
+      
+      // set image at the view.
+      ImageView background = (ImageView) findViewById(R.id.background);
+      background.setImageBitmap(imgBackgroundBitmap);
+
+      paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
+          RelativeLayout.TRUE);
+      
+      background.setLayoutParams(paramsMiniature);
+    }
+  }
+  
   /** Resize and mask the miniature button. */
   public void buttonMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
@@ -341,7 +362,6 @@ public class CameraActivity extends Activity {
         // Resize miniature.
         background.setClickable(false);
         setBackground();
-  
         miniature.setVisibility(View.VISIBLE);
       }
     });
@@ -362,10 +382,7 @@ public class CameraActivity extends Activity {
     
     // Call the method to handle the position of the miniature.
     positioningMiniature(paramsMiniature);
-    
-    
-//    paramsMiniature.addRule(RelativeLayout.ALIGN_TOP, 0);
- 
+
     imageView.setLayoutParams(paramsMiniature);
   }
   
@@ -375,15 +392,56 @@ public class CameraActivity extends Activity {
    */
   public void positioningMiniature(RelativeLayout.LayoutParams paramsMiniature) {
     if (photoTaken == null) {
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,
-          RelativeLayout.TRUE);
+      // Position at the bottom
+      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);   
+      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
     } else {
+      // Position at the top
       paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP,
-          RelativeLayout.TRUE);
+      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+    }
+    // In all cases, position at the left
+    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+  }
+  
+  /**
+   * Display the layout accept/decline photo + mask photo button.
+   */
+  public void displayAceptDeclineButtons() {
+    LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
+    Button photo = (Button) findViewById(R.id.capture);
+    SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+    Button miniature = (Button) findViewById(R.id.miniature);
+    ImageView background = (ImageView) findViewById(R.id.background);
+    LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature
+        .getLayoutParams();
+    
+    if (photoTaken != null) {
+      // Show/hide elements when a photo is taken 
+      keepPhoto.setVisibility(View.VISIBLE);  
+      photo.setVisibility(View.INVISIBLE);   
+      zoomLevel.setVisibility(View.INVISIBLE);
+      
+      ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
+      miniature.setLayoutParams(paramsLayoutMiniature);
+      
+      if (modeMiniature) {
+        setParamsMiniature(background, false);
+      }
+      
+    } else {
+      // Show/hide elements when a photo is not taken
+      keepPhoto.setVisibility(View.INVISIBLE);
+      photo.setVisibility(View.VISIBLE);
+      zoomLevel.setVisibility(View.VISIBLE);
+      
+      
+      ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
+      miniature.setLayoutParams(paramsLayoutMiniature);
+      
+      if (modeMiniature) {
+        setParamsMiniature(background, false);
+      }
     }
   }
   
@@ -417,7 +475,6 @@ public class CameraActivity extends Activity {
    * @param view Current view.
    */
   public void takePhoto(View view) {
-
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -464,38 +521,11 @@ public class CameraActivity extends Activity {
         // Preview from camera
         photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
         
-        // Show buttons to accept or decline the picture.
-        LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-        keepPhoto.setVisibility(View.VISIBLE);
-
-        // Hide the capture button.
-        Button photo = (Button) findViewById(R.id.capture);
-        photo.setVisibility(View.INVISIBLE);
-
-        // Hide the zoom progressBar
-        SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-        zoomLevel.setVisibility(View.INVISIBLE);
-
-        // Put button miniature at the top of the page
-        Button miniature = (Button) findViewById(R.id.miniature);
-        LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature
-            .getLayoutParams();
-        ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
-        miniature.setLayoutParams(paramsLayoutMiniature);
-
-
-        // If miniature mode when photo is taken, the miniature goes to
-        // the top
-        if (modeMiniature) {
-          ImageView background = (ImageView) findViewById(R.id.background);
-          setParamsMiniature(background, false);
-        }
-
+        displayAceptDeclineButtons();
+        
         // Lock the screen until the accept/decline button is clicked
         // ---> OPTION
         // lockScreen(true);
-
-//        assignFunctionButtonAcceptAndDecline();
       }
     };
     // Start capture picture.
@@ -520,7 +550,7 @@ public class CameraActivity extends Activity {
           photoTaken.getWidth(), photoTaken.getHeight(), mat, true);
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       photoTaken.compress(CompressFormat.JPEG, 70, stream);
-
+      
       // Get path picture to storage.
       String pathPicture = Environment.getExternalStorageDirectory()
           .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera/";
@@ -532,6 +562,8 @@ public class CameraActivity extends Activity {
       outStream.write(stream.toByteArray());
       outStream.close();
 
+      TransferBigData.setImgBackgroundBase64(stream.toByteArray());
+      
       // Return to success & finish current activity.
       cameraActivityCurrent.setResult(1,
           new Intent().putExtra("pathPicture", pathPicture));
@@ -542,44 +574,6 @@ public class CameraActivity extends Activity {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-  
-  /**
-   * Call when the photo is declined.
-   * @param view The current View.
-   */
-  public void declinePhoto(View view) {
-    final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-    final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    final LinearLayout buttonMiniatureAndPhoto = 
-        (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
-    final Button miniature = (Button) findViewById(R.id.miniature);
-    final Button photo = (Button) findViewById(R.id.capture);
-    
-    photoTaken = null;
-    LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature
-         .getLayoutParams();
-    ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
-    miniature.setLayoutParams(paramsLayoutMiniature);
-
-     // If mode miniature and photo is declined, the miniature goes
-     // back to the bottom
-    if (modeMiniature) {
-      ImageView background = (ImageView) findViewById(R.id.background);
-      setParamsMiniature(background, false);
-    }
-    keepPhoto.setVisibility(View.INVISIBLE);
-    photo.setVisibility(View.VISIBLE);
-    SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    zoomLevel.setVisibility(View.VISIBLE);
-    ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
-    photoResized.setVisibility(View.INVISIBLE);
-    customCamera.startPreview();
-    preview.setVisibility(View.VISIBLE);
-    buttonMiniatureAndPhoto.setVisibility(View.VISIBLE);
-
-      // Unlock the screen ---> OPTION
-      // lockScreen(false);
   }
   
   /**
@@ -620,7 +614,7 @@ public class CameraActivity extends Activity {
 
     return redirect;
   }
-
+  
   /**
    * Get the orientation of the current camera.
    * 
@@ -633,24 +627,25 @@ public class CameraActivity extends Activity {
 
     return info.facing;
   }
-
+  
   /**
-   * To get camera resource or stop this activity.
-   * 
-   * @return boolean
+   * Call when the photo is declined.
+   * @param view The current View.
    */
-  protected boolean initCameraResource() {
-    customCamera = ManagerCamera.getCameraInstance();
+  public void declinePhoto(View view) {
+    final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+    ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
+    
+    photoTaken = null;
+    
+    displayAceptDeclineButtons();
+   
+    photoResized.setVisibility(View.INVISIBLE);
+    customCamera.startPreview();
+    preview.setVisibility(View.VISIBLE);
 
-    if (customCamera == null) {
-      this.setResult(2,
-          new Intent().putExtra("errorMessage", "Camera is unavailable."));
-      this.finish();
-
-      return false;
-    }
-
-    return true;
+      // Unlock the screen ---> OPTION
+      // lockScreen(false);
   }
   
   /** To save some contains of the activity. */
@@ -665,9 +660,6 @@ public class CameraActivity extends Activity {
   @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-    LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    LinearLayout buttonMiniatureAndPhoto = 
-        (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
     modeMiniature = savedInstanceState.getBoolean("modeMiniature");
     photoTaken = savedInstanceState.getParcelable("photoTaken");
     
@@ -688,10 +680,9 @@ public class CameraActivity extends Activity {
       ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
       photoResized.setImageBitmap(newBitmap);
       preview.setVisibility(View.INVISIBLE);
-  
-      keepPhoto.setVisibility(View.VISIBLE);
-      buttonMiniatureAndPhoto.setVisibility(View.INVISIBLE);
-//      assignFunctionButtonAcceptAndDecline();
+      
+      displayAceptDeclineButtons();
+      
     }
   
     super.onRestoreInstanceState(savedInstanceState);
@@ -731,172 +722,45 @@ public class CameraActivity extends Activity {
     
     return newBitmap;
   }
-
   
-//  /**
-//   * Display the miniature.
-//   * 
-//   * @param view Current view.
-//   */
-//  public void showMiniature(View view) {
-//    ImageView background = (ImageView) findViewById(R.id.background);
-//    final Button miniature = (Button) view;
-//
-//    // if it's not miniature mode.
-//    if (!modeMiniature) {
-//      modeMiniature = true;
-//      // Set new size for miniature layout.
-//      setParamsMiniature(background, true);
-//
-//      // Hide the miniature button.
-//      miniature.setVisibility(View.INVISIBLE);
-//      // Add event on click action for the miniature picture.
-//      background.setOnClickListener(new View.OnClickListener() {
-//        public void onClick(View view) {
-//          modeMiniature = false;
-//          ImageView background = (ImageView) findViewById(R.id.background);
-//          // resize miniature.
-//          background.setClickable(false);
-//          setBackground();
-//
-//          miniature.setVisibility(View.VISIBLE);
-//        }
-//      });
-//    }
-//  }
-
-  
-//  /** When the back button is pressed. */
-//  @Override
-//  public void onBackPressed() {
-//    this.setResult(3);
-//    this.finish();
-//  }
-
-
-//  /**
-//   * Allow to lock the screen or not.
-//   * 
-//   * @param boolean lock Do we have to lock or not ?
-//   */
-//  protected void lockScreen(boolean lock) {
-//    if (lock == false) {
-//      this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-//    } else {
-//      int defaultOrientation = this.getDeviceDefaultOrientation();
-//      int newOrientation = 0;
-//      
-//      switch (getWindowManager().getDefaultDisplay().getRotation()) {
-//        case 0:
-//          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-//              ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//              : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-//          break;
-//        case 1:
-//          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-//              ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-//              : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-//          break;
-//        case 2:
-//          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-//              ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-//              : ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-//          break;
-//        case 3:
-//          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-//              ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-//              : ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-//          break;
-//        default:
-//          break;
-//      }
-//      
-//      this.setRequestedOrientation(newOrientation);
-//    }
-//  }
-//
-//  /** Assign actions on button "accept" and "decline". */
-//  protected void assignFunctionButtonAcceptAndDecline() {
-//    final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-//    final LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-//    final LinearLayout buttonMiniatureAndPhoto = 
-//        (LinearLayout) findViewById(R.id.buttonMiniatureAndPhoto);
-//    final Button miniature = (Button) findViewById(R.id.miniature);
-//    final Button accept = (Button) findViewById(R.id.accept);
-//    final Button decline = (Button) findViewById(R.id.decline);
-//    final Button photo = (Button) findViewById(R.id.capture);
-//    final CameraActivity cameraActivityCurrent = this;
-//
-//    // Event started after accept picture.
-//    accept.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View view) {
-//        try {
-//          // Matrix to perform rotation
-//          Matrix mat = new Matrix();
-//          float redirect = redirectPhotoInGallery();
-//          mat.postRotate(redirect);
-//
-//          // Creation of the bitmap
-//          storedBitmap = Bitmap.createBitmap(storedBitmap, 0, 0,
-//              storedBitmap.getWidth(), storedBitmap.getHeight(), mat, true);
-//          ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//          storedBitmap.compress(CompressFormat.JPEG, 70, stream);
-//
-//          photoTaken = false;
-//          // Get path picture to storage.
-//          String pathPicture = Environment.getExternalStorageDirectory()
-//              .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera/";
-//          pathPicture = pathPicture
-//              + String.format("%d.jpeg", System.currentTimeMillis());
-//
-//          // Write data in file.
-//          FileOutputStream outStream = new FileOutputStream(pathPicture);
-//          outStream.write(stream.toByteArray());
-//          outStream.close();
-//
-//          // Return to success & finish current activity.
-//          cameraActivityCurrent.setResult(1,
-//              new Intent().putExtra("pathPicture", pathPicture));
-//          cameraActivityCurrent.finish();
-//
-//          // Unlock the screen ---> OPTION
-//          // lockScreen(false);
-//        } catch (IOException e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    });
-//
-//    // Event started after decline picture.
-//    decline.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View view) {
-//        photoTaken = false;
-//        LayoutParams paramsLayoutAcceptDecacceptedline = (LinearLayout.LayoutParams) miniature
-//            .getLayoutParams();
-//        ((LinearLayout.LayoutParams) paramsLayoutAcceptDecline).gravity = Gravity.BOTTOM;
-//        miniature.setLayoutParams(paramsLayoutAcceptDecline);
-//
-//        // If mode miniature and photo is declined, the miniature goes
-//        // back to the bottom
-//        if (modeMiniature) {
-//          ImageView background = (ImageView) findViewById(R.id.background);
-//          setParamsMiniature(background, false);
-//        }
-//        keepPhoto.setVisibility(View.INVISIBLE);
-//        photo.setVisibility(View.VISIBLE);
-//        SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-//        zoomLevel.setVisibility(View.VISIBLE);
-//        ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
-//        photoResized.setVisibility(View.INVISIBLE);
-//        customCamera.startPreview();
-//        preview.setVisibility(View.VISIBLE);
-//        buttonMiniatureAndPhoto.setVisibility(View.VISIBLE);
-//
-//        // Unlock the screen ---> OPTION
-//        // lockScreen(false);
-//      }
-//    });
-//  }
+  /**
+  * Allow to lock the screen or not.
+  * 
+  * @param boolean lock Do we have to lock or not ?
+  */
+  protected void lockScreen(boolean lock) {
+    if (lock == false) {
+      this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+    } else {
+      int defaultOrientation = this.getDeviceDefaultOrientation();
+      int newOrientation = 0;
+     
+      switch (getWindowManager().getDefaultDisplay().getRotation()) {
+        case 0:
+          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
+             ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+             : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+          break;
+        case 1:
+          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
+             ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+             : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+          break;
+        case 2:
+          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
+             ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+             : ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+          break;
+        case 3:
+          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
+             ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+             : ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+          break;
+        default:
+          break;
+      }
+     
+      this.setRequestedOrientation(newOrientation);
+    }
+  }
 }
