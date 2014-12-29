@@ -521,7 +521,8 @@ public class CameraActivity extends Activity {
           case 0:
             redirect = CameraActivity.DEGREE_90;
             // If the device is in front camera by default
-            if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (orientationCamera == 1 
+                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
               redirect = CameraActivity.DEGREE_270;
             }
             break;
@@ -531,7 +532,8 @@ public class CameraActivity extends Activity {
           case 2:
             redirect = CameraActivity.DEGREE_270;
             // If the device is in front camera by default
-            if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (orientationCamera == 1 
+                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
               redirect = CameraActivity.DEGREE_90;
             }
             break;
@@ -629,7 +631,7 @@ public class CameraActivity extends Activity {
     super.onRestoreInstanceState(savedInstanceState);
   }
 
-  /** To display or not the picture taken */
+  /** To display or not the picture taken. */
   protected void displayPicture() {
     FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
     ImageView photoResized = (ImageView) findViewById(R.id.photoResized);

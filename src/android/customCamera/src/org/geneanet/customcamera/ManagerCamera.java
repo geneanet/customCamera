@@ -9,7 +9,7 @@ import android.util.Log;
 public class ManagerCamera {
   protected static Camera mCamera = null;
 
-  // Constant to define differents orientations for the devices.
+  // Constant to define different orientations for the devices.
   public static final int PORTRAIT = 0;
   public static final int LANDSCAPE = 1;
   public static final int PORTRAIT_INVERSED = 2;
