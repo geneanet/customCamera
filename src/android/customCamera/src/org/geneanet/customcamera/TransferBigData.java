@@ -5,6 +5,7 @@ package org.geneanet.customcamera;
  */
 public class TransferBigData {
   protected static byte[] imgBackgroundBase64 = null;
+  protected static byte[] imgTaken = null;
 
   /**
    * Get bytes to represent background picture.
@@ -22,5 +23,23 @@ public class TransferBigData {
    */
   public static void setImgBackgroundBase64(byte[] imgBackgroundBase64) {
     TransferBigData.imgBackgroundBase64 = imgBackgroundBase64;
+  }
+
+  /**
+   * Get bytes to represent picture taken.
+   * 
+   * @return byte[]
+   */
+  public static byte[] getImgTaken() {
+    return TransferBigData.imgTaken;
+  }
+
+  /**
+   * Set bytes to represent picture taken.
+   * 
+   * @param byte[] imgTaken
+   */
+  public static void setImgTaken(byte[] imgTaken) {
+    TransferBigData.imgTaken = imgTaken;
   }
 }

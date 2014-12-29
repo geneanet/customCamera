@@ -53,6 +53,11 @@ public class CameraActivity extends Activity {
   // The image in Bitmap format of the preview photo.
   private Bitmap photoTaken = null;
 
+  public static final int DEGREE_0 = 0;
+  public static final int DEGREE_90 = 90;
+  public static final int DEGREE_180 = 180;
+  public static final int DEGREE_270 = 270;
+
   /**
    * To get camera resource or stop this activity.
    * 
@@ -123,20 +128,21 @@ public class CameraActivity extends Activity {
     int orientation = 0;
     switch (getCustomRotation()) {
       case 0:
-        orientation = 90;
+        orientation = CameraActivity.DEGREE_90;
         break;
       case 1:
-        orientation = 0;
+        orientation = CameraActivity.DEGREE_0;
         break;
       case 2:
-        orientation = 270;
+        orientation = CameraActivity.DEGREE_270;
         break;
       case 3:
-        orientation = 180;
+        orientation = CameraActivity.DEGREE_180;
         break;
       default:
         break;
     }
+
     customCamera.setDisplayOrientation(orientation);
 
     // Assign the render camera to the view
@@ -396,7 +402,7 @@ public class CameraActivity extends Activity {
   /**
    * Display the layout accept/decline photo + mask photo button.
    */
-  public void displayAceptDeclineButtons() {
+  public void displayAcceptDeclineButtons() {
     LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
     Button photo = (Button) findViewById(R.id.capture);
     SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
@@ -484,9 +490,6 @@ public class CameraActivity extends Activity {
        * @param Camera camera Current resource camera.
        */
       public void onPictureTaken(final byte[] data, Camera camera) {
-        // Stop link between view and camera to start the preview
-        // picture.
-        customCamera.stopPreview();
         BitmapFactory.Options opt;
         opt = new BitmapFactory.Options();
 
@@ -508,12 +511,42 @@ public class CameraActivity extends Activity {
 
         // Preview from camera
         photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
-        
-        displayAceptDeclineButtons();
-        
-        // Lock the screen until the accept/decline button is clicked
-        // ---> OPTION
-        // lockScreen(true);
+
+        // Matrix to perform rotation
+        Matrix mat = new Matrix();
+        int defaultOrientation = getDeviceDefaultOrientation();
+        int orientationCamera = getOrientationOfCamera();
+        int redirect = 0;
+        switch (getCustomRotation()) {
+          case 0:
+            redirect = CameraActivity.DEGREE_90;
+            // If the device is in front camera by default
+            if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+              redirect = CameraActivity.DEGREE_270;
+            }
+            break;
+          case 1:
+            redirect = CameraActivity.DEGREE_0;
+            break;
+          case 2:
+            redirect = CameraActivity.DEGREE_270;
+            // If the device is in front camera by default
+            if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+              redirect = CameraActivity.DEGREE_90;
+            }
+            break;
+          case 3:
+            redirect = CameraActivity.DEGREE_180;
+            break;
+          default:
+            break;
+        }
+        mat.postRotate(redirect);
+
+        // Creation of the bitmap
+        photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
+            photoTaken.getWidth(), photoTaken.getHeight(), mat, true);
+        displayPicture();
       }
     };
     // Start capture picture.
@@ -528,14 +561,6 @@ public class CameraActivity extends Activity {
     final CameraActivity cameraActivityCurrent = this;
 
     try {
-      // Matrix to perform rotation
-      Matrix mat = new Matrix();
-      float redirect = redirectPhotoInGallery();
-      mat.postRotate(redirect);
-
-      // Creation of the bitmap
-      photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
-          photoTaken.getWidth(), photoTaken.getHeight(), mat, true);
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       photoTaken.compress(CompressFormat.JPEG, 70, stream);
       
@@ -550,55 +575,14 @@ public class CameraActivity extends Activity {
       outStream.write(stream.toByteArray());
       outStream.close();
 
-      TransferBigData.setImgBackgroundBase64(stream.toByteArray());
+      TransferBigData.setImgTaken(stream.toByteArray());
       
       // Return to success & finish current activity.
-      cameraActivityCurrent.setResult(1,
-          new Intent().putExtra("pathPicture", pathPicture));
+      cameraActivityCurrent.setResult(1,new Intent());
       cameraActivityCurrent.finish();
-
-      // Unlock the screen ---> OPTION
-      // lockScreen(false);
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-  
-  /**
-   * To redirect (by rotation) the image stored in gallery.
-   * 
-   * @return int 
-   */
-  public int redirectPhotoInGallery() {
-    int defaultOrientation = getDeviceDefaultOrientation();
-    int orientationCamera = getOrientationOfCamera();
-    int redirect = 0;
-    switch (getCustomRotation()) {
-      case 0:
-        redirect = 90;
-        // If the device is in front camera by default
-        if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
-          redirect = 270;
-        }
-        break;
-      case 1:
-        redirect = 0;
-        break;
-      case 2:
-        redirect = 270;
-        // If the device is in front camera by default
-        if (orientationCamera == 1 && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
-          redirect = 90;
-        }
-        break;
-      case 3:
-        redirect = 180;
-        break;
-      default:
-        break;
-    }
-    
-    return redirect;
   }
   
   /**
@@ -619,17 +603,8 @@ public class CameraActivity extends Activity {
    * @param view The current View.
    */
   public void declinePhoto(View view) {
-    final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-    ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
-    
-    photoTaken = null;  
-    displayAceptDeclineButtons();
-    photoResized.setVisibility(View.INVISIBLE);
-    customCamera.startPreview();
-    preview.setVisibility(View.VISIBLE);
-
-      // Unlock the screen ---> OPTION
-      // lockScreen(false);
+    photoTaken = null;
+    displayPicture();
   }
   
   /** To save some contains of the activity. */
@@ -643,79 +618,68 @@ public class CameraActivity extends Activity {
   /** To restore the contains saved on the method onSaveInstanceState(). */
   @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
     modeMiniature = savedInstanceState.getBoolean("modeMiniature");
     photoTaken = savedInstanceState.getParcelable("photoTaken");
     
     if (modeMiniature) {
       buttonMiniature(findViewById(R.id.miniature));
     }
-  
-    // If the photo is taken when we orient the device
-    if (photoTaken != null) {
-      // Matrix to perform rotation
-      Matrix mat = new Matrix();
-      int orientation = 0;
-      switch (getCustomRotation()) {
-        case 0:
-          orientation = 270;
-          break;
-        case 1:
-          orientation = 90;
-          break;
-        case 2:
-          orientation = 0;
-          break;
-        case 3:
-          orientation = 180;
-          break;
-        default:
-          break;
-      }
-      mat.postRotate(orientation);
-  
-      // Creation of the bitmap
-      photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
-          photoTaken.getWidth(), photoTaken.getHeight(), mat, true);
-      Bitmap newBitmap = resizeAfterRotate(photoTaken);
-      ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
-      photoResized.setImageBitmap(newBitmap);
-      preview.setVisibility(View.INVISIBLE);
-      
-      displayAceptDeclineButtons();
-    }
+
+    displayPicture();
     super.onRestoreInstanceState(savedInstanceState);
   }
-  
+
+  /** To display or not the picture taken */
+  protected void displayPicture() {
+    FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+    ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
+
+    if (photoTaken != null) {
+      // Stop link between view and camera to start the preview
+      // picture.
+      customCamera.stopPreview();
+
+      Bitmap newBitmap = resizePictureTaken();
+      photoResized.setImageBitmap(newBitmap);
+      photoResized.setVisibility(View.VISIBLE);
+      preview.setVisibility(View.INVISIBLE);
+    } else {
+      customCamera.startPreview();
+      photoResized.setVisibility(View.INVISIBLE);
+      preview.setVisibility(View.VISIBLE);
+    }
+
+    displayAcceptDeclineButtons();
+  }
+
   /**
   * Resize the bitmap saved when you rotate the device.
-  * @param Bitmap bitmap The original bitmap
   * 
   * @return the new bitmap.
   */
-  protected Bitmap resizeAfterRotate(Bitmap bitmap) {
+  protected Bitmap resizePictureTaken() {
     // Initialize the new bitmap resized
     Bitmap newBitmap = null;
   
-   // Get sizes screen.
+    // Get sizes screen.
     Display defaultDisplay = getWindowManager().getDefaultDisplay();
     DisplayMetrics displayMetrics = new DisplayMetrics();
     defaultDisplay.getMetrics(displayMetrics);
     int displayWidthPx = (int) displayMetrics.widthPixels;
     int displayHeightPx = (int) displayMetrics.heightPixels;
   
-   // Get sizes picture.
-    int widthBackground = (int) (bitmap.getWidth() * displayMetrics.density);
-    int heightBackground = (int) (bitmap.getHeight() * displayMetrics.density);
+    // Get sizes picture.
+    int widthBackground = (int) (photoTaken.getWidth() * displayMetrics.density);
+    int heightBackground = (int) (photoTaken.getHeight() * displayMetrics.density);
    
-   // Change size ImageView.
+    // Change size ImageView.
     float ratioX = (float) displayWidthPx / (float) widthBackground;
     float ratioY = (float) displayHeightPx / (float) heightBackground;
     if (ratioX < ratioY && ratioX < 1) {
-      newBitmap = Bitmap.createScaledBitmap(bitmap, (int) displayWidthPx,
+      newBitmap = Bitmap.createScaledBitmap(photoTaken, (int) displayWidthPx,
          (int) (ratioX * heightBackground), false);
     } else if (ratioX >= ratioY && ratioY < 1) {
-      newBitmap = Bitmap.createScaledBitmap(bitmap,
+      newBitmap = Bitmap.createScaledBitmap(photoTaken,
          (int) (ratioY * widthBackground), (int) displayHeightPx, false);
     }
     
@@ -731,29 +695,20 @@ public class CameraActivity extends Activity {
     if (lock == false) {
       this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
     } else {
-      int defaultOrientation = this.getDeviceDefaultOrientation();
       int newOrientation = 0;
      
-      switch (getWindowManager().getDefaultDisplay().getRotation()) {
+      switch (getCustomRotation()) {
         case 0:
-          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-             ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-             : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+          newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
           break;
         case 1:
-          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-             ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-             : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+          newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
           break;
         case 2:
-          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-             ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-             : ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+          newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
           break;
         case 3:
-          newOrientation = defaultOrientation == Configuration.ORIENTATION_LANDSCAPE
-             ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-             : ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+          newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
           break;
         default:
           break;
@@ -765,17 +720,15 @@ public class CameraActivity extends Activity {
   
   /**
    * To perform the rotation.
-   * @return the code of the rotation (0, 1, 2 , 3)
+   * @return the code of the rotation (0, 1, 2, 3)
    */
   protected int getCustomRotation() {
     WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
     int code = windowManager.getDefaultDisplay().getRotation();
-    int defaultOrientation = getDeviceDefaultOrientation();
-    if (defaultOrientation == 2) {
+    if (getDeviceDefaultOrientation() == 2) {
       code ++;
     }
-    code = code == 4 ? 0 : code;
-    
-    return code;
+
+    return code == 4 ? 0 : code;
   }
 }

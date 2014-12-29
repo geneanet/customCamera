@@ -78,12 +78,8 @@ public class CameraLauncher extends CordovaPlugin {
                     );
                     break;
                 case CameraLauncher.RESULT_SUCCESS:
-                    String pathPicture = intent.getStringExtra("pathPicture");
                     try {
-                        File fl = new File(pathPicture);
-                        byte[] ret = loadFile(fl);
-
-                        byte[] output = Base64.encode(ret, Base64.NO_WRAP);
+                        byte[] output = Base64.encode(TransferBigData.getImgTaken(), Base64.NO_WRAP);
                         String js_out = new String(output);
                         
                         this.callbackContext.success(js_out);
