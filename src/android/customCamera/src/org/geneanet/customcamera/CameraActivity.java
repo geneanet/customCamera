@@ -733,4 +733,13 @@ public class CameraActivity extends Activity {
 
     return code == 4 ? 0 : code;
   }
+
+  /**
+   * When the back button is pressed
+   */
+  @Override
+  public void onBackPressed() {
+    this.setResult(3);
+    this.finish();
+  }
 }

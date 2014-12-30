@@ -19,8 +19,8 @@ customCameraExport.prototype.startCamera = function(imgBackgroundBase64, success
         successFct(data);
     };
 
-    var failFctCallback = function(message) {
-        failFct(message);
+    var failFctCallback = function(data) {
+        failFct(data.code, data.message);
     };
 
     exec(
