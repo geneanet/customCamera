@@ -49,6 +49,8 @@ public class CameraLauncher extends CordovaPlugin {
             }
             TransferBigData.setImgBackgroundBase64(imgBackgroundBase64);
 
+            intent.putExtra("miniature", args.getBoolean(1));
+
             cordova.startActivityForResult((CordovaPlugin) this, intent, CameraLauncher.REQUEST_CODE);
 
             return true;
