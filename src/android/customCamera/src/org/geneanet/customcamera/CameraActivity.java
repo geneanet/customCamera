@@ -103,7 +103,7 @@ public class CameraActivity extends Activity {
           boolean fromUser) {
         progress = progressValue;
         ImageView background = (ImageView) findViewById(R.id.background);
-        float newOpacity = (float) (0.2 + progress * 0.1);
+        float newOpacity = (float) (progress * 0.1);
         background.setAlpha(newOpacity);
       }
 
@@ -331,6 +331,7 @@ public class CameraActivity extends Activity {
       // set image at the view.
       ImageView background = (ImageView) findViewById(R.id.background);
       background.setImageBitmap(imgBackgroundBitmap);
+      background.setAlpha((float)0.5);  // Opacity at the beginning
 
       paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
           RelativeLayout.TRUE);
@@ -735,7 +736,7 @@ public class CameraActivity extends Activity {
   }
 
   /**
-   * When the back button is pressed
+   * When the back button is pressed.
    */
   @Override
   public void onBackPressed() {

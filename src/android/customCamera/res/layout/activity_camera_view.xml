@@ -54,12 +54,12 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="0"
             android:alpha="0.6"
-            android:max="7"
+            android:max="10"
             android:maxHeight="13dp"
             android:minHeight="0dp"
-            android:progress="0"
+            android:progress="5"
             android:progressDrawable="@drawable/custom_opacity_bar"
-            android:secondaryProgress="7"
+            android:secondaryProgress="10"
             android:thumb="@drawable/thumb"
             android:thumbOffset="-0.9px" />
     </LinearLayout>
