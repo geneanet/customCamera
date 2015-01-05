@@ -740,7 +740,7 @@ public class CameraActivity extends Activity {
   }
 
   /**
-   * When the back button is pressed
+   * When the back button is pressed.
    */
   @Override
   public void onBackPressed() {
