@@ -113,6 +113,11 @@ public class CameraActivity extends Activity {
       @Override
       public void onStopTrackingTouch(SeekBar seekBar) {}
     });
+
+    if (!this.getIntent().getBooleanExtra("miniature", true)) {
+      Button miniature = (Button) findViewById(R.id.miniature);
+      miniature.setVisibility(View.INVISIBLE);
+    }
   }
 
   /** Method onStart. Handle the zoom level seekBar and the camera orientation. */
