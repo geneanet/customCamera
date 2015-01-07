@@ -210,7 +210,6 @@ public class CameraActivity extends Activity {
           distanceBetweenFingers = getFingerSpacing(event);
         } else if (action == MotionEvent.ACTION_MOVE
             && paramsCamera.isZoomSupported()) {
-          customCamera.cancelAutoFocus();
           handleZoom(event, paramsCamera, distanceBetweenFingers);
         }
       } else {
