@@ -277,7 +277,7 @@ public class CameraActivity extends Activity {
   private void setZoomProgress(int maxZoom, int zoom) {
     SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
     zoomLevel.setMax(maxZoom);
-    zoomLevel.setProgress(zoom * 2);
+    zoomLevel.setProgress(zoom);
     zoomLevel.setVisibility(View.VISIBLE);
   }
 
@@ -336,7 +336,6 @@ public class CameraActivity extends Activity {
       // set image at the view.
       ImageView background = (ImageView) findViewById(R.id.background);
       background.setImageBitmap(imgBackgroundBitmap);
-      background.setAlpha((float)0.5);  // Opacity at the beginning
 
       paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
           RelativeLayout.TRUE);
@@ -496,6 +495,7 @@ public class CameraActivity extends Activity {
        * @param Camera camera Current resource camera.
        */
       public void onPictureTaken(final byte[] data, Camera camera) {
+        
         BitmapFactory.Options opt;
         opt = new BitmapFactory.Options();
 
