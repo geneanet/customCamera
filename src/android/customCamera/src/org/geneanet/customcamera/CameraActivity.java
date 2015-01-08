@@ -243,7 +243,8 @@ public class CameraActivity extends Activity {
    * @param float       distanceBetweenFingers Distance between two fingers.
    */
   private void handleZoom(MotionEvent event, Camera.Parameters paramsCamera,
-      float distanceBetweenFingers) {
+      float distanceBetweenFingers) {   
+    final Display display = getWindowManager().getDefaultDisplay(); 
     // take zoom max for the camera hardware.
     int maxZoom = paramsCamera.getMaxZoom();
     // current value for the zoom.
@@ -251,21 +252,23 @@ public class CameraActivity extends Activity {
     setZoomProgress(maxZoom, zoom);
     // new distance between fingers.
     float newDist = getFingerSpacing(event);
-
-    if (newDist > distanceBetweenFingers) {
-      // zoom in
-      if (zoom < maxZoom) {
-        zoom++;
+    
+    if (Math.abs(newDist - distanceBetweenFingers) > (display.getWidth() / 20)) {
+      if (newDist > distanceBetweenFingers) {
+        // zoom in
+        if (zoom < maxZoom) {
+          zoom++;
+        }
+      } else if (newDist < distanceBetweenFingers) {
+        // zoom out
+        if (zoom > 0) {
+          zoom--;
+        }
       }
-    } else if (newDist < distanceBetweenFingers) {
-      // zoom out
-      if (zoom > 0) {
-        zoom--;
-      }
+      distanceBetweenFingers = newDist;
+      paramsCamera.setZoom(zoom);
+      customCamera.setParameters(paramsCamera);
     }
-    distanceBetweenFingers = newDist;
-    paramsCamera.setZoom(zoom);
-    customCamera.setParameters(paramsCamera);
   }
 
   /**
@@ -569,7 +572,7 @@ public class CameraActivity extends Activity {
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      photoTaken.compress(CompressFormat.JPEG, 70, stream);
+      photoTaken.compress(CompressFormat.JPEG, 99, stream);
       
       // Get path picture to storage.
       String pathPicture = Environment.getExternalStorageDirectory()
