@@ -342,6 +342,11 @@ public class CameraActivity extends Activity {
           RelativeLayout.TRUE);
       
       background.setLayoutParams(paramsMiniature);
+    } else {
+      Button miniature = (Button) findViewById(R.id.miniature);
+      miniature.setVisibility(View.INVISIBLE);
+      SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
+      switchOpacity.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -354,7 +359,7 @@ public class CameraActivity extends Activity {
     // Set new size for miniature layout.
     setParamsMiniature(background, true);
     // Hide the miniature button.
-    miniature.setVisibility(View.INVISIBLE);  
+    miniature.setVisibility(View.INVISIBLE);
       
     // Add event on click action for the miniature picture.
     background.setOnClickListener(new View.OnClickListener() {
