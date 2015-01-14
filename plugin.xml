@@ -5,12 +5,12 @@
     id="org.geneanet.customCamera"
     version="0.0.1"
 >
-    <name>customCamera</name>
+    <name>GeneanetCustomCamera</name>
     <description>customCamera by Geneanet</description>
     <license>undefined</license>
     <keywords>custom,camera,geneanet</keywords>
-    <js-module src="www/customCamera.js" name="customCamera">
-        <clobbers target="customCamera" />
+    <js-module src="www/customCamera.js" name="GeneanetCustomCamera">
+        <clobbers target="GeneanetCustomCamera" />
     </js-module>
 
     <hook type="after_plugin_install" src="hooks/after_plugin_install/npminstall.js" />
