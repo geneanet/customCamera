@@ -17,7 +17,10 @@ var customCameraExport = function() {
 customCameraExport.prototype.startCamera = function(options, successFct, failFct) {
     var defaultOptions = {
         imgBackgroundBase64: null, // background picture in base64.
-        miniature: true // active or disable the miniature function.
+        miniature: true, // active or disable the miniature function.
+        cameraBackgroundColor: "#e26760", // color of the camera button.
+        cameraBackgroundColorPressed: "#dc453d" // color of the pressed camera button.
+        // To get supported color formats, go to see method parseColor : http://developer.android.com/reference/android/graphics/Color.html#parseColor(java.lang.String)
     };
 
     for (var nameOption in defaultOptions) {
@@ -41,7 +44,9 @@ customCameraExport.prototype.startCamera = function(options, successFct, failFct
         "startCamera",
         [
             options.imgBackgroundBase64,
-            options.miniature
+            options.miniature,
+            options.cameraBackgroundColor,
+            options.cameraBackgroundColorPressed
         ]
     );
 };

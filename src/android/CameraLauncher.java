@@ -52,6 +52,8 @@ public class CameraLauncher extends CordovaPlugin {
             }
 
             intent.putExtra("miniature", args.getBoolean(1));
+            intent.putExtra("cameraBackgroundColor", args.getString(2));
+            intent.putExtra("cameraBackgroundColorPressed", args.getString(3));
 
             cordova.startActivityForResult((CordovaPlugin) this, intent, CameraLauncher.REQUEST_CODE);
 
