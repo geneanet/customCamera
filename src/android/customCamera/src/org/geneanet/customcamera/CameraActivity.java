@@ -7,7 +7,9 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -26,6 +28,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -117,6 +120,51 @@ public class CameraActivity extends Activity {
     if (!this.getIntent().getBooleanExtra("miniature", true)) {
       Button miniature = (Button) findViewById(R.id.miniature);
       miniature.setVisibility(View.INVISIBLE);
+    }
+
+    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    final Activity currentActivity = this;
+    
+    this.setCameraBackgroundColor(this.getIntent().getStringExtra("cameraBackgroundColor"));
+    
+    imgIcon.setOnTouchListener(new View.OnTouchListener() { 
+      @Override
+      public boolean onTouch(View view, MotionEvent event) {
+        switch (event.getAction()) {
+          case MotionEvent.ACTION_DOWN:
+            ((CameraActivity) currentActivity).setCameraBackgroundColor(
+                currentActivity.getIntent().getStringExtra("cameraBackgroundColorPressed"));
+            break;
+          case MotionEvent.ACTION_UP:
+            view.performClick();
+            ((CameraActivity) currentActivity).setCameraBackgroundColor(
+                currentActivity.getIntent().getStringExtra("cameraBackgroundColor"));
+            ((CameraActivity) currentActivity).takePhoto();
+            break;
+          default:
+            break;
+        }
+        return true;
+      }
+    });
+  }
+  
+  /**
+   * Set the background color of the camera button.
+   * @param color The color of the background.
+   */
+  protected void setCameraBackgroundColor(String color) {
+    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    GradientDrawable backgroundGradient = (GradientDrawable)imgIcon.getBackground();
+    if (color.length() > 0) {
+      try {
+        int cameraBackgroundColor = Color.parseColor(color);
+        backgroundGradient.setColor(cameraBackgroundColor);
+      } catch (IllegalArgumentException e) {
+        backgroundGradient.setColor(Color.TRANSPARENT);
+      }
+    } else {
+      backgroundGradient.setColor(Color.TRANSPARENT);
     }
   }
 
@@ -415,7 +463,7 @@ public class CameraActivity extends Activity {
    */
   public void displayAcceptDeclineButtons() {
     LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    Button photo = (Button) findViewById(R.id.capture);
+    ImageButton photo = (ImageButton) findViewById(R.id.capture);
     SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
     Button miniature = (Button) findViewById(R.id.miniature);
     ImageView background = (ImageView) findViewById(R.id.background);
@@ -477,9 +525,8 @@ public class CameraActivity extends Activity {
 
   /**
    * Method to take picture.
-   * @param view Current view.
    */
-  public void takePhoto(View view) {
+  public void takePhoto() {
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -504,7 +551,7 @@ public class CameraActivity extends Activity {
         BitmapFactory.Options opt;
         opt = new BitmapFactory.Options();
 
-        // Temp storage to use for decoding
+        // Temporarily storage to use for decoding
         opt.inTempStorage = new byte[16 * 1024];
         Camera.Parameters paramsCamera = customCamera.getParameters();
         Size size = paramsCamera.getPictureSize();

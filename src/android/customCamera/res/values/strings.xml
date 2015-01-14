@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">TestCustomCamera</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -11,7 +10,7 @@
     <string name="miniature">Miniature</string>
     <string name="capture">Photo</string>
     <string name="BoutonMiniature">Ceci est le bouton permettant d\'afficher une miniature</string>
-	<string name="descImage">Il s\'agit de l\'image de fond de l\'appareil photo</string>
-	<string name="acceptePicture">Accepter Photo</string>
-	<string name="declinePicture">Refuser Photo</string>
+	  <string name="descImage">Il s\'agit de l\'image de fond de l\'appareil photo</string>
+	  <string name="acceptePicture">Accepter Photo</string>
+	  <string name="declinePicture">Refuser Photo</string>
 </resources>
