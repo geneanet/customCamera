@@ -166,7 +166,7 @@ var updateConfig = function() {
     var contentResAndroidPlugin = fs.readdirSync(pathResAndroidPlugin);
     for (var i = contentResAndroidPlugin.length - 1; i >= 0; i--) {
         var nameDirDrawable = contentResAndroidPlugin[i];
-        if (nameDirDrawable.match(/^drawable-.*$/) || nameDirDrawable.match(/^values-?.*$/)) {
+        if (nameDirDrawable.match(/^drawable-?.*$/) || nameDirDrawable.match(/^values-?.*$/)) {
             var contentDrawableDir = fs.readdirSync(pathResAndroidPlugin+nameDirDrawable);
             for (var j = contentDrawableDir.length - 1; j >= 0; j--) {
                 var nameFileInDrawable = contentDrawableDir[j];

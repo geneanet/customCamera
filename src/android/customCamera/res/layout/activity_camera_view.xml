@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/round_button"
-            android:src="@drawable/capture2" />
+            android:src="@drawable/capture" />
 
         <org.geneanet.customcamera.VerticalSeekBar
             android:id="@+id/switchOpacity"
