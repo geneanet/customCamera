@@ -198,10 +198,42 @@ public class CameraActivity extends Activity {
 
     customCamera.setDisplayOrientation(orientation);
 
+    DisplayMetrics dm = new DisplayMetrics();
+    getWindowManager().getDefaultDisplay().getMetrics(dm);
+    final int widthScreen = dm.widthPixels;
+    final int heightScreen = dm.heightPixels;
+    
+    FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
+    LayoutParams paramsCameraPreview = 
+        (LayoutParams) cameraPreview.getLayoutParams();
+    
+    Size camParameters = customCamera.getParameters().getPictureSize();
+    
+    int minSize;
+    int maxSize;
+    if (camParameters.width > camParameters.height) {
+      maxSize = camParameters.width;
+      minSize = camParameters.height;
+    } else {
+      maxSize = camParameters.height;
+      minSize = camParameters.width;
+    }
+
+    float ratio;
+    if (widthScreen > heightScreen) {
+      paramsCameraPreview.height = LayoutParams.FILL_PARENT;  
+      ratio = ( (float)minSize / (float)heightScreen );  
+      paramsCameraPreview.width = (int)(maxSize / ratio);   
+    } else {
+      paramsCameraPreview.width = LayoutParams.FILL_PARENT;
+      ratio = ( (float)minSize / (float)widthScreen ); 
+      paramsCameraPreview.height = (int)(maxSize / ratio);
+    }
+    cameraPreview.setLayoutParams(paramsCameraPreview);
+    
     // Assign the render camera to the view
     CameraPreview myPreview = new CameraPreview(this, customCamera);
-    FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-    preview.addView(myPreview);
+    cameraPreview.addView(myPreview);
 
     // The zoom bar progress
     final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
