@@ -660,16 +660,18 @@ public class CameraActivity extends Activity {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       photoTaken.compress(CompressFormat.JPEG, 70, stream);
       
-      // Get path picture to storage.
-      String pathPicture = Environment.getExternalStorageDirectory()
-          .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera/";
-      pathPicture = pathPicture
-          + String.format("%d.jpeg", System.currentTimeMillis());
+      if (this.getIntent().getBooleanExtra("saveInGallery", false)) {
+        // Get path picture to storage.
+        String pathPicture = Environment.getExternalStorageDirectory()
+            .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera/";
+        pathPicture = pathPicture
+            + String.format("%d.jpeg", System.currentTimeMillis());
 
-      // Write data in file.
-      FileOutputStream outStream = new FileOutputStream(pathPicture);
-      outStream.write(stream.toByteArray());
-      outStream.close();
+        // Write data in file.
+        FileOutputStream outStream = new FileOutputStream(pathPicture);
+        outStream.write(stream.toByteArray());
+        outStream.close();
+      }
 
       TransferBigData.setImgTaken(stream.toByteArray());
       

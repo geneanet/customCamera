@@ -18,6 +18,7 @@
         var defaultOptions = {
             imgBackgroundBase64: null, // background picture in base64.
             miniature: true, // active or disable the miniature function.
+            saveInGallery: false, // save or not the picture in gallery.
             cameraBackgroundColor: "#e26760", // color of the camera button.
             cameraBackgroundColorPressed: "#dc453d" // color of the pressed camera button.
             // To get supported color formats, go to see method parseColor : http://developer.android.com/reference/android/graphics/Color.html#parseColor(java.lang.String)
@@ -45,6 +46,7 @@
             [
                 options.imgBackgroundBase64,
                 options.miniature,
+                options.saveInGallery,
                 options.cameraBackgroundColor,
                 options.cameraBackgroundColorPressed
             ]
