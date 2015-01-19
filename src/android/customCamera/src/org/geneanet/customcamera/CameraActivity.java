@@ -200,8 +200,6 @@ public class CameraActivity extends Activity {
 
     DisplayMetrics dm = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(dm);
-    final int widthScreen = dm.widthPixels;
-    final int heightScreen = dm.heightPixels;
     
     FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
     RelativeLayout.LayoutParams paramsCameraPreview = 
@@ -218,7 +216,9 @@ public class CameraActivity extends Activity {
       maxSize = camParameters.height;
       minSize = camParameters.width;
     }
-
+    
+    int widthScreen = dm.widthPixels;
+    int heightScreen = dm.heightPixels;
     float ratio;
     if (widthScreen > heightScreen) {
       paramsCameraPreview.height = LayoutParams.FILL_PARENT;
