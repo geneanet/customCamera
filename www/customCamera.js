@@ -29,13 +29,13 @@
             }
         }
 
-        var successFctCallback = function(data) {
+        function successFctCallback(data) {
             successFct(data);
-        };
+        }
 
-        var failFctCallback = function(data) {
+        function failFctCallback(data) {
             failFct(data.code, data.message);
-        };
+        }
 
         exec(
             successFctCallback,
