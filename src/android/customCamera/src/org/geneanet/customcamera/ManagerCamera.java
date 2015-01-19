@@ -38,7 +38,7 @@ public class ManagerCamera {
 
     return cam; // returns null if camera is unavailable
   }
-  
+
   /**
    * To release the camera.
    */
