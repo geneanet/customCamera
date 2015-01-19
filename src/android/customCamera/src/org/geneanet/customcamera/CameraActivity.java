@@ -658,7 +658,7 @@ public class CameraActivity extends Activity {
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      photoTaken.compress(CompressFormat.JPEG, 70, stream);
+      photoTaken.compress(CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
       
       if (this.getIntent().getBooleanExtra("saveInGallery", false)) {
         // Get path picture to storage.
