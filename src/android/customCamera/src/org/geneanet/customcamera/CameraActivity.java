@@ -204,8 +204,8 @@ public class CameraActivity extends Activity {
     final int heightScreen = dm.heightPixels;
     
     FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
-    LayoutParams paramsCameraPreview = 
-        (LayoutParams) cameraPreview.getLayoutParams();
+    RelativeLayout.LayoutParams paramsCameraPreview = 
+        new RelativeLayout.LayoutParams(cameraPreview.getLayoutParams());
     
     Size camParameters = customCamera.getParameters().getPictureSize();
     
@@ -221,13 +221,17 @@ public class CameraActivity extends Activity {
 
     float ratio;
     if (widthScreen > heightScreen) {
-      paramsCameraPreview.height = LayoutParams.FILL_PARENT;  
-      ratio = ( (float)minSize / (float)heightScreen );  
-      paramsCameraPreview.width = (int)(maxSize / ratio);   
+      paramsCameraPreview.height = LayoutParams.FILL_PARENT;
+      ratio = ( (float)minSize / (float)heightScreen );
+      paramsCameraPreview.width = (int)(maxSize / ratio);
+      int marginLeft = (int) (((float)(widthScreen - paramsCameraPreview.width)) / 2);
+      paramsCameraPreview.setMargins(marginLeft, 0, 0, 0);
     } else {
       paramsCameraPreview.width = LayoutParams.FILL_PARENT;
-      ratio = ( (float)minSize / (float)widthScreen ); 
+      ratio = ( (float)minSize / (float)widthScreen );
       paramsCameraPreview.height = (int)(maxSize / ratio);
+      int marginTop = (int) (((float)(heightScreen - paramsCameraPreview.height)) / 2);
+      paramsCameraPreview.setMargins(0, marginTop, 0, 0);
     }
     cameraPreview.setLayoutParams(paramsCameraPreview);
     
