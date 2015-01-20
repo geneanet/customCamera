@@ -1,6 +1,6 @@
 # org.geneanet.customcamera
 
-Ce plugin défini une variable globale navigator.GeneanetCustomCamera contenant un objet. Celui-ci permet de démarrer une caméra customisée & customisable en partie.
+Ce plugin définit une variable globale navigator.GeneanetCustomCamera contenant un objet. Celui-ci permet de démarrer un appareil photo customisée et customisable en partie.
 
 ## Installation
 
@@ -116,4 +116,4 @@ Une implémentation dans AngularJS a été réalisée pour faciliter son utilisa
 Pour contribuer à ce projet, merci de respecter les règles suivantes :
 + **Les bugs, suggestions, etc :** Ils doivent être remontés via le système d'issues de Github. Merci de vérifier que votre sujet n'a pas déjà été traité.
 + **Développement Javascript :** Le code javascript doit être valide avec JSHint.
-+ **Développement Java :** Le code java doit être valide [Checkstyle](http://eclipse-cs.sourceforge.net/#!/)
++ **Développement Java :** Le code java doit être valide [Checkstyle](http://eclipse-cs.sourceforge.net/#!/).
