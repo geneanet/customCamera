@@ -563,6 +563,8 @@ public class CameraActivity extends Activity {
    * Method to take picture.
    */
   public void takePhoto() {
+    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    imgIcon.setEnabled(false);
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -675,6 +677,8 @@ public class CameraActivity extends Activity {
       }
 
       TransferBigData.setImgTaken(stream.toByteArray());
+      ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+      imgIcon.setEnabled(true);
       
       // Return to success & finish current activity.
       cameraActivityCurrent.setResult(1,new Intent());
@@ -702,6 +706,8 @@ public class CameraActivity extends Activity {
    * @param view The current View.
    */
   public void declinePhoto(View view) {
+    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    imgIcon.setEnabled(true);
     photoTaken = null;
     displayPicture();
   }
