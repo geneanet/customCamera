@@ -659,7 +659,7 @@ public class CameraActivity extends Activity {
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       photoTaken.compress(
-        CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
+          CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
       
       if (this.getIntent().getBooleanExtra("saveInGallery", false)) {
         // Get path picture to storage.
@@ -774,10 +774,10 @@ public class CameraActivity extends Activity {
     // Change size ImageView.
     float ratioX = (float) displayWidthPx / (float) widthBackground;
     float ratioY = (float) displayHeightPx / (float) heightBackground;
-    if (ratioX < ratioY && ratioX < 1) {
+    if (ratioX < ratioY) {
       newBitmap = Bitmap.createScaledBitmap(photoTaken, (int) displayWidthPx,
          (int) (ratioX * heightBackground), false);
-    } else if (ratioX >= ratioY && ratioY < 1) {
+    } else if (ratioX >= ratioY) {
       newBitmap = Bitmap.createScaledBitmap(photoTaken,
          (int) (ratioY * widthBackground), (int) displayHeightPx, false);
     }
