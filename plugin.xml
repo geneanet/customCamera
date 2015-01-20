@@ -10,7 +10,7 @@
     <license>undefined</license>
     <keywords>custom,camera,geneanet</keywords>
     <js-module src="www/customCamera.js" name="GeneanetCustomCamera">
-        <clobbers target="GeneanetCustomCamera" />
+        <clobbers target="navigator.GeneanetCustomCamera" />
     </js-module>
 
     <hook type="after_plugin_install" src="hooks/after_plugin_install/npminstall.js" />
