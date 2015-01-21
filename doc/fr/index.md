@@ -4,7 +4,7 @@ Ce plugin définit une variable globale navigator.GeneanetCustomCamera contenant
 
 ## Installation
 
-    cordova plugin add https://github.com/ChristopheBoucaut/customCamera.git
+    cordova plugin add https://github.com/geneanet/customCamera.git
     cordova build `platform`
 
 ## Plateformes supportées
@@ -109,7 +109,7 @@ navigator.GeneanetCustomCamera.startCamera(
 
 ### AngularJS
 
-Une implémentation dans AngularJS a été réalisée pour faciliter son utilisation : [TODO](TODO)
+Une implémentation dans AngularJS a été réalisée pour faciliter son utilisation : [$geneanetCustomCamera](https://github.com/geneanet/customCameraAngular.git).
 
 ## Contribuer
 
