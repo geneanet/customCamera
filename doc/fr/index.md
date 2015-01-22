@@ -1,6 +1,8 @@
 # org.geneanet.customcamera
 
-Ce plugin définit une variable globale navigator.GeneanetCustomCamera contenant un objet. Celui-ci permet de démarrer un appareil photo customisée et customisable en partie.
+Ce plugin cordova est une alternative au plugin cordova officiel (camera). Il permet de démarrer un appareil photo personnalisé (image en surimpression de l'appareil photo avec réglage de l'opacité, barre de zoom) et customisable (couleur des boutons, activation/désactivation de fonctions).
+
+Ce plugin définit une variable globale `navigator.GeneanetCustomCamera`.
 
 ## Installation
 
@@ -25,7 +27,7 @@ navigator.GeneanetCustomCamera.startCamera(options, onSuccess, onFail);
 
 L'objet `options` contient les options de configuration de l'appareil photo.
 
-+ **imgBackgroundBase64 :** Image qui sera présente par dessus le rendu de l'appareil photo. Doit être en base64.
++ **imgBackgroundBase64 :** Image qui sera présente en surimpression de l'appareil photo. Elle doit être en base64.
     - **Type :** `string`
     - **Valeur par défaut :** `null`
 
@@ -60,7 +62,7 @@ L'objet `options` contient les options de configuration de l'appareil photo.
 
 #### *{Function}* onSuccess
 
-La fonction `onSuccess` est appelée lorsque la prise de vue est réussie.
+La fonction `onSuccess` est appelée lorsque la prise de vue a réussie.
 
 + **Paramètres :**
     - **result :**
@@ -69,7 +71,7 @@ La fonction `onSuccess` est appelée lorsque la prise de vue est réussie.
 
 #### *{Function}* onFail
 
-La fonction `onFail` est appelée lorsque la prise de vue est ratée.
+La fonction `onFail` est appelée lorsque la prise de vue a échouée.
 + **Paramètres :**
     - **code :**
         + **Type :** `integer`
