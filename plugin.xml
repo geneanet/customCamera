@@ -7,7 +7,7 @@
 >
     <name>GeneanetCustomCamera</name>
     <description>customCamera by Geneanet</description>
-    <license>undefined</license>
+    <license>BSD</license>
     <keywords>custom,camera,geneanet</keywords>
     <js-module src="www/customCamera.js" name="GeneanetCustomCamera">
         <clobbers target="navigator.GeneanetCustomCamera" />
