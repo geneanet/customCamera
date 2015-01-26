@@ -21,6 +21,24 @@
         android:alpha="0.2"
         android:scaleType="fitXY" />
 
+    <ImageButton
+        android:id="@+id/flash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:onClick="enableFlash"
+        android:src="@drawable/flash" />
+
+    <ImageButton
+        android:id="@+id/noFlash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:onClick="enableFlash"
+        android:src="@drawable/no_flash" />
+
     <LinearLayout
         android:id="@+id/beforePhoto"
         android:layout_width="match_parent"

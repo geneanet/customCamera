@@ -859,4 +859,59 @@ public class CameraActivity extends Activity {
     this.setResult(3);
     this.finish();
   }
+  
+  /**
+   * Allow to enable or disable the flash of the camera.
+   * @param view The current view.
+   */
+  public void enableFlash(View view) {
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
+    Camera.Parameters params = customCamera.getParameters();
+  
+    if (hasFlash()) {
+      if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_ON)
+          || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_AUTO)
+          || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_RED_EYE)
+          || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+        params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        noFlash.setVisibility(View.VISIBLE);
+        flash.setVisibility(View.INVISIBLE);
+      } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
+        params.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+        noFlash.setVisibility(View.INVISIBLE);
+        flash.setVisibility(View.VISIBLE);
+      }
+      customCamera.setParameters(params);
+    } else {
+      flash.setVisibility(View.INVISIBLE);
+      noFlash.setVisibility(View.INVISIBLE);
+    }
+  }
+  
+  /**
+   * Check if camera has a flash feature.
+   * @return boolean.
+   */
+  public boolean hasFlash() {
+    if (customCamera == null) {
+      return false;
+    }
+
+    Camera.Parameters parameters = customCamera.getParameters();
+
+    if (parameters.getFlashMode() == null) {
+      return false;
+    }
+
+    List<String> supportedFlashModes = parameters.getSupportedFlashModes();
+    if (supportedFlashModes == null 
+        || supportedFlashModes.isEmpty()
+        || supportedFlashModes.size() == 1 
+        && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)) {
+      return false;
+    }
+
+    return true;
+  }
 }
