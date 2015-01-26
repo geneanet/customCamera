@@ -60,6 +60,10 @@ L'objet `options` contient les options de configuration de l'appareil photo.
         + La valeur doit être comprise entre 0 et 100. Si la valeur n'est pas dans cet interval, la valeur par défaut est utilisée.
         + Pour plus d'information, consulter la méthode [`compress()`](http://developer.android.com/reference/android/graphics/Bitmap.html).
 
++ **opacity :** Permet d'activer ou non la fonction d'opacité de l'image en surimpression. `true` : Active l'option. `false` : Désactive l'option.
+    - **Type :** `boolean`
+    - **Valeur par défaut :** `true`
+
 #### *{Function}* onSuccess
 
 La fonction `onSuccess` est appelée lorsque la prise de vue a réussie.

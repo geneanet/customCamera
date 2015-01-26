@@ -55,6 +55,8 @@ public class CameraActivity extends Activity {
   private boolean modeMiniature = false;
   // The image in Bitmap format of the preview photo.
   private Bitmap photoTaken = null;
+  // Flag to active or disable opacity function.
+  private Boolean opacity = true;
 
   public static final int DEGREE_0 = 0;
   public static final int DEGREE_90 = 90;
@@ -92,34 +94,41 @@ public class CameraActivity extends Activity {
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
     setContentView(R.layout.activity_camera_view);
+
+    opacity = this.getIntent().getBooleanExtra("opacity", true);
+
     setBackground();
-
-    // The opacity bar
-    SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
-
-    // Event on change opacity.
-    switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-      int progress = 0;
-
-      @Override
-      public void onProgressChanged(SeekBar seekBar, int progressValue,
-          boolean fromUser) {
-        progress = progressValue;
-        ImageView background = (ImageView) findViewById(R.id.background);
-        float newOpacity = (float) (progress * 0.1);
-        background.setAlpha(newOpacity);
-      }
-
-      @Override
-      public void onStartTrackingTouch(SeekBar seekBar) {}
-
-      @Override
-      public void onStopTrackingTouch(SeekBar seekBar) {}
-    });
 
     if (!this.getIntent().getBooleanExtra("miniature", true)) {
       Button miniature = (Button) findViewById(R.id.miniature);
       miniature.setVisibility(View.INVISIBLE);
+    }
+
+    // The opacity bar
+    SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
+
+    if (opacity) {
+      // Event on change opacity.
+      switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        int progress = 0;
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progressValue,
+            boolean fromUser) {
+          progress = progressValue;
+          ImageView background = (ImageView) findViewById(R.id.background);
+          float newOpacity = (float) (progress * 0.1);
+          background.setAlpha(newOpacity);
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {}
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {}
+      });
+    } else {
+      switchOpacity.setVisibility(View.INVISIBLE);
     }
 
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
@@ -420,7 +429,12 @@ public class CameraActivity extends Activity {
       // set image at the view.
       ImageView background = (ImageView) findViewById(R.id.background);
       background.setImageBitmap(imgBackgroundBitmap);
-      background.setAlpha((float)0.5);  // Opacity at the beginning
+      // Opacity at the beginning
+      if (opacity) {
+        background.setAlpha((float)0.5);
+      } else {
+        background.setAlpha((float)1);
+      }
 
       paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
           RelativeLayout.TRUE);
