@@ -22,7 +22,8 @@
             cameraBackgroundColor: "#e26760", // color of the camera button.
             cameraBackgroundColorPressed: "#dc453d", // color of the pressed camera button.
             // To get supported color formats, go to see method parseColor : http://developer.android.com/reference/android/graphics/Color.html#parseColor(java.lang.String)
-            quality: 100 // picture's quality : range 0 - 100 : http://developer.android.com/reference/android/graphics/Bitmap.html#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream) (parameter "quality")
+            quality: 100, // picture's quality : range 0 - 100 : http://developer.android.com/reference/android/graphics/Bitmap.html#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream) (parameter "quality")
+            opacity: true // active or disable the opacity function.
         };
 
         for (var nameOption in defaultOptions) {
@@ -50,7 +51,8 @@
                 options.saveInGallery,
                 options.cameraBackgroundColor,
                 options.cameraBackgroundColorPressed,
-                options.quality
+                options.quality,
+                options.opacity
             ]
         );
     };
