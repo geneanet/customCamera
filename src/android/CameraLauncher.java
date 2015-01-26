@@ -67,6 +67,7 @@ public class CameraLauncher extends CordovaPlugin {
       if (args.getInt(5) >= 0 && args.getInt(5) <= 100) {
         intent.putExtra("quality", args.getInt(5));
       }
+      intent.putExtra("opacity", args.getBoolean(6));
 
       cordova.startActivityForResult((CordovaPlugin) this, intent,
           CameraLauncher.REQUEST_CODE);
