@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<widget id="org.geneanet.customCamera.Barcode" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>Codebar</name>
+  <description>
+    Application's test.
+  </description>
+  <author href="http://www.geneanet.org/" email="">
+        Geneanet
+    </author>
+  <content src="index.html"/>
+  <access origin="*"/>
+</widget>
