@@ -59,6 +59,8 @@ public class CameraActivity extends Activity {
   private Boolean opacity = true;
   // Flag to save state of flash -> 0 : off, 1 : on, 2 : auto. 
   private int stateFlash = 0;
+  // Flag to know which camera is active.
+  private int cameraActive = getOrientationOfCamera();
 
   public static final int DEGREE_0 = 0;
   public static final int DEGREE_90 = 90;
@@ -890,6 +892,7 @@ public class CameraActivity extends Activity {
     this.setResult(3);
     this.finish();
   }
+<<<<<<< HEAD
   
   /**
    * Allow to enable or disable the flash of the camera.
@@ -991,4 +994,110 @@ public class CameraActivity extends Activity {
       (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
     );
   }
+||||||| merged common ancestors
+=======
+  
+  /**
+   * Check if a front camera exist.
+   * return boolean
+   */
+  public boolean hasFrontCamera() {
+    int numCameras = Camera.getNumberOfCameras();
+    for (int i = 0; i < numCameras; i++) {
+      Camera.CameraInfo info = new CameraInfo();
+      Camera.getCameraInfo(i, info);
+      if (CameraInfo.CAMERA_FACING_FRONT == info.facing) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * To change the active camera.
+   * @param view The current view.
+   */
+  public void switchCamera(View view) {
+    if (hasFrontCamera()) {
+      System.out.println("Camera frontale OK !");
+      System.out.println("Camera face : " + Camera.CameraInfo.CAMERA_FACING_FRONT);
+      System.out.println("Camera back : " + Camera.CameraInfo.CAMERA_FACING_BACK);
+      
+      int orientationCamera = getOrientationOfCamera();
+      System.out.println("Orientation camera : " + orientationCamera);
+      
+      System.out.println("Camera Active : " + cameraActive);
+      
+//      int cameraCount = Camera.getNumberOfCameras();
+//      System.out.println("nb Camera : " + cameraCount);
+//      for ( int camIdx = 0; camIdx < cameraCount; camIdx++ ) {
+//        System.out.println("ok");
+//        Camera.getCameraInfo( camIdx, cameraInfo );
+//        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+//          System.out.println("Je l'ai trouvé !! ");
+//          try {
+//            customCamera = Camera.open(camIdx);
+//            CameraPreview myPreview = new CameraPreview(this, customCamera);
+//            cameraPreview.addView(myPreview);
+//          } catch (RuntimeException e) {
+//            System.out.println("FAIL");
+//          }
+//        }
+      ManagerCamera.clearCameraAccess();
+      FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
+      cameraPreview.removeAllViews();
+      if (cameraActive == Camera.CameraInfo.CAMERA_FACING_BACK) {
+        try {
+          cameraActive = 1;
+          customCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+          setCameraDisplayOrientation(CameraActivity.this, 1, customCamera);
+          CameraPreview myPreview = new CameraPreview(this, customCamera);
+          cameraPreview.addView(myPreview);
+        } catch (RuntimeException e) {
+          System.out.println("FAIL");
+        }
+      } else if (cameraActive == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+        try {
+          cameraActive = 0;
+          customCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+          System.out.println("J'ai réussi !! ");
+          CameraPreview myPreview = new CameraPreview(this, customCamera);
+          cameraPreview.addView(myPreview);
+        } catch (RuntimeException e) {
+          System.out.println("FAIL");
+        }
+      }
+    }
+  }
+  
+  /**
+   * 
+   * @param activity
+   * @param cameraId
+   * @param camera
+   */
+  public static void setCameraDisplayOrientation(Activity activity,
+      int cameraId, android.hardware.Camera camera) {
+    Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+    Camera.getCameraInfo(cameraId, info);
+    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+    int degrees = 0;
+    switch (rotation) {
+      case Surface.ROTATION_0: degrees = 0; break;
+      case Surface.ROTATION_90: degrees = 90; break;
+      case Surface.ROTATION_180: degrees = 180; break;
+      case Surface.ROTATION_270: degrees = 270; break;
+      default : break;
+    }
+
+    int result;
+    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+      result = (info.orientation + degrees) % 360;
+      result = (360 - result) % 360;  // compensate the mirror
+    } else {  // back-facing
+      result = (info.orientation - degrees + 360) % 360;
+    }
+    camera.setDisplayOrientation(result);
+  }
+>>>>>>> Première implémentation du switch camera -> Marche de camera back à camera front mais pas l'inverse
 }
