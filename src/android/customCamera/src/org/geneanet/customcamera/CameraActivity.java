@@ -578,7 +578,13 @@ public class CameraActivity extends Activity {
    */
   public void takePhoto() {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
+    ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
     imgIcon.setEnabled(false);
+    flash.setVisibility(View.INVISIBLE);
+    flashAuto.setVisibility(View.INVISIBLE);
+    noFlash.setVisibility(View.INVISIBLE);
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -721,7 +727,13 @@ public class CameraActivity extends Activity {
    */
   public void declinePhoto(View view) {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
+    ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
     imgIcon.setEnabled(true);
+    flash.setVisibility(View.VISIBLE);
+    flashAuto.setVisibility(View.VISIBLE);
+    noFlash.setVisibility(View.VISIBLE);
     photoTaken = null;
     displayPicture();
   }
