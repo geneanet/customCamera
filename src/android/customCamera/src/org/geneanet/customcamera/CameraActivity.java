@@ -866,25 +866,30 @@ public class CameraActivity extends Activity {
    */
   public void enableFlash(View view) {
     ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
     ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
     Camera.Parameters params = customCamera.getParameters();
   
     if (hasFlash()) {
+      flash.setVisibility(View.INVISIBLE);
+      flashAuto.setVisibility(View.INVISIBLE);
+      noFlash.setVisibility(View.INVISIBLE);
       if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_ON)
-          || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_AUTO)
           || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_RED_EYE)
           || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+        params.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        flashAuto.setVisibility(View.VISIBLE);
+      } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_AUTO)) {
         params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         noFlash.setVisibility(View.VISIBLE);
-        flash.setVisibility(View.INVISIBLE);
       } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
         params.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-        noFlash.setVisibility(View.INVISIBLE);
         flash.setVisibility(View.VISIBLE);
       }
       customCamera.setParameters(params);
     } else {
       flash.setVisibility(View.INVISIBLE);
+      flashAuto.setVisibility(View.INVISIBLE);
       noFlash.setVisibility(View.INVISIBLE);
     }
   }
