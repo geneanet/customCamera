@@ -396,7 +396,15 @@ public class CameraActivity extends Activity {
   /** To set background in the view. */
   protected void setBackground() {
     // Get the base64 picture for the background only if it's exist.
-    byte[] imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
+    byte[] imgBackgroundBase64;
+    if (
+      TransferBigData.getImgBackgroundBase64OtherOrientation() == null ||
+      this.getIntent().getIntExtra("startOrientation", 1) == this.getResources().getConfiguration().orientation
+    ) {
+      imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
+    } else {
+      imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64OtherOrientation();
+    }
     if (imgBackgroundBase64 != null) {
       // Get picture.
       Bitmap imgBackgroundBitmap = BitmapFactory.decodeByteArray(

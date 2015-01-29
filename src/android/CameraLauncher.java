@@ -60,14 +60,29 @@ public class CameraLauncher extends CordovaPlugin {
         TransferBigData.setImgBackgroundBase64(imgBackgroundBase64);
       }
 
-      intent.putExtra("miniature", args.getBoolean(1));
-      intent.putExtra("saveInGallery", args.getBoolean(2));
-      intent.putExtra("cameraBackgroundColor", args.getString(3));
-      intent.putExtra("cameraBackgroundColorPressed", args.getString(4));
-      if (args.getInt(5) >= 0 && args.getInt(5) <= 100) {
-        intent.putExtra("quality", args.getInt(5));
+      if (args.getString(1) != "null") {
+        byte[] imgBackgroundBase64OtherOrientation;
+        try {
+          imgBackgroundBase64OtherOrientation = Base64
+              .decode(args.getString(1), Base64.NO_WRAP);
+        } catch (IllegalArgumentException e) {
+          this.callbackContext.error(generateError(CameraLauncher.RESULT_ERROR,
+              "Error decode base64 picture."));
+
+          return false;
+        }
+        TransferBigData.setImgBackgroundBase64OtherOrientation(imgBackgroundBase64OtherOrientation);
       }
-      intent.putExtra("opacity", args.getBoolean(6));
+
+      intent.putExtra("miniature", args.getBoolean(2));
+      intent.putExtra("saveInGallery", args.getBoolean(3));
+      intent.putExtra("cameraBackgroundColor", args.getString(4));
+      intent.putExtra("cameraBackgroundColorPressed", args.getString(5));
+      if (args.getInt(6) >= 0 && args.getInt(6) <= 100) {
+        intent.putExtra("quality", args.getInt(6));
+      }
+      intent.putExtra("opacity", args.getBoolean(7));
+      intent.putExtra("startOrientation", this.cordova.getActivity().getResources().getConfiguration().orientation);
 
       cordova.startActivityForResult((CordovaPlugin) this, intent,
           CameraLauncher.REQUEST_CODE);

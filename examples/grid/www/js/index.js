@@ -1,7 +1,11 @@
-function getGrid() {
+function getGrid(inverse) {
     var format = "image/png";
     var width = window.innerWidth * devicePixelRatio;
     var height = window.innerHeight * devicePixelRatio;
+    if (inverse) {
+        width = window.innerHeight * devicePixelRatio;
+        height = window.innerWidth * devicePixelRatio; 
+    }
     var widthInterval = width * 0.25;
     var heightInterval = height * 0.25;
     var x = widthInterval;
@@ -39,6 +43,7 @@ document.getElementById("start-camera").onclick = function() {
     navigator.GeneanetCustomCamera.startCamera(
         {
             imgBackgroundBase64: getGrid(),
+            imgBackgroundBase64OtherOrientation: getGrid(true),
             opacity: false,
             miniature: false
         },
