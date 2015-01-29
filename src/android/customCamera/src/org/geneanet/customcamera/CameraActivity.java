@@ -57,6 +57,8 @@ public class CameraActivity extends Activity {
   private Bitmap photoTaken = null;
   // Flag to active or disable opacity function.
   private Boolean opacity = true;
+  // Flag to save state of flash -> 0 : off, 1 : on, 2 : auto. 
+  private int stateFlash = 0;
 
   public static final int DEGREE_0 = 0;
   public static final int DEGREE_90 = 90;
@@ -577,10 +579,10 @@ public class CameraActivity extends Activity {
    * Method to take picture.
    */
   public void takePhoto() {
-    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
-    ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
-    ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
+    final ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    final ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    final ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
+    final ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
     imgIcon.setEnabled(false);
     flash.setVisibility(View.INVISIBLE);
     flashAuto.setVisibility(View.INVISIBLE);
@@ -731,9 +733,13 @@ public class CameraActivity extends Activity {
     ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
     ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
     imgIcon.setEnabled(true);
-    flash.setVisibility(View.VISIBLE);
-    flashAuto.setVisibility(View.VISIBLE);
-    noFlash.setVisibility(View.VISIBLE);
+    if (stateFlash == 0) {
+      noFlash.setVisibility(View.VISIBLE);
+    } else if (stateFlash == 1) {
+      flash.setVisibility(View.VISIBLE);
+    } else if (stateFlash == 2) {
+      flashAuto.setVisibility(View.VISIBLE);
+    } 
     photoTaken = null;
     displayPicture();
   }
@@ -743,6 +749,7 @@ public class CameraActivity extends Activity {
   protected void onSaveInstanceState(Bundle outState) {
     outState.putBoolean("modeMiniature", modeMiniature);
     outState.putParcelable("photoTaken", photoTaken);
+    outState.putInt("stateFlash", stateFlash);
     super.onSaveInstanceState(outState);
   }
 
@@ -751,6 +758,7 @@ public class CameraActivity extends Activity {
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     modeMiniature = savedInstanceState.getBoolean("modeMiniature");
     photoTaken = savedInstanceState.getParcelable("photoTaken");
+    stateFlash = savedInstanceState.getInt("stateFlash");
     
     if (modeMiniature) {
       buttonMiniature(findViewById(R.id.miniature));
@@ -890,13 +898,16 @@ public class CameraActivity extends Activity {
           || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_RED_EYE)
           || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
         params.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        stateFlash = 2;
         flashAuto.setVisibility(View.VISIBLE);
       } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_AUTO)) {
         params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         noFlash.setVisibility(View.VISIBLE);
+        stateFlash = 0;
       } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
         params.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
         flash.setVisibility(View.VISIBLE);
+        stateFlash = 1;
       }
       customCamera.setParameters(params);
     } else {
