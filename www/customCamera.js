@@ -17,6 +17,7 @@
     CustomCameraExport.prototype.startCamera = function(options, successFct, failFct) {
         var defaultOptions = {
             imgBackgroundBase64: null, // background picture in base64.
+            imgBackgroundBase64OtherOrientation: null, // background picture in base64 for second orientation. If it's not defined, imgBackgroundBase64 is used.
             miniature: true, // active or disable the miniature function.
             saveInGallery: false, // save or not the picture in gallery.
             cameraBackgroundColor: "#e26760", // color of the camera button.
@@ -47,6 +48,7 @@
             "startCamera",
             [
                 options.imgBackgroundBase64,
+                options.imgBackgroundBase64OtherOrientation,
                 options.miniature,
                 options.saveInGallery,
                 options.cameraBackgroundColor,

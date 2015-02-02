@@ -2,7 +2,12 @@
 .project
 .classpath
 project.properties
+ant.properties
+build.xml
+local.properties
+proguard-project.txt
 
+nbandroid/*
 bin/*
 gen/*
 libs/*

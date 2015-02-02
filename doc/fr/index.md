@@ -31,6 +31,10 @@ L'objet `options` contient les options de configuration de l'appareil photo.
     - **Type :** `string`
     - **Valeur par défaut :** `null`
 
++ **imgBackgroundBase64OtherOrientation :** Image qui sera présente en surimpression de l'appareil photo lorsque l'on tourne l'appareil dans l'autre sens que celui de démarrage du plugin. Elle doit être en base64. Si à `null`, on utilisera `imgBackgroundBase64` en redimensionnant l'image.
+    - **Type :** `string`
+    - **Valeur par défaut :** `null`
+
 + **miniature :** Permet d'activer ou non la fonction de miniature. `true` : Active l'option. `false` : Désactive l'option.
     - **Type :** `boolean`
     - **Valeur par défaut :** `true`
@@ -113,6 +117,18 @@ navigator.GeneanetCustomCamera.startCamera(
 );
 ```
 
+### Application de code barre
+
+[Voir le code](https://github.com/geneanet/customCamera/tree/master/examples/barcode)
+
+![Barcode](https://raw.githubusercontent.com/geneanet/customCamera/master/examples/barcode/screenshot.png)
+
+### Application avec grille
+
+[Voir le code](https://github.com/geneanet/customCamera/tree/master/examples/grid)
+
+![Grid](https://raw.githubusercontent.com/geneanet/customCamera/master/examples/grid/screenshot.png)
+
 ### AngularJS
 
 Une implémentation dans AngularJS a été réalisée pour faciliter son utilisation : [$geneanetCustomCamera](https://github.com/geneanet/customCameraAngular.git).
@@ -122,4 +138,3 @@ Une implémentation dans AngularJS a été réalisée pour faciliter son utilisa
 Pour contribuer à ce projet, merci de respecter les règles suivantes :
 + **Les bugs, suggestions, etc :** Ils doivent être remontés via le système d'issues de Github. Merci de vérifier que votre sujet n'a pas déjà été traité.
 + **Développement Javascript :** Le code javascript doit être valide avec JSHint.
-+ **Développement Java :** Le code java doit être valide [Checkstyle](http://eclipse-cs.sourceforge.net/#!/).
