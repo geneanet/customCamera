@@ -5,6 +5,7 @@ package org.geneanet.customcamera;
  */
 public class TransferBigData {
   protected static byte[] imgBackgroundBase64 = null;
+  protected static byte[] imgBackgroundBase64OtherOrientation = null;
   protected static byte[] imgTaken = null;
 
   /**
@@ -23,6 +24,24 @@ public class TransferBigData {
    */
   public static void setImgBackgroundBase64(byte[] imgBackgroundBase64) {
     TransferBigData.imgBackgroundBase64 = imgBackgroundBase64;
+  }
+
+  /**
+   * Get bytes to represent background picture for OtherOrientation.
+   * 
+   * @return byte[]
+   */
+  public static byte[] getImgBackgroundBase64OtherOrientation() {
+    return TransferBigData.imgBackgroundBase64OtherOrientation;
+  }
+
+  /**
+   * Set bytes to represent background picture for OtherOrientation.
+   * 
+   * @param byte[] imgBackgroundBase64OtherOrientation
+   */
+  public static void setImgBackgroundBase64OtherOrientation(byte[] imgBackgroundBase64OtherOrientation) {
+    TransferBigData.imgBackgroundBase64OtherOrientation = imgBackgroundBase64OtherOrientation;
   }
 
   /**
