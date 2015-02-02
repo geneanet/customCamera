@@ -31,6 +31,10 @@ L'objet `options` contient les options de configuration de l'appareil photo.
     - **Type :** `string`
     - **Valeur par défaut :** `null`
 
++ **imgBackgroundBase64OtherOrientation :** Image qui sera présente en surimpression de l'appareil photo lorsque l'on tourne l'appareil dans l'autre sens que celui de démarrage du plugin. Elle doit être en base64. Si à `null`, on utilisera `imgBackgroundBase64` en redimensionnant l'image.
+    - **Type :** `string`
+    - **Valeur par défaut :** `null`
+
 + **miniature :** Permet d'activer ou non la fonction de miniature. `true` : Active l'option. `false` : Désactive l'option.
     - **Type :** `boolean`
     - **Valeur par défaut :** `true`
