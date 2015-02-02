@@ -117,6 +117,18 @@ navigator.GeneanetCustomCamera.startCamera(
 );
 ```
 
+### Application de code barre
+
+[Voir le code](https://github.com/geneanet/customCamera/tree/master/examples/barcode)
+
+![Barcode](https://raw.githubusercontent.com/geneanet/customCamera/master/examples/barcode/screenshot.png)
+
+### Application avec grille
+
+[Voir le code](https://github.com/geneanet/customCamera/tree/master/examples/grid)
+
+![Grid](https://raw.githubusercontent.com/geneanet/customCamera/master/examples/grid/screenshot.png)
+
 ### AngularJS
 
 Une implémentation dans AngularJS a été réalisée pour faciliter son utilisation : [$geneanetCustomCamera](https://github.com/geneanet/customCameraAngular.git).
