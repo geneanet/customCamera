@@ -399,7 +399,8 @@ public class CameraActivity extends Activity {
     byte[] imgBackgroundBase64;
     if (
       TransferBigData.getImgBackgroundBase64OtherOrientation() == null ||
-      this.getIntent().getIntExtra("startOrientation", 1) == this.getResources().getConfiguration().orientation
+      this.getIntent().getIntExtra("startOrientation", 1)
+          == this.getResources().getConfiguration().orientation
     ) {
       imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
     } else {
