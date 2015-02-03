@@ -291,6 +291,7 @@ public class CameraActivity extends Activity {
   }
   
   /** Method to pause the activity. */
+  @Override
   protected void onPause() {
     super.onPause();
     ManagerCamera.clearCameraAccess();
@@ -298,7 +299,10 @@ public class CameraActivity extends Activity {
     preview.removeAllViews();
   }
   
-  /** Event on touch screen to call the manager of the zoom & the auto focus. */
+  /** 
+   * Event on touch screen to call the manager of the zoom & the auto focus.
+   * @return boolean
+   */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (photoTaken == null) {
@@ -360,7 +364,7 @@ public class CameraActivity extends Activity {
         zoom--;
       }
     }
-    distanceBetweenFingers = newDist;
+    
     paramsCamera.setZoom(zoom);
     customCamera.setParameters(paramsCamera);
   }
@@ -441,7 +445,10 @@ public class CameraActivity extends Activity {
     }
   }
   
-  /** Resize and mask the miniature button. */
+  /**
+   * Resize and mask the miniature button.
+   * @param view
+   */
   public void buttonMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
     final Button miniature = (Button) view;
@@ -704,7 +711,6 @@ public class CameraActivity extends Activity {
       cameraActivityCurrent.setResult(1,new Intent());
       cameraActivityCurrent.finish();
     } catch (IOException e) {
-      e.printStackTrace();
     }
   }
   
@@ -786,10 +792,10 @@ public class CameraActivity extends Activity {
   }
 
   /**
-  * Resize the bitmap saved when you rotate the device.
-  * 
-  * @return the new bitmap.
-  */
+   * Resize the bitmap saved when you rotate the device.
+   * 
+   * @return the new bitmap.
+   */
   protected Bitmap resizePictureTaken() {
     // Initialize the new bitmap resized
     Bitmap newBitmap = null;
@@ -820,10 +826,10 @@ public class CameraActivity extends Activity {
   }
   
   /**
-  * Allow to lock the screen or not.
-  * 
-  * @param boolean lock Do we have to lock or not ?
-  */
+   * Allow to lock the screen or not.
+   * 
+   * @param lock Do we have to lock or not ?
+   */
   protected void lockScreen(boolean lock) {
     if (lock == false) {
       this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
@@ -969,16 +975,9 @@ public class CameraActivity extends Activity {
     }
 
     List<String> supportedFlashModes = parameters.getSupportedFlashModes();
-    if (supportedFlashModes == null 
-        || supportedFlashModes.isEmpty()
-        || (
-          supportedFlashModes.size() == 1 
-          && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)
-        )
-    ) {
-      return false;
-    }
-
-    return true;
+    
+    return !(supportedFlashModes == null || supportedFlashModes.isEmpty() ||
+      (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
+    );
   }
 }
