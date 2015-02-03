@@ -27,26 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="60dp"
         android:background="@android:color/transparent"
-        android:onClick="enableFlash"
+        android:onClick="switchFlash"
         android:src="@drawable/flash" />
-
-    <ImageButton
-        android:id="@+id/noFlash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:background="@android:color/transparent"
-        android:onClick="enableFlash"
-        android:src="@drawable/no_flash" />
-
-    <ImageButton
-        android:id="@+id/flashAuto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:background="@android:color/transparent"
-        android:onClick="enableFlash"
-        android:src="@drawable/icon_flash_auto" />
 
     <LinearLayout
         android:id="@+id/beforePhoto"

@@ -64,6 +64,10 @@ public class CameraActivity extends Activity {
   public static final int DEGREE_90 = 90;
   public static final int DEGREE_180 = 180;
   public static final int DEGREE_270 = 270;
+  
+  public static final int FLASH_DISABLE = 0;
+  public static final int FLASH_ENABLE = 1;
+  public static final int FLASH_AUTO = 2;
 
   /**
    * To get camera resource or stop this activity.
@@ -150,7 +154,7 @@ public class CameraActivity extends Activity {
             view.performClick();
             ((CameraActivity) currentActivity).setCameraBackgroundColor(
                 currentActivity.getIntent().getStringExtra("cameraBackgroundColor"));
-            ((CameraActivity) currentActivity).takePhoto();
+            ((CameraActivity) currentActivity).startTakePhoto();
             break;
           default:
             break;
@@ -188,6 +192,8 @@ public class CameraActivity extends Activity {
     if (!initCameraResource()) {
       return;
     }
+    
+    updateStateFlash(stateFlash);
     
     int orientation = 0;
     switch (getCustomRotation()) {
@@ -308,11 +314,6 @@ public class CameraActivity extends Activity {
           customCamera.cancelAutoFocus();
           handleZoom(event, paramsCamera, distanceBetweenFingers);
         }
-      } else {
-        // If we touch with one finger -> auto-focus
-        if (action == MotionEvent.ACTION_UP) {
-          handleFocus(event, paramsCamera);
-        }
       }
     }
     
@@ -374,25 +375,6 @@ public class CameraActivity extends Activity {
     zoomLevel.setMax(maxZoom);
     zoomLevel.setProgress(zoom * 2);
     zoomLevel.setVisibility(View.VISIBLE);
-  }
-
-  /**
-   * Manage the focus.
-   * @param event        Current event which start this action.
-   * @param paramsCamera Camera's parameter.
-   */
-  public void handleFocus(MotionEvent event, Camera.Parameters paramsCamera) {
-    if (photoTaken == null) {
-      List<String> supportedFocusModes = paramsCamera.getSupportedFocusModes();
-      if (supportedFocusModes != null
-          && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-        customCamera.autoFocus(new Camera.AutoFocusCallback() {
-          @Override
-          public void onAutoFocus(boolean bool, Camera camera) {
-          }
-        });
-      }
-    }
   }
 
   /** To set background in the view. */
@@ -585,17 +567,26 @@ public class CameraActivity extends Activity {
   }
 
   /**
+   * Start to take photo.
+   */
+  public void startTakePhoto() {
+    ImageButton buttonCapture = (ImageButton)findViewById(R.id.capture);
+    buttonCapture.setEnabled(false);
+    setFlashMode();
+    customCamera.autoFocus(new Camera.AutoFocusCallback() {
+      @Override
+      public void onAutoFocus(boolean bool, Camera camera) {
+        takePhoto();
+      }
+    });
+  }
+
+  /**
    * Method to take picture.
    */
   public void takePhoto() {
-    final ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-    final ImageButton flash = (ImageButton)findViewById(R.id.flash);
-    final ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
-    final ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
-    imgIcon.setEnabled(false);
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
     flash.setVisibility(View.INVISIBLE);
-    flashAuto.setVisibility(View.INVISIBLE);
-    noFlash.setVisibility(View.INVISIBLE);
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -708,9 +699,7 @@ public class CameraActivity extends Activity {
       }
 
       TransferBigData.setImgTaken(stream.toByteArray());
-      ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-      imgIcon.setEnabled(true);
-      
+
       // Return to success & finish current activity.
       cameraActivityCurrent.setResult(1,new Intent());
       cameraActivityCurrent.finish();
@@ -739,16 +728,11 @@ public class CameraActivity extends Activity {
   public void declinePhoto(View view) {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
     ImageButton flash = (ImageButton)findViewById(R.id.flash);
-    ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
-    ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
     imgIcon.setEnabled(true);
-    if (stateFlash == 0) {
-      noFlash.setVisibility(View.VISIBLE);
-    } else if (stateFlash == 1) {
-      flash.setVisibility(View.VISIBLE);
-    } else if (stateFlash == 2) {
-      flashAuto.setVisibility(View.VISIBLE);
-    } 
+    flash.setVisibility(View.VISIBLE);
+    Camera.Parameters params = customCamera.getParameters();
+    params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    customCamera.setParameters(params);
     photoTaken = null;
     displayPicture();
   }
@@ -774,6 +758,7 @@ public class CameraActivity extends Activity {
     }
 
     displayPicture();
+    updateStateFlash(stateFlash);
     super.onRestoreInstanceState(savedInstanceState);
   }
 
@@ -893,36 +878,78 @@ public class CameraActivity extends Activity {
    * Allow to enable or disable the flash of the camera.
    * @param view The current view.
    */
-  public void enableFlash(View view) {
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
-    ImageButton flashAuto = (ImageButton)findViewById(R.id.flashAuto);
-    ImageButton noFlash = (ImageButton)findViewById(R.id.noFlash);
-    Camera.Parameters params = customCamera.getParameters();
+  public void switchFlash(View view) {
+    switch(stateFlash) {
+      case CameraActivity.FLASH_DISABLE:
+        updateStateFlash(CameraActivity.FLASH_ENABLE);
+        break;
+      case CameraActivity.FLASH_ENABLE:
+        updateStateFlash(CameraActivity.FLASH_AUTO);
+        break;
+      case CameraActivity.FLASH_AUTO:
+        updateStateFlash(CameraActivity.FLASH_DISABLE);
+        break;
+    }
+  }
   
+  protected void updateStateFlash(int newStateFlash) {
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
     if (hasFlash()) {
-      flash.setVisibility(View.INVISIBLE);
-      flashAuto.setVisibility(View.INVISIBLE);
-      noFlash.setVisibility(View.INVISIBLE);
-      if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_ON)
-          || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_RED_EYE)
-          || params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
-        params.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-        stateFlash = 2;
-        flashAuto.setVisibility(View.VISIBLE);
-      } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_AUTO)) {
-        params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-        noFlash.setVisibility(View.VISIBLE);
-        stateFlash = 0;
-      } else if (params.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
-        params.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-        flash.setVisibility(View.VISIBLE);
-        stateFlash = 1;
+      Camera.Parameters params = customCamera.getParameters();
+      List<String> supportedFlashModes = params.getSupportedFlashModes();
+      
+      if (newStateFlash == CameraActivity.FLASH_AUTO
+        && !supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)
+      ) {
+        if (stateFlash == CameraActivity.FLASH_ENABLE) {
+          newStateFlash = CameraActivity.FLASH_DISABLE;
+        } else {
+          newStateFlash = CameraActivity.FLASH_ENABLE;
+        }
       }
+      stateFlash = newStateFlash;
+      
+      int imgResource = R.drawable.no_flash;
+      switch(stateFlash) {
+        case CameraActivity.FLASH_DISABLE:
+          imgResource = R.drawable.no_flash;
+          break;
+        case CameraActivity.FLASH_ENABLE:
+          imgResource = R.drawable.flash;
+          break;
+        case CameraActivity.FLASH_AUTO:
+          imgResource = R.drawable.flash_auto;
+          break;
+      }
+      
+      flash.setImageResource(imgResource);
+      
       customCamera.setParameters(params);
     } else {
       flash.setVisibility(View.INVISIBLE);
-      flashAuto.setVisibility(View.INVISIBLE);
-      noFlash.setVisibility(View.INVISIBLE);
+    }
+  }
+  
+  protected void setFlashMode() {
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    if (hasFlash()) {
+      String mode = Camera.Parameters.FLASH_MODE_OFF;
+      switch(stateFlash) {
+        case CameraActivity.FLASH_DISABLE:
+          mode = Camera.Parameters.FLASH_MODE_OFF;
+          break;
+        case CameraActivity.FLASH_ENABLE:
+          mode = Camera.Parameters.FLASH_MODE_ON;
+          break;
+        case CameraActivity.FLASH_AUTO:
+          mode = Camera.Parameters.FLASH_MODE_AUTO;
+          break;
+      }
+      Camera.Parameters params = customCamera.getParameters();
+      params.setFlashMode(mode);
+      customCamera.setParameters(params);
+    } else {
+      flash.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -944,8 +971,11 @@ public class CameraActivity extends Activity {
     List<String> supportedFlashModes = parameters.getSupportedFlashModes();
     if (supportedFlashModes == null 
         || supportedFlashModes.isEmpty()
-        || supportedFlashModes.size() == 1 
-        && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)) {
+        || (
+          supportedFlashModes.size() == 1 
+          && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)
+        )
+    ) {
       return false;
     }
 
