@@ -7,6 +7,8 @@
     // constructor.
     function CustomCameraExport() {}
 
+    CustomCameraExport.prototype.FlashModes = {DISABLE: 0, ACTIVE: 1, AUTO: 2};
+
     /**
      * Start custom camera.
      *
@@ -24,7 +26,9 @@
             cameraBackgroundColorPressed: "#dc453d", // color of the pressed camera button.
             // To get supported color formats, go to see method parseColor : http://developer.android.com/reference/android/graphics/Color.html#parseColor(java.lang.String)
             quality: 100, // picture's quality : range 0 - 100 : http://developer.android.com/reference/android/graphics/Bitmap.html#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream) (parameter "quality")
-            opacity: true // active or disable the opacity function.
+            opacity: true, // active or disable the opacity function.
+            defaultFlash: this.FlashModes.DISABLE, // default state for flash. Corrects values = 0 (disable) / 1 (active) / 2 (auto)
+            switchFlash: true // active or disable the switch flash button.
         };
 
         for (var nameOption in defaultOptions) {
@@ -54,7 +58,9 @@
                 options.cameraBackgroundColor,
                 options.cameraBackgroundColorPressed,
                 options.quality,
-                options.opacity
+                options.opacity,
+                options.defaultFlash,
+                options.switchFlash
             ]
         );
     };

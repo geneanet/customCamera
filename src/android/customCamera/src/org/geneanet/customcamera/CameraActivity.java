@@ -109,6 +109,11 @@ public class CameraActivity extends Activity {
       Button miniature = (Button) findViewById(R.id.miniature);
       miniature.setVisibility(View.INVISIBLE);
     }
+    
+    if (!this.getIntent().getBooleanExtra("switchFlash", true)) {
+      ImageButton flash = (ImageButton)findViewById(R.id.flash);
+      flash.setVisibility(View.INVISIBLE);
+    }
 
     // The opacity bar
     SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
@@ -192,6 +197,8 @@ public class CameraActivity extends Activity {
     if (!initCameraResource()) {
       return;
     }
+    
+    stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
     
     updateStateFlash(stateFlash);
     
@@ -733,9 +740,13 @@ public class CameraActivity extends Activity {
    */
   public void declinePhoto(View view) {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
     imgIcon.setEnabled(true);
-    flash.setVisibility(View.VISIBLE);
+    
+    if (hasFlash()) {
+      ImageButton flash = (ImageButton)findViewById(R.id.flash);
+      flash.setVisibility(View.VISIBLE);
+    }
+    
     Camera.Parameters params = customCamera.getParameters();
     params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
     customCamera.setParameters(params);
