@@ -68,6 +68,14 @@ L'objet `options` contient les options de configuration de l'appareil photo.
     - **Type :** `boolean`
     - **Valeur par défaut :** `true`
 
++ **defaultFlash :** Séléctionne un mode par défaut pour le flash.
+    - **Type :** `integer`
+    - **Valeur par défaut :** `0`
+
++ **switchFlash :** Permet d'activer ou non le bouton pour changer le mode du flash. `true` : Active l'option. `false` : Désactive l'option.
+    - **Type :** `boolean`
+    - **Valeur par défaut :** `true`
+
 #### *{Function}* onSuccess
 
 La fonction `onSuccess` est appelée lorsque la prise de vue a réussie.
@@ -89,6 +97,18 @@ La fonction `onFail` est appelée lorsque la prise de vue a échouée.
     - **message :**
         + **Type :** `string`
         + **Note :** Contient un message détaillant l'erreur.
+
+## Constantes
+
++ **CustomCamera.FlashModes.DISABLE :**
+    - **Type :** `integer`
+    - **Valeur :** `0`
++ **CustomCamera.FlashModes.ACTIVE :**
+    - **Type :** `integer`
+    - **Valeur :** `1`
++ **CustomCamera.FlashModes.AUTO :**
+    - **Type :** `integer`
+    - **Valeur :** `2`
 
 ## Implémentation
 
