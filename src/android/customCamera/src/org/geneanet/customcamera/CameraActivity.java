@@ -57,11 +57,17 @@ public class CameraActivity extends Activity {
   private Bitmap photoTaken = null;
   // Flag to active or disable opacity function.
   private Boolean opacity = true;
+  // Flag to save state of flash -> 0 : off, 1 : on, 2 : auto. 
+  private int stateFlash = 0;
 
   public static final int DEGREE_0 = 0;
   public static final int DEGREE_90 = 90;
   public static final int DEGREE_180 = 180;
   public static final int DEGREE_270 = 270;
+  
+  public static final int FLASH_DISABLE = 0;
+  public static final int FLASH_ENABLE = 1;
+  public static final int FLASH_AUTO = 2;
 
   /**
    * To get camera resource or stop this activity.
@@ -102,6 +108,11 @@ public class CameraActivity extends Activity {
     if (!this.getIntent().getBooleanExtra("miniature", true)) {
       Button miniature = (Button) findViewById(R.id.miniature);
       miniature.setVisibility(View.INVISIBLE);
+    }
+    
+    if (!this.getIntent().getBooleanExtra("switchFlash", true)) {
+      ImageButton flash = (ImageButton)findViewById(R.id.flash);
+      flash.setVisibility(View.INVISIBLE);
     }
 
     // The opacity bar
@@ -148,7 +159,7 @@ public class CameraActivity extends Activity {
             view.performClick();
             ((CameraActivity) currentActivity).setCameraBackgroundColor(
                 currentActivity.getIntent().getStringExtra("cameraBackgroundColor"));
-            ((CameraActivity) currentActivity).takePhoto();
+            ((CameraActivity) currentActivity).startTakePhoto();
             break;
           default:
             break;
@@ -186,6 +197,10 @@ public class CameraActivity extends Activity {
     if (!initCameraResource()) {
       return;
     }
+    
+    stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
+    
+    updateStateFlash(stateFlash);
     
     int orientation = 0;
     switch (getCustomRotation()) {
@@ -283,6 +298,7 @@ public class CameraActivity extends Activity {
   }
   
   /** Method to pause the activity. */
+  @Override
   protected void onPause() {
     super.onPause();
     ManagerCamera.clearCameraAccess();
@@ -290,7 +306,10 @@ public class CameraActivity extends Activity {
     preview.removeAllViews();
   }
   
-  /** Event on touch screen to call the manager of the zoom & the auto focus. */
+  /** 
+   * Event on touch screen to call the manager of the zoom & the auto focus.
+   * @return boolean
+   */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (photoTaken == null) {
@@ -305,11 +324,6 @@ public class CameraActivity extends Activity {
             && paramsCamera.isZoomSupported()) {
           customCamera.cancelAutoFocus();
           handleZoom(event, paramsCamera, distanceBetweenFingers);
-        }
-      } else {
-        // If we touch with one finger -> auto-focus
-        if (action == MotionEvent.ACTION_UP) {
-          handleFocus(event, paramsCamera);
         }
       }
     }
@@ -357,7 +371,7 @@ public class CameraActivity extends Activity {
         zoom--;
       }
     }
-    distanceBetweenFingers = newDist;
+    
     paramsCamera.setZoom(zoom);
     customCamera.setParameters(paramsCamera);
   }
@@ -372,25 +386,6 @@ public class CameraActivity extends Activity {
     zoomLevel.setMax(maxZoom);
     zoomLevel.setProgress(zoom * 2);
     zoomLevel.setVisibility(View.VISIBLE);
-  }
-
-  /**
-   * Manage the focus.
-   * @param event        Current event which start this action.
-   * @param paramsCamera Camera's parameter.
-   */
-  public void handleFocus(MotionEvent event, Camera.Parameters paramsCamera) {
-    if (photoTaken == null) {
-      List<String> supportedFocusModes = paramsCamera.getSupportedFocusModes();
-      if (supportedFocusModes != null
-          && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-        customCamera.autoFocus(new Camera.AutoFocusCallback() {
-          @Override
-          public void onAutoFocus(boolean bool, Camera camera) {
-          }
-        });
-      }
-    }
   }
 
   /** To set background in the view. */
@@ -457,7 +452,10 @@ public class CameraActivity extends Activity {
     }
   }
   
-  /** Resize and mask the miniature button. */
+  /**
+   * Resize and mask the miniature button.
+   * @param view
+   */
   public void buttonMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
     final Button miniature = (Button) view;
@@ -583,11 +581,26 @@ public class CameraActivity extends Activity {
   }
 
   /**
+   * Start to take photo.
+   */
+  public void startTakePhoto() {
+    ImageButton buttonCapture = (ImageButton)findViewById(R.id.capture);
+    buttonCapture.setEnabled(false);
+    setFlashMode();
+    customCamera.autoFocus(new Camera.AutoFocusCallback() {
+      @Override
+      public void onAutoFocus(boolean bool, Camera camera) {
+        takePhoto();
+      }
+    });
+  }
+
+  /**
    * Method to take picture.
    */
   public void takePhoto() {
-    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-    imgIcon.setEnabled(false);
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    flash.setVisibility(View.INVISIBLE);
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -700,14 +713,11 @@ public class CameraActivity extends Activity {
       }
 
       TransferBigData.setImgTaken(stream.toByteArray());
-      ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-      imgIcon.setEnabled(true);
-      
+
       // Return to success & finish current activity.
       cameraActivityCurrent.setResult(1,new Intent());
       cameraActivityCurrent.finish();
     } catch (IOException e) {
-      e.printStackTrace();
     }
   }
   
@@ -731,6 +741,15 @@ public class CameraActivity extends Activity {
   public void declinePhoto(View view) {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
     imgIcon.setEnabled(true);
+    
+    if (hasFlash()) {
+      ImageButton flash = (ImageButton)findViewById(R.id.flash);
+      flash.setVisibility(View.VISIBLE);
+    }
+    
+    Camera.Parameters params = customCamera.getParameters();
+    params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    customCamera.setParameters(params);
     photoTaken = null;
     displayPicture();
   }
@@ -740,6 +759,7 @@ public class CameraActivity extends Activity {
   protected void onSaveInstanceState(Bundle outState) {
     outState.putBoolean("modeMiniature", modeMiniature);
     outState.putParcelable("photoTaken", photoTaken);
+    outState.putInt("stateFlash", stateFlash);
     super.onSaveInstanceState(outState);
   }
 
@@ -748,12 +768,14 @@ public class CameraActivity extends Activity {
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     modeMiniature = savedInstanceState.getBoolean("modeMiniature");
     photoTaken = savedInstanceState.getParcelable("photoTaken");
+    stateFlash = savedInstanceState.getInt("stateFlash");
     
     if (modeMiniature) {
       buttonMiniature(findViewById(R.id.miniature));
     }
 
     displayPicture();
+    updateStateFlash(stateFlash);
     super.onRestoreInstanceState(savedInstanceState);
   }
 
@@ -781,10 +803,10 @@ public class CameraActivity extends Activity {
   }
 
   /**
-  * Resize the bitmap saved when you rotate the device.
-  * 
-  * @return the new bitmap.
-  */
+   * Resize the bitmap saved when you rotate the device.
+   * 
+   * @return the new bitmap.
+   */
   protected Bitmap resizePictureTaken() {
     // Initialize the new bitmap resized
     Bitmap newBitmap = null;
@@ -815,10 +837,10 @@ public class CameraActivity extends Activity {
   }
   
   /**
-  * Allow to lock the screen or not.
-  * 
-  * @param boolean lock Do we have to lock or not ?
-  */
+   * Allow to lock the screen or not.
+   * 
+   * @param lock Do we have to lock or not ?
+   */
   protected void lockScreen(boolean lock) {
     if (lock == false) {
       this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
@@ -867,5 +889,106 @@ public class CameraActivity extends Activity {
   public void onBackPressed() {
     this.setResult(3);
     this.finish();
+  }
+  
+  /**
+   * Allow to enable or disable the flash of the camera.
+   * @param view The current view.
+   */
+  public void switchFlash(View view) {
+    switch(stateFlash) {
+      case CameraActivity.FLASH_DISABLE:
+        updateStateFlash(CameraActivity.FLASH_ENABLE);
+        break;
+      case CameraActivity.FLASH_ENABLE:
+        updateStateFlash(CameraActivity.FLASH_AUTO);
+        break;
+      case CameraActivity.FLASH_AUTO:
+        updateStateFlash(CameraActivity.FLASH_DISABLE);
+        break;
+    }
+  }
+  
+  protected void updateStateFlash(int newStateFlash) {
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    if (hasFlash()) {
+      Camera.Parameters params = customCamera.getParameters();
+      List<String> supportedFlashModes = params.getSupportedFlashModes();
+      
+      if (newStateFlash == CameraActivity.FLASH_AUTO
+        && !supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)
+      ) {
+        if (stateFlash == CameraActivity.FLASH_ENABLE) {
+          newStateFlash = CameraActivity.FLASH_DISABLE;
+        } else {
+          newStateFlash = CameraActivity.FLASH_ENABLE;
+        }
+      }
+      stateFlash = newStateFlash;
+      
+      int imgResource = R.drawable.no_flash;
+      switch(stateFlash) {
+        case CameraActivity.FLASH_DISABLE:
+          imgResource = R.drawable.no_flash;
+          break;
+        case CameraActivity.FLASH_ENABLE:
+          imgResource = R.drawable.flash;
+          break;
+        case CameraActivity.FLASH_AUTO:
+          imgResource = R.drawable.flash_auto;
+          break;
+      }
+      
+      flash.setImageResource(imgResource);
+      
+      customCamera.setParameters(params);
+    } else {
+      flash.setVisibility(View.INVISIBLE);
+    }
+  }
+  
+  protected void setFlashMode() {
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    if (hasFlash()) {
+      String mode = Camera.Parameters.FLASH_MODE_OFF;
+      switch(stateFlash) {
+        case CameraActivity.FLASH_DISABLE:
+          mode = Camera.Parameters.FLASH_MODE_OFF;
+          break;
+        case CameraActivity.FLASH_ENABLE:
+          mode = Camera.Parameters.FLASH_MODE_ON;
+          break;
+        case CameraActivity.FLASH_AUTO:
+          mode = Camera.Parameters.FLASH_MODE_AUTO;
+          break;
+      }
+      Camera.Parameters params = customCamera.getParameters();
+      params.setFlashMode(mode);
+      customCamera.setParameters(params);
+    } else {
+      flash.setVisibility(View.INVISIBLE);
+    }
+  }
+  
+  /**
+   * Check if camera has a flash feature.
+   * @return boolean.
+   */
+  public boolean hasFlash() {
+    if (customCamera == null) {
+      return false;
+    }
+
+    Camera.Parameters parameters = customCamera.getParameters();
+
+    if (parameters.getFlashMode() == null) {
+      return false;
+    }
+
+    List<String> supportedFlashModes = parameters.getSupportedFlashModes();
+    
+    return !(supportedFlashModes == null || supportedFlashModes.isEmpty() ||
+      (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
+    );
   }
 }
