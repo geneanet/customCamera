@@ -892,7 +892,6 @@ public class CameraActivity extends Activity {
     this.setResult(3);
     this.finish();
   }
-<<<<<<< HEAD
   
   /**
    * Allow to enable or disable the flash of the camera.
@@ -994,9 +993,7 @@ public class CameraActivity extends Activity {
       (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
     );
   }
-||||||| merged common ancestors
-=======
-  
+
   /**
    * Check if a front camera exist.
    * return boolean
@@ -1018,53 +1015,31 @@ public class CameraActivity extends Activity {
    * @param view The current view.
    */
   public void switchCamera(View view) {
-    if (hasFrontCamera()) {
-      System.out.println("Camera frontale OK !");
-      System.out.println("Camera face : " + Camera.CameraInfo.CAMERA_FACING_FRONT);
-      System.out.println("Camera back : " + Camera.CameraInfo.CAMERA_FACING_BACK);
-      
-      int orientationCamera = getOrientationOfCamera();
-      System.out.println("Orientation camera : " + orientationCamera);
-      
-      System.out.println("Camera Active : " + cameraActive);
-      
-//      int cameraCount = Camera.getNumberOfCameras();
-//      System.out.println("nb Camera : " + cameraCount);
-//      for ( int camIdx = 0; camIdx < cameraCount; camIdx++ ) {
-//        System.out.println("ok");
-//        Camera.getCameraInfo( camIdx, cameraInfo );
-//        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-//          System.out.println("Je l'ai trouvé !! ");
-//          try {
-//            customCamera = Camera.open(camIdx);
-//            CameraPreview myPreview = new CameraPreview(this, customCamera);
-//            cameraPreview.addView(myPreview);
-//          } catch (RuntimeException e) {
-//            System.out.println("FAIL");
-//          }
-//        }
+    if (hasFrontCamera() && Camera.getNumberOfCameras() >= 2) {   
       ManagerCamera.clearCameraAccess();
       FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
       cameraPreview.removeAllViews();
       if (cameraActive == Camera.CameraInfo.CAMERA_FACING_BACK) {
         try {
           cameraActive = 1;
+          customCamera.release();
           customCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
           setCameraDisplayOrientation(CameraActivity.this, 1, customCamera);
           CameraPreview myPreview = new CameraPreview(this, customCamera);
           cameraPreview.addView(myPreview);
         } catch (RuntimeException e) {
-          System.out.println("FAIL");
+          System.out.println("FAIL FRONT CAMERA");
         }
       } else if (cameraActive == Camera.CameraInfo.CAMERA_FACING_FRONT) {
         try {
           cameraActive = 0;
+          customCamera.release();
           customCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
-          System.out.println("J'ai réussi !! ");
+          setCameraDisplayOrientation(CameraActivity.this, 0, customCamera);
           CameraPreview myPreview = new CameraPreview(this, customCamera);
           cameraPreview.addView(myPreview);
         } catch (RuntimeException e) {
-          System.out.println("FAIL");
+          System.out.println("FAIL BACK CAMERA");
         }
       }
     }
@@ -1099,5 +1074,4 @@ public class CameraActivity extends Activity {
     }
     camera.setDisplayOrientation(result);
   }
->>>>>>> Première implémentation du switch camera -> Marche de camera back à camera front mais pas l'inverse
 }
