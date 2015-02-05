@@ -59,8 +59,6 @@ public class CameraActivity extends Activity {
   private Boolean opacity = true;
   // Flag to save state of flash -> 0 : off, 1 : on, 2 : auto. 
   private int stateFlash = 0;
-  // Flag to know which camera is active.
-  private int cameraActive = getOrientationOfCamera();
 
   public static final int DEGREE_0 = 0;
   public static final int DEGREE_90 = 90;
@@ -77,7 +75,8 @@ public class CameraActivity extends Activity {
    * @return boolean
    */
   protected boolean initCameraResource() {
-    customCamera = ManagerCamera.getCameraInstance();
+    int defaultCamera = ManagerCamera.determinePositionBackCamera();
+    customCamera = ManagerCamera.getCameraInstance(defaultCamera);
 
     if (customCamera == null) {
       this.setResult(2,
@@ -264,6 +263,12 @@ public class CameraActivity extends Activity {
     // Assign the render camera to the view
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
+    
+    // Hide the switch camera button if the number of cameras is lower than 2.
+    if(Camera.getNumberOfCameras() < 2){
+      ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
+      switchCamera.setVisibility(View.INVISIBLE);
+    }
 
     // The zoom bar progress
     final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
@@ -748,9 +753,10 @@ public class CameraActivity extends Activity {
       ImageButton flash = (ImageButton)findViewById(R.id.flash);
       flash.setVisibility(View.VISIBLE);
     }
-    
     Camera.Parameters params = customCamera.getParameters();
-    params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    if (hasFlash()) {
+      params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    }
     customCamera.setParameters(params);
     photoTaken = null;
     displayPicture();
@@ -941,6 +947,7 @@ public class CameraActivity extends Activity {
           break;
       }
       
+      flash.setVisibility(View.VISIBLE);
       flash.setImageResource(imgResource);
       
       customCamera.setParameters(params);
@@ -1015,34 +1022,15 @@ public class CameraActivity extends Activity {
    * @param view The current view.
    */
   public void switchCamera(View view) {
-    if (hasFrontCamera() && Camera.getNumberOfCameras() >= 2) {   
-      ManagerCamera.clearCameraAccess();
-      FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
-      cameraPreview.removeAllViews();
-      if (cameraActive == Camera.CameraInfo.CAMERA_FACING_BACK) {
-        try {
-          cameraActive = 1;
-          customCamera.release();
-          customCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
-          setCameraDisplayOrientation(CameraActivity.this, 1, customCamera);
-          CameraPreview myPreview = new CameraPreview(this, customCamera);
-          cameraPreview.addView(myPreview);
-        } catch (RuntimeException e) {
-          System.out.println("FAIL FRONT CAMERA");
-        }
-      } else if (cameraActive == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-        try {
-          cameraActive = 0;
-          customCamera.release();
-          customCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
-          setCameraDisplayOrientation(CameraActivity.this, 0, customCamera);
-          CameraPreview myPreview = new CameraPreview(this, customCamera);
-          cameraPreview.addView(myPreview);
-        } catch (RuntimeException e) {
-          System.out.println("FAIL BACK CAMERA");
-        }
-      }
-    }
+    int oppositeCamera = ManagerCamera.determineOppositeCamera();
+    customCamera = ManagerCamera.getCameraInstance(oppositeCamera);
+    setCameraDisplayOrientation(CameraActivity.this, oppositeCamera, customCamera);
+    FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
+    cameraPreview.removeAllViews();
+    CameraPreview myPreview = new CameraPreview(this, customCamera);
+    cameraPreview.addView(myPreview);
+    // To re-display the flash.
+    updateStateFlash(stateFlash);
   }
   
   /**

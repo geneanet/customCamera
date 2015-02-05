@@ -1,4 +1,10 @@
 {
+    "0": {
+        "miniature": "Miniature",
+        "capture": "Capture",
+        "acceptePicture": "Valid the picture",
+        "declinePicture": "Decline the picture"
+    },
     "fr": {
         "miniature": "Miniature",
         "capture": "Photo",
