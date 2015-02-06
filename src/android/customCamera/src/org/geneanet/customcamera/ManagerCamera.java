@@ -73,7 +73,7 @@ public class ManagerCamera {
   }
   
   /**
-   *  
+   * Determine the cameraId of the camera currently in use.
    * 
    * @param position Back or front camera.
    * 
