@@ -75,7 +75,8 @@ public class CameraActivity extends Activity {
    * @return boolean
    */
   protected boolean initCameraResource() {
-    customCamera = ManagerCamera.getCameraInstance();
+    int defaultCamera = ManagerCamera.determinePositionBackCamera();
+    customCamera = ManagerCamera.getCameraInstance(defaultCamera);
 
     if (customCamera == null) {
       this.setResult(2,
@@ -262,6 +263,12 @@ public class CameraActivity extends Activity {
     // Assign the render camera to the view
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
+    
+    // Hide the switch camera button if the number of cameras is lower than 2.
+    if(Camera.getNumberOfCameras() < 2){
+      ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
+      switchCamera.setVisibility(View.INVISIBLE);
+    }
 
     // The zoom bar progress
     final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
@@ -648,13 +655,12 @@ public class CameraActivity extends Activity {
         Matrix mat = new Matrix();
         int defaultOrientation = getDeviceDefaultOrientation();
         int orientationCamera = getOrientationOfCamera();
-        int redirect = 0;
+        int redirect = CameraActivity.DEGREE_0;
+
         switch (getCustomRotation()) {
           case 0:
             redirect = CameraActivity.DEGREE_90;
-            // If the device is in front camera by default
-            if (orientationCamera == 1 
-                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
               redirect = CameraActivity.DEGREE_270;
             }
             break;
@@ -662,10 +668,11 @@ public class CameraActivity extends Activity {
             redirect = CameraActivity.DEGREE_0;
             break;
           case 2:
-            redirect = CameraActivity.DEGREE_270;
-            // If the device is in front camera by default
-            if (orientationCamera == 1 
-                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Only on device with landscape mode by default.
+            if (defaultOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+              redirect = CameraActivity.DEGREE_270;
+            }
+            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
               redirect = CameraActivity.DEGREE_90;
             }
             break;
@@ -676,6 +683,14 @@ public class CameraActivity extends Activity {
             break;
         }
         mat.postRotate(redirect);
+        // We execute a mirror to the matrix in case of front camera.
+        if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1 ) {
+          if (getCustomRotation() == 0 || getCustomRotation() == 2) {
+            mat.preScale(1.0f, -1.0f);
+          } else if (getCustomRotation() == 1 || getCustomRotation() == 3) {
+            mat.preScale(-1.0f, 1.0f);
+          }
+        }
 
         // Creation of the bitmap
         photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
@@ -746,9 +761,10 @@ public class CameraActivity extends Activity {
       ImageButton flash = (ImageButton)findViewById(R.id.flash);
       flash.setVisibility(View.VISIBLE);
     }
-    
     Camera.Parameters params = customCamera.getParameters();
-    params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    if (hasFlash()) {
+      params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    }
     customCamera.setParameters(params);
     photoTaken = null;
     displayPicture();
@@ -939,6 +955,7 @@ public class CameraActivity extends Activity {
           break;
       }
       
+      flash.setVisibility(View.VISIBLE);
       flash.setImageResource(imgResource);
       
       customCamera.setParameters(params);
@@ -990,5 +1007,51 @@ public class CameraActivity extends Activity {
     return !(supportedFlashModes == null || supportedFlashModes.isEmpty() ||
       (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
     );
+  }
+  
+  /**
+   * To change the active camera.
+   * @param view The current view.
+   */
+  public void switchCamera(View view) {
+    int oppositeCamera = ManagerCamera.determineOppositeCamera();
+    customCamera = ManagerCamera.getCameraInstance(oppositeCamera);
+    setCameraDisplayOrientation(CameraActivity.this, oppositeCamera, customCamera);
+    FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
+    cameraPreview.removeAllViews();
+    CameraPreview myPreview = new CameraPreview(this, customCamera);
+    cameraPreview.addView(myPreview);
+    // To re-display the flash.
+    updateStateFlash(stateFlash);
+  }
+  
+  /**
+   * To stabilize the orientation of the camera preview.
+   * @param activity
+   * @param cameraId
+   * @param camera
+   */
+  public static void setCameraDisplayOrientation(Activity activity,
+      int cameraId, android.hardware.Camera camera) {
+    Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
+    Camera.getCameraInfo(cameraId, info);
+    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+    int degrees = 0;
+    switch (rotation) {
+      case Surface.ROTATION_0: degrees = 0; break;
+      case Surface.ROTATION_90: degrees = 90; break;
+      case Surface.ROTATION_180: degrees = 180; break;
+      case Surface.ROTATION_270: degrees = 270; break;
+      default : break;
+    }
+
+    int result;
+    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+      result = (info.orientation + degrees) % 360;
+      result = (360 - result) % 360;  // compensate the mirror
+    } else {  // back-facing
+      result = (info.orientation - degrees + 360) % 360;
+    }
+    camera.setDisplayOrientation(result);
   }
 }
