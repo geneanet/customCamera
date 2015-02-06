@@ -243,36 +243,28 @@ public class CameraActivity extends Activity {
     
     int widthScreen = dm.widthPixels;
     int heightScreen = dm.heightPixels;
-    float ratio = widthScreen > heightScreen ? ((float)minSize / (float)heightScreen) : ((float)minSize / (float)widthScreen);
-    /**
-     * landscape and width resized isn't more large screen's width.
-     * OR
-     * portrait and height resized is more large screen's height.
-     */
-    if (
-      (widthScreen > heightScreen && (int)(maxSize / ratio) <= widthScreen) ||
-      (widthScreen < heightScreen && (int)(maxSize / ratio) > heightScreen)
-    ) {
-      paramsCameraPreview.height = LayoutParams.MATCH_PARENT;
-      if (widthScreen < heightScreen) {
-        ratio = ((float)maxSize / (float)heightScreen);
-        paramsCameraPreview.width = (int)(minSize / ratio);
-      } else {
-        paramsCameraPreview.width = (int)(maxSize / ratio);
-      }
-      int marginLeft = (int) (((float)(widthScreen - paramsCameraPreview.width)) / 2);
-      paramsCameraPreview.setMargins(marginLeft, 0, 0, 0);
+    int marginLeft = 0;
+    int marginTop = 0;
+    float ratioWidth, ratioHeight, sizeToResize;
+    if (widthScreen > heightScreen) {
+      ratioWidth = ((float)maxSize / (float)widthScreen);
+      ratioHeight = ((float)minSize / (float)heightScreen);
+      sizeToResize = ratioWidth > ratioHeight ? minSize : maxSize;
     } else {
-      paramsCameraPreview.width = LayoutParams.MATCH_PARENT;
-      if (widthScreen > heightScreen) {
-        ratio = ((float)maxSize / (float)widthScreen);
-        paramsCameraPreview.height = (int)(minSize / ratio);
-      } else {
-        paramsCameraPreview.height = (int)(maxSize / ratio);
-      }
-      int marginTop = (int) (((float)(heightScreen - paramsCameraPreview.height)) / 2);
-      paramsCameraPreview.setMargins(0, marginTop, 0, 0);
+      ratioWidth = ((float)minSize / (float)widthScreen);
+      ratioHeight = ((float)maxSize / (float)heightScreen);
+      sizeToResize = ratioWidth > ratioHeight ? maxSize : minSize;
     }
+    if (ratioWidth > ratioHeight) {
+      paramsCameraPreview.height = (int)(sizeToResize / ratioWidth);
+      paramsCameraPreview.width = LayoutParams.MATCH_PARENT;
+      marginTop = (int)(((float)(heightScreen - paramsCameraPreview.height)) / 2);
+    } else {
+      paramsCameraPreview.height = LayoutParams.MATCH_PARENT;
+      paramsCameraPreview.width = (int)(sizeToResize / ratioHeight);;
+      marginLeft = (int)(((float)(widthScreen - paramsCameraPreview.width)) / 2);
+    }
+    paramsCameraPreview.setMargins(marginLeft, marginTop, 0, 0);
     cameraPreview.setLayoutParams(paramsCameraPreview);
     
     // Assign the render camera to the view
