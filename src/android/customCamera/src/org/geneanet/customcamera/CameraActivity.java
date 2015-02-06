@@ -243,17 +243,33 @@ public class CameraActivity extends Activity {
     
     int widthScreen = dm.widthPixels;
     int heightScreen = dm.heightPixels;
-    float ratio;
-    if (widthScreen > heightScreen) {
-      paramsCameraPreview.height = LayoutParams.FILL_PARENT;
-      ratio = ( (float)minSize / (float)heightScreen );
-      paramsCameraPreview.width = (int)(maxSize / ratio);
+    float ratio = widthScreen > heightScreen ? ((float)minSize / (float)heightScreen) : ((float)minSize / (float)widthScreen);
+    /**
+     * landscape and width resized isn't more large screen's width.
+     * OR
+     * portrait and height resized is more large screen's height.
+     */
+    if (
+      (widthScreen > heightScreen && (int)(maxSize / ratio) <= widthScreen) ||
+      (widthScreen < heightScreen && (int)(maxSize / ratio) > heightScreen)
+    ) {
+      paramsCameraPreview.height = LayoutParams.MATCH_PARENT;
+      if (widthScreen < heightScreen) {
+        ratio = ((float)maxSize / (float)heightScreen);
+        paramsCameraPreview.width = (int)(minSize / ratio);
+      } else {
+        paramsCameraPreview.width = (int)(maxSize / ratio);
+      }
       int marginLeft = (int) (((float)(widthScreen - paramsCameraPreview.width)) / 2);
       paramsCameraPreview.setMargins(marginLeft, 0, 0, 0);
     } else {
-      paramsCameraPreview.width = LayoutParams.FILL_PARENT;
-      ratio = ( (float)minSize / (float)widthScreen );
-      paramsCameraPreview.height = (int)(maxSize / ratio);
+      paramsCameraPreview.width = LayoutParams.MATCH_PARENT;
+      if (widthScreen > heightScreen) {
+        ratio = ((float)maxSize / (float)widthScreen);
+        paramsCameraPreview.height = (int)(minSize / ratio);
+      } else {
+        paramsCameraPreview.height = (int)(maxSize / ratio);
+      }
       int marginTop = (int) (((float)(heightScreen - paramsCameraPreview.height)) / 2);
       paramsCameraPreview.setMargins(0, marginTop, 0, 0);
     }
