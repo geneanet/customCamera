@@ -54,14 +54,31 @@ public class ManagerCamera {
     }
   }
   
+  /**
+   * Return a function to determine the front camera in use.
+   * 
+   * @return function 
+   */
   public static int determinePositionFrontCamera() {
     return determineCamera(Camera.CameraInfo.CAMERA_FACING_FRONT);
   }
   
+  /**
+   * Return a function to determine the back camera in use.
+   * 
+   * @return function 
+   */
   public static int determinePositionBackCamera() {
     return determineCamera(Camera.CameraInfo.CAMERA_FACING_BACK); 
   }
   
+  /**
+   *  
+   * 
+   * @param position Back or front camera.
+   * 
+   * @return the cameraId of the current camera if it exists.
+   */
   protected static Integer determineCamera(int position) {
     CameraInfo info = new Camera.CameraInfo();
     if (Camera.getNumberOfCameras() == 0) {
@@ -80,15 +97,49 @@ public class ManagerCamera {
     return 0;
   }
   
+  /**
+   * Get the currentCamera.
+   * 
+   * @return the value of the variable.
+   */
   private static int getCurrentFacingCamera() {
     return currentCameraPosition;
   }
   
+  /**
+   * Determine the opposite camera of which currently in use.
+   * 
+   * @return function.
+   */
   public static int determineOppositeCamera() {
     if (getCurrentFacingCamera() == Camera.CameraInfo.CAMERA_FACING_BACK) {
       return determinePositionFrontCamera();
     } else {
       return determinePositionBackCamera();
     }
+  }
+  
+  /**
+   * Determine if the current camera is front.
+   * 
+   * @return True if the current camera is front. Else return false.
+   */
+  public static boolean currentCameraIsFacingBack() {
+    if (getCurrentFacingCamera() == Camera.CameraInfo.CAMERA_FACING_BACK) {
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Determine if the camera is back.
+   * 
+   * @return True if the current camera is back. Else return false.
+   */
+  public static boolean currentCameraIsFacingFront() {
+    if (getCurrentFacingCamera() == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+      return true;
+    }
+    return false;
   }
 }

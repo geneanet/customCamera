@@ -655,13 +655,12 @@ public class CameraActivity extends Activity {
         Matrix mat = new Matrix();
         int defaultOrientation = getDeviceDefaultOrientation();
         int orientationCamera = getOrientationOfCamera();
-        int redirect = 0;
+        int redirect = CameraActivity.DEGREE_0;
+
         switch (getCustomRotation()) {
           case 0:
             redirect = CameraActivity.DEGREE_90;
-            // If the device is in front camera by default
-            if (orientationCamera == 1 
-                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
               redirect = CameraActivity.DEGREE_270;
             }
             break;
@@ -669,10 +668,11 @@ public class CameraActivity extends Activity {
             redirect = CameraActivity.DEGREE_0;
             break;
           case 2:
-            redirect = CameraActivity.DEGREE_270;
-            // If the device is in front camera by default
-            if (orientationCamera == 1 
-                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Only on device with landscape mode by default.
+            if (defaultOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+              redirect = CameraActivity.DEGREE_270;
+            }
+            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
               redirect = CameraActivity.DEGREE_90;
             }
             break;
@@ -683,6 +683,14 @@ public class CameraActivity extends Activity {
             break;
         }
         mat.postRotate(redirect);
+        // We execute a mirror to the matrix in case of front camera.
+        if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1 ) {
+          if (getCustomRotation() == 0 || getCustomRotation() == 2) {
+            mat.preScale(1.0f, -1.0f);
+          } else if (getCustomRotation() == 1 || getCustomRotation() == 3) {
+            mat.preScale(-1.0f, 1.0f);
+          }
+        }
 
         // Creation of the bitmap
         photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
@@ -1000,22 +1008,6 @@ public class CameraActivity extends Activity {
       (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
     );
   }
-
-  /**
-   * Check if a front camera exist.
-   * return boolean
-   */
-  public boolean hasFrontCamera() {
-    int numCameras = Camera.getNumberOfCameras();
-    for (int i = 0; i < numCameras; i++) {
-      Camera.CameraInfo info = new CameraInfo();
-      Camera.getCameraInfo(i, info);
-      if (CameraInfo.CAMERA_FACING_FRONT == info.facing) {
-        return true;
-      }
-    }
-    return false;
-  }
   
   /**
    * To change the active camera.
@@ -1034,7 +1026,7 @@ public class CameraActivity extends Activity {
   }
   
   /**
-   * 
+   * To stabilize the orientation of the camera preview.
    * @param activity
    * @param cameraId
    * @param camera
