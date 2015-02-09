@@ -460,11 +460,6 @@ public class CameraActivity extends Activity {
           RelativeLayout.TRUE);
       
       background.setLayoutParams(paramsMiniature);
-    } else {
-      Button miniature = (Button) findViewById(R.id.miniature);
-      miniature.setVisibility(View.INVISIBLE);
-      SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
-      switchOpacity.setVisibility(View.INVISIBLE);
     }
   }
   
