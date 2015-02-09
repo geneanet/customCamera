@@ -87,6 +87,9 @@ public class CameraLauncher extends CordovaPlugin {
       intent.putExtra("defaultFlash", args.getInt(8));
       intent.putExtra("switchFlash", args.getBoolean(9));
 
+      intent.putExtra("defaultCamera", args.getInt(10));
+      intent.putExtra("switchCamera", args.getBoolean(11));
+
       cordova.startActivityForResult((CordovaPlugin) this, intent,
           CameraLauncher.REQUEST_CODE);
 

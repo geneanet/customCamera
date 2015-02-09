@@ -68,6 +68,9 @@ public class CameraActivity extends Activity {
   public static final int FLASH_DISABLE = 0;
   public static final int FLASH_ENABLE = 1;
   public static final int FLASH_AUTO = 2;
+  
+  public static final int CAMERA_BACK = 0;
+  public static final int CAMERA_FRONT = 1;
 
   /**
    * To get camera resource or stop this activity.
@@ -75,7 +78,12 @@ public class CameraActivity extends Activity {
    * @return boolean
    */
   protected boolean initCameraResource() {
-    int defaultCamera = ManagerCamera.determinePositionBackCamera();
+    int defaultCamera;
+    if (this.getIntent().getIntExtra("defaultCamera", CameraActivity.CAMERA_BACK) == CameraActivity.CAMERA_FRONT) {
+      defaultCamera = ManagerCamera.determinePositionFrontCamera();
+    } else {
+      defaultCamera = ManagerCamera.determinePositionBackCamera();
+    }
     customCamera = ManagerCamera.getCameraInstance(defaultCamera);
 
     if (customCamera == null) {
@@ -114,6 +122,11 @@ public class CameraActivity extends Activity {
     if (!this.getIntent().getBooleanExtra("switchFlash", true)) {
       ImageButton flash = (ImageButton)findViewById(R.id.flash);
       flash.setVisibility(View.INVISIBLE);
+    }
+    
+    if (!this.getIntent().getBooleanExtra("switchCamera", true)) {
+      ImageButton switchCamera = (ImageButton)findViewById(R.id.switchCamera);
+      switchCamera.setVisibility(View.INVISIBLE);
     }
 
     // The opacity bar
