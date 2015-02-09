@@ -881,8 +881,7 @@ public class CameraActivity extends Activity {
    * @return the code of the rotation (0, 1, 2, 3)
    */
   protected int getCustomRotation() {
-    WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-    int code = windowManager.getDefaultDisplay().getRotation();
+    int code = this.getWindowManager().getDefaultDisplay().getRotation();
     if (getDeviceDefaultOrientation() == 2) {
       code ++;
     }
