@@ -125,6 +125,9 @@ var updateConfig = function() {
         translationsForApplication = JSON.parse(translationsForApplication);
         for (lang in translationsForApplication) {
             var pathFileTranslate = pathResAndroidCordova+"values-"+lang+"/";
+            if (lang == "default") {
+                pathFileTranslate = pathResAndroidCordova+"values/";
+            }
 
             var objToXml;
             // already exist, get data.

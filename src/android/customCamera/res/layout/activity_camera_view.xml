@@ -30,6 +30,15 @@
         android:onClick="switchFlash"
         android:src="@drawable/flash" />
 
+    <ImageButton
+        android:id="@+id/switchCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="false"
+        android:layout_marginTop="150dp"
+        android:src="@drawable/switch_camera"
+        android:onClick="switchCamera" />
+
     <LinearLayout
         android:id="@+id/beforePhoto"
         android:layout_width="match_parent"

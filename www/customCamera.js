@@ -8,6 +8,7 @@
     function CustomCameraExport() {}
 
     CustomCameraExport.prototype.FlashModes = {DISABLE: 0, ACTIVE: 1, AUTO: 2};
+    CustomCameraExport.prototype.CameraFacings = {BACK: 0, FRONT: 1};
 
     /**
      * Start custom camera.
@@ -27,8 +28,10 @@
             // To get supported color formats, go to see method parseColor : http://developer.android.com/reference/android/graphics/Color.html#parseColor(java.lang.String)
             quality: 100, // picture's quality : range 0 - 100 : http://developer.android.com/reference/android/graphics/Bitmap.html#compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream) (parameter "quality")
             opacity: true, // active or disable the opacity function.
-            defaultFlash: this.FlashModes.DISABLE, // default state for flash. Corrects values = 0 (disable) / 1 (active) / 2 (auto)
-            switchFlash: true // active or disable the switch flash button.
+            defaultFlash: this.FlashModes.DISABLE, // default state for flash. See CustomCamera.FlashModes for corrects values.
+            switchFlash: true, // active or disable the switch flash button.
+            defaultCamera: this.CameraFacings.BACK, // default camera used. See CustomCamera.CameraFacings for corrects values.
+            switchCamera: true // active or disable the switch camera button.
         };
 
         for (var nameOption in defaultOptions) {
@@ -60,7 +63,9 @@
                 options.quality,
                 options.opacity,
                 options.defaultFlash,
-                options.switchFlash
+                options.switchFlash,
+                options.defaultCamera,
+                options.switchCamera
             ]
         );
     };

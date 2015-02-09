@@ -68,15 +68,27 @@ public class CameraActivity extends Activity {
   public static final int FLASH_DISABLE = 0;
   public static final int FLASH_ENABLE = 1;
   public static final int FLASH_AUTO = 2;
+  
+  public static final int CAMERA_BACK = 0;
+  public static final int CAMERA_FRONT = 1;
 
   /**
    * To get camera resource or stop this activity.
    * 
+   * @param position The position of the camera.
+   * 
    * @return boolean
    */
-  protected boolean initCameraResource() {
-    customCamera = ManagerCamera.getCameraInstance();
-
+  protected boolean initCameraResource(Integer position) {
+    if (position == null) {
+      if (this.getIntent().getIntExtra("defaultCamera", CameraActivity.CAMERA_BACK) == CameraActivity.CAMERA_FRONT) {
+        position = ManagerCamera.determinePositionFrontCamera();
+      } else {
+        position = ManagerCamera.determinePositionBackCamera();
+      }
+    }
+    customCamera = ManagerCamera.getCameraInstance(position);
+    
     if (customCamera == null) {
       this.setResult(2,
           new Intent().putExtra("errorMessage", "Camera is unavailable."));
@@ -85,6 +97,48 @@ public class CameraActivity extends Activity {
       return false;
     }
 
+    ManagerCamera.setCameraDisplayOrientation(this);
+    
+    // The zoom bar progress
+    final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+    final Camera.Parameters paramsCamera = customCamera.getParameters();
+    if (paramsCamera.isZoomSupported()) {
+      final int zoom = paramsCamera.getZoom();
+      int maxZoom = paramsCamera.getMaxZoom();
+  
+      // Event on change zoom with the bar.
+      zoomLevel.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        int progress = 0;
+  
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progresValue,
+            boolean fromUser) {
+          progress = progresValue;
+          int newZoom = (int) (zoom + progress);
+          zoomLevel.setProgress(newZoom);
+          paramsCamera.setZoom(newZoom);
+          ManagerCamera.getCurrentCameraResource().setParameters(paramsCamera);
+        }
+  
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+  
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+        }
+      });
+      
+      zoomLevel.setMax(maxZoom);
+      zoomLevel.setProgress(zoom);
+      zoomLevel.setVisibility(View.VISIBLE);
+    } else {
+      zoomLevel.setVisibility(View.INVISIBLE);
+    }
+    
+    updateStateFlash(stateFlash);
+    manageDisplayButtons();
+    
     return true;
   }
   
@@ -102,24 +156,11 @@ public class CameraActivity extends Activity {
     setContentView(R.layout.activity_camera_view);
 
     opacity = this.getIntent().getBooleanExtra("opacity", true);
-
-    setBackground();
-
-    if (!this.getIntent().getBooleanExtra("miniature", true)) {
-      Button miniature = (Button) findViewById(R.id.miniature);
-      miniature.setVisibility(View.INVISIBLE);
-    }
-    
-    if (!this.getIntent().getBooleanExtra("switchFlash", true)) {
-      ImageButton flash = (ImageButton)findViewById(R.id.flash);
-      flash.setVisibility(View.INVISIBLE);
-    }
-
-    // The opacity bar
-    SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
+    stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
 
     if (opacity) {
       // Event on change opacity.
+      SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
       switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
         int progress = 0;
 
@@ -138,8 +179,6 @@ public class CameraActivity extends Activity {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {}
       });
-    } else {
-      switchOpacity.setVisibility(View.INVISIBLE);
     }
 
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
@@ -168,60 +207,20 @@ public class CameraActivity extends Activity {
       }
     });
   }
-  
-  /**
-   * Set the background color of the camera button.
-   * @param color The color of the background.
-   */
-  protected void setCameraBackgroundColor(String color) {
-    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-    GradientDrawable backgroundGradient = (GradientDrawable)imgIcon.getBackground();
-    if (color.length() > 0) {
-      try {
-        int cameraBackgroundColor = Color.parseColor(color);
-        backgroundGradient.setColor(cameraBackgroundColor);
-      } catch (IllegalArgumentException e) {
-        backgroundGradient.setColor(Color.TRANSPARENT);
-      }
-    } else {
-      backgroundGradient.setColor(Color.TRANSPARENT);
-    }
-  }
 
   /** Method onStart. Handle the zoom level seekBar and the camera orientation. */
   @Override
   protected void onStart() {
     super.onStart();
-
+    
+    setBackground();
+    
     // Init camera resource.
-    if (!initCameraResource()) {
+    if (!initCameraResource(null)) {
       return;
     }
-    
-    stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
-    
-    updateStateFlash(stateFlash);
-    
-    int orientation = 0;
-    switch (getCustomRotation()) {
-      case 0:
-        orientation = CameraActivity.DEGREE_90;
-        break;
-      case 1:
-        orientation = CameraActivity.DEGREE_0;
-        break;
-      case 2:
-        orientation = CameraActivity.DEGREE_270;
-        break;
-      case 3:
-        orientation = CameraActivity.DEGREE_180;
-        break;
-      default:
-        break;
-    }
 
-    customCamera.setDisplayOrientation(orientation);
-
+    // Adapt camera_preview to keep a ratio between screen' size and camera' size.
     DisplayMetrics dm = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(dm);
     
@@ -262,39 +261,37 @@ public class CameraActivity extends Activity {
     // Assign the render camera to the view
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
+    
+    // Hide the switch camera button if the number of cameras is lower than 2.
+    if(Camera.getNumberOfCameras() < 2){
+      ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
+      switchCamera.setVisibility(View.INVISIBLE);
+    }
+  }
+  
+  /** To save some contains of the activity. */
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    outState.putBoolean("modeMiniature", modeMiniature);
+    outState.putParcelable("photoTaken", photoTaken);
+    outState.putInt("stateFlash", stateFlash);
+    super.onSaveInstanceState(outState);
+  }
 
-    // The zoom bar progress
-    final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    final Camera.Parameters paramsCamera = customCamera.getParameters();
-    final int zoom = paramsCamera.getZoom();
-    int maxZoom = paramsCamera.getMaxZoom();
+  /** To restore the contains saved on the method onSaveInstanceState(). */
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    modeMiniature = savedInstanceState.getBoolean("modeMiniature");
+    photoTaken = savedInstanceState.getParcelable("photoTaken");
+    stateFlash = savedInstanceState.getInt("stateFlash");
+    
+    if (modeMiniature) {
+      buttonMiniature(findViewById(R.id.miniature));
+    }
 
-    zoomLevel.setMax(maxZoom);
-    zoomLevel.setProgress(zoom);
-    zoomLevel.setVisibility(View.VISIBLE);
-
-    // Event on change zoom with the bar.
-    zoomLevel.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-      int progress = 0;
-
-      @Override
-      public void onProgressChanged(SeekBar seekBar, int progresValue,
-          boolean fromUser) {
-        progress = progresValue;
-        int newZoom = (int) (zoom + progress);
-        zoomLevel.setProgress(newZoom);
-        paramsCamera.setZoom(newZoom);
-        customCamera.setParameters(paramsCamera);
-      }
-
-      @Override
-      public void onStartTrackingTouch(SeekBar seekBar) {
-      }
-
-      @Override
-      public void onStopTrackingTouch(SeekBar seekBar) {
-      }
-    });
+    displayPicture();
+    updateStateFlash(stateFlash);
+    super.onRestoreInstanceState(savedInstanceState);
   }
   
   /** Method to pause the activity. */
@@ -329,6 +326,25 @@ public class CameraActivity extends Activity {
     }
     
     return true;
+  }
+  
+  /**
+   * Set the background color of the camera button.
+   * @param color The color of the background.
+   */
+  protected void setCameraBackgroundColor(String color) {
+    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    GradientDrawable backgroundGradient = (GradientDrawable)imgIcon.getBackground();
+    if (color.length() > 0) {
+      try {
+        int cameraBackgroundColor = Color.parseColor(color);
+        backgroundGradient.setColor(cameraBackgroundColor);
+      } catch (IllegalArgumentException e) {
+        backgroundGradient.setColor(Color.TRANSPARENT);
+      }
+    } else {
+      backgroundGradient.setColor(Color.TRANSPARENT);
+    }
   }
 
   /**
@@ -444,11 +460,6 @@ public class CameraActivity extends Activity {
           RelativeLayout.TRUE);
       
       background.setLayoutParams(paramsMiniature);
-    } else {
-      Button miniature = (Button) findViewById(R.id.miniature);
-      miniature.setVisibility(View.INVISIBLE);
-      SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
-      switchOpacity.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -516,22 +527,35 @@ public class CameraActivity extends Activity {
   }
   
   /**
-   * Display the layout accept/decline photo + mask photo button.
+   * Manage to display buttons in function of picture is taken or not.
    */
-  public void displayAcceptDeclineButtons() {
-    LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    ImageButton photo = (ImageButton) findViewById(R.id.capture);
-    SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    Button miniature = (Button) findViewById(R.id.miniature);
-    ImageView background = (ImageView) findViewById(R.id.background);
-    LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature
-        .getLayoutParams();
+  public void manageDisplayButtons() {
+    LinearLayout keepPhoto   = (LinearLayout) findViewById(R.id.keepPhoto);
+    Button miniature         = (Button) findViewById(R.id.miniature);
+    ImageButton flash        = (ImageButton) findViewById(R.id.flash);
+    ImageButton photo        = (ImageButton) findViewById(R.id.capture);
+    ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
+    ImageView background     = (ImageView) findViewById(R.id.background);
+    SeekBar zoomLevel        = (SeekBar) findViewById(R.id.zoomLevel);
+    SeekBar switchOpacity    = (SeekBar) findViewById(R.id.switchOpacity);
+    
+    LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature.getLayoutParams();
+    Camera.Parameters paramsCamera = customCamera.getParameters();
+    
+    if (!this.getIntent().getBooleanExtra("miniature", true)) {
+      miniature.setVisibility(View.INVISIBLE);
+    }
+    if (!opacity) {
+      switchOpacity.setVisibility(View.INVISIBLE);
+    }
     
     if (photoTaken != null) {
       // Show/hide elements when a photo is taken 
       keepPhoto.setVisibility(View.VISIBLE);  
       photo.setVisibility(View.INVISIBLE);   
       zoomLevel.setVisibility(View.INVISIBLE);
+      flash.setVisibility(View.INVISIBLE);
+      switchCamera.setVisibility(View.INVISIBLE);
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -544,7 +568,21 @@ public class CameraActivity extends Activity {
       // Show/hide elements when a photo is not taken
       keepPhoto.setVisibility(View.INVISIBLE);
       photo.setVisibility(View.VISIBLE);
-      zoomLevel.setVisibility(View.VISIBLE);  
+      if (paramsCamera.isZoomSupported()) {
+        zoomLevel.setVisibility(View.VISIBLE);
+      }
+      
+      if (this.getIntent().getBooleanExtra("switchFlash", true)) {
+        flash.setVisibility(View.VISIBLE);
+      } else {
+        flash.setVisibility(View.INVISIBLE);
+      }
+      
+      if (this.getIntent().getBooleanExtra("switchCamera", true)) {
+        switchCamera.setVisibility(View.VISIBLE);
+      } else {
+        switchCamera.setVisibility(View.INVISIBLE);
+      }
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -599,8 +637,6 @@ public class CameraActivity extends Activity {
    * Method to take picture.
    */
   public void takePhoto() {
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
-    flash.setVisibility(View.INVISIBLE);
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -648,13 +684,12 @@ public class CameraActivity extends Activity {
         Matrix mat = new Matrix();
         int defaultOrientation = getDeviceDefaultOrientation();
         int orientationCamera = getOrientationOfCamera();
-        int redirect = 0;
+        int redirect = CameraActivity.DEGREE_0;
+
         switch (getCustomRotation()) {
           case 0:
             redirect = CameraActivity.DEGREE_90;
-            // If the device is in front camera by default
-            if (orientationCamera == 1 
-                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
               redirect = CameraActivity.DEGREE_270;
             }
             break;
@@ -662,10 +697,11 @@ public class CameraActivity extends Activity {
             redirect = CameraActivity.DEGREE_0;
             break;
           case 2:
-            redirect = CameraActivity.DEGREE_270;
-            // If the device is in front camera by default
-            if (orientationCamera == 1 
-                  && defaultOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Only on device with landscape mode by default.
+            if (defaultOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+              redirect = CameraActivity.DEGREE_270;
+            }
+            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
               redirect = CameraActivity.DEGREE_90;
             }
             break;
@@ -676,6 +712,14 @@ public class CameraActivity extends Activity {
             break;
         }
         mat.postRotate(redirect);
+        // We execute a mirror to the matrix in case of front camera.
+        if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1 ) {
+          if (getCustomRotation() == 0 || getCustomRotation() == 2) {
+            mat.preScale(1.0f, -1.0f);
+          } else if (getCustomRotation() == 1 || getCustomRotation() == 3) {
+            mat.preScale(-1.0f, 1.0f);
+          }
+        }
 
         // Creation of the bitmap
         photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
@@ -743,40 +787,13 @@ public class CameraActivity extends Activity {
     imgIcon.setEnabled(true);
     
     if (hasFlash()) {
-      ImageButton flash = (ImageButton)findViewById(R.id.flash);
-      flash.setVisibility(View.VISIBLE);
+      Camera.Parameters params = customCamera.getParameters();
+      params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+      customCamera.setParameters(params);
     }
     
-    Camera.Parameters params = customCamera.getParameters();
-    params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-    customCamera.setParameters(params);
     photoTaken = null;
     displayPicture();
-  }
-  
-  /** To save some contains of the activity. */
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    outState.putBoolean("modeMiniature", modeMiniature);
-    outState.putParcelable("photoTaken", photoTaken);
-    outState.putInt("stateFlash", stateFlash);
-    super.onSaveInstanceState(outState);
-  }
-
-  /** To restore the contains saved on the method onSaveInstanceState(). */
-  @Override
-  protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    modeMiniature = savedInstanceState.getBoolean("modeMiniature");
-    photoTaken = savedInstanceState.getParcelable("photoTaken");
-    stateFlash = savedInstanceState.getInt("stateFlash");
-    
-    if (modeMiniature) {
-      buttonMiniature(findViewById(R.id.miniature));
-    }
-
-    displayPicture();
-    updateStateFlash(stateFlash);
-    super.onRestoreInstanceState(savedInstanceState);
   }
 
   /** To display or not the picture taken. */
@@ -799,7 +816,7 @@ public class CameraActivity extends Activity {
       preview.setVisibility(View.VISIBLE);
     }
 
-    displayAcceptDeclineButtons();
+    manageDisplayButtons();
   }
 
   /**
@@ -938,12 +955,10 @@ public class CameraActivity extends Activity {
           imgResource = R.drawable.flash_auto;
           break;
       }
-      
+
       flash.setImageResource(imgResource);
       
       customCamera.setParameters(params);
-    } else {
-      flash.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -965,8 +980,6 @@ public class CameraActivity extends Activity {
       Camera.Parameters params = customCamera.getParameters();
       params.setFlashMode(mode);
       customCamera.setParameters(params);
-    } else {
-      flash.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -990,5 +1003,18 @@ public class CameraActivity extends Activity {
     return !(supportedFlashModes == null || supportedFlashModes.isEmpty() ||
       (supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF))
     );
+  }
+  
+  /**
+   * To change the active camera.
+   * @param view The current view.
+   */
+  public void switchCamera(View view) {
+    int oppositeCamera = ManagerCamera.determineOppositeCamera();
+    initCameraResource(oppositeCamera);
+    FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
+    cameraPreview.removeAllViews();
+    CameraPreview myPreview = new CameraPreview(this, customCamera);
+    cameraPreview.addView(myPreview);
   }
 }
