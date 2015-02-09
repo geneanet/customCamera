@@ -156,8 +156,6 @@ public class CameraActivity extends Activity {
 
     opacity = this.getIntent().getBooleanExtra("opacity", true);
 
-    setBackground();
-
     if (!this.getIntent().getBooleanExtra("miniature", true)) {
       Button miniature = (Button) findViewById(R.id.miniature);
       miniature.setVisibility(View.INVISIBLE);
@@ -227,36 +225,20 @@ public class CameraActivity extends Activity {
       }
     });
   }
-  
-  /**
-   * Set the background color of the camera button.
-   * @param color The color of the background.
-   */
-  protected void setCameraBackgroundColor(String color) {
-    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
-    GradientDrawable backgroundGradient = (GradientDrawable)imgIcon.getBackground();
-    if (color.length() > 0) {
-      try {
-        int cameraBackgroundColor = Color.parseColor(color);
-        backgroundGradient.setColor(cameraBackgroundColor);
-      } catch (IllegalArgumentException e) {
-        backgroundGradient.setColor(Color.TRANSPARENT);
-      }
-    } else {
-      backgroundGradient.setColor(Color.TRANSPARENT);
-    }
-  }
 
   /** Method onStart. Handle the zoom level seekBar and the camera orientation. */
   @Override
   protected void onStart() {
     super.onStart();
     
+    setBackground();
+    
     // Init camera resource.
     if (!initCameraResource(null)) {
       return;
     }
 
+    // Adapt camera_preview to keep a ratio between screen' size and camera' size.
     DisplayMetrics dm = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(dm);
     
@@ -305,6 +287,31 @@ public class CameraActivity extends Activity {
     }
   }
   
+  /** To save some contains of the activity. */
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    outState.putBoolean("modeMiniature", modeMiniature);
+    outState.putParcelable("photoTaken", photoTaken);
+    outState.putInt("stateFlash", stateFlash);
+    super.onSaveInstanceState(outState);
+  }
+
+  /** To restore the contains saved on the method onSaveInstanceState(). */
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    modeMiniature = savedInstanceState.getBoolean("modeMiniature");
+    photoTaken = savedInstanceState.getParcelable("photoTaken");
+    stateFlash = savedInstanceState.getInt("stateFlash");
+    
+    if (modeMiniature) {
+      buttonMiniature(findViewById(R.id.miniature));
+    }
+
+    displayPicture();
+    updateStateFlash(stateFlash);
+    super.onRestoreInstanceState(savedInstanceState);
+  }
+  
   /** Method to pause the activity. */
   @Override
   protected void onPause() {
@@ -337,6 +344,25 @@ public class CameraActivity extends Activity {
     }
     
     return true;
+  }
+  
+  /**
+   * Set the background color of the camera button.
+   * @param color The color of the background.
+   */
+  protected void setCameraBackgroundColor(String color) {
+    ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
+    GradientDrawable backgroundGradient = (GradientDrawable)imgIcon.getBackground();
+    if (color.length() > 0) {
+      try {
+        int cameraBackgroundColor = Color.parseColor(color);
+        backgroundGradient.setColor(cameraBackgroundColor);
+      } catch (IllegalArgumentException e) {
+        backgroundGradient.setColor(Color.TRANSPARENT);
+      }
+    } else {
+      backgroundGradient.setColor(Color.TRANSPARENT);
+    }
   }
 
   /**
@@ -772,31 +798,6 @@ public class CameraActivity extends Activity {
     
     photoTaken = null;
     displayPicture();
-  }
-  
-  /** To save some contains of the activity. */
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    outState.putBoolean("modeMiniature", modeMiniature);
-    outState.putParcelable("photoTaken", photoTaken);
-    outState.putInt("stateFlash", stateFlash);
-    super.onSaveInstanceState(outState);
-  }
-
-  /** To restore the contains saved on the method onSaveInstanceState(). */
-  @Override
-  protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    modeMiniature = savedInstanceState.getBoolean("modeMiniature");
-    photoTaken = savedInstanceState.getParcelable("photoTaken");
-    stateFlash = savedInstanceState.getInt("stateFlash");
-    
-    if (modeMiniature) {
-      buttonMiniature(findViewById(R.id.miniature));
-    }
-
-    displayPicture();
-    updateStateFlash(stateFlash);
-    super.onRestoreInstanceState(savedInstanceState);
   }
 
   /** To display or not the picture taken. */
