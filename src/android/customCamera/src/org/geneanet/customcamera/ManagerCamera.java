@@ -176,4 +176,13 @@ public class ManagerCamera {
     }
     ManagerCamera.mCamera.setDisplayOrientation(result);
   }
+  
+  /**
+   * Get the value of currentCameraPosition.
+   * 
+   * @return Integer.
+   */
+  public static int getCurrentCameraPosition() {
+    return ManagerCamera.currentCameraPosition;
+  }
 }
