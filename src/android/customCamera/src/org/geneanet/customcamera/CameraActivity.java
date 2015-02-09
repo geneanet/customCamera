@@ -137,6 +137,7 @@ public class CameraActivity extends Activity {
     }
     
     updateStateFlash(stateFlash);
+    manageDisplayButtons();
     
     return true;
   }
@@ -155,28 +156,11 @@ public class CameraActivity extends Activity {
     setContentView(R.layout.activity_camera_view);
 
     opacity = this.getIntent().getBooleanExtra("opacity", true);
-
-    if (!this.getIntent().getBooleanExtra("miniature", true)) {
-      Button miniature = (Button) findViewById(R.id.miniature);
-      miniature.setVisibility(View.INVISIBLE);
-    }
-    
-    if (!this.getIntent().getBooleanExtra("switchFlash", true)) {
-      ImageButton flash = (ImageButton) findViewById(R.id.flash);
-      flash.setVisibility(View.INVISIBLE);
-    }
     stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
-    
-    if (!this.getIntent().getBooleanExtra("switchCamera", true)) {
-      ImageButton switchCamera = (ImageButton)findViewById(R.id.switchCamera);
-      switchCamera.setVisibility(View.INVISIBLE);
-    }
-
-    // The opacity bar
-    SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
 
     if (opacity) {
       // Event on change opacity.
+      SeekBar switchOpacity = (SeekBar) findViewById(R.id.switchOpacity);
       switchOpacity.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
         int progress = 0;
 
@@ -195,8 +179,6 @@ public class CameraActivity extends Activity {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {}
       });
-    } else {
-      switchOpacity.setVisibility(View.INVISIBLE);
     }
 
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
@@ -550,18 +532,27 @@ public class CameraActivity extends Activity {
   }
   
   /**
-   * Display the layout accept/decline photo + mask photo button.
+   * Manage to display buttons in function of picture is taken or not.
    */
-  public void displayAcceptDeclineButtons() {
-    LinearLayout keepPhoto = (LinearLayout) findViewById(R.id.keepPhoto);
-    ImageButton photo = (ImageButton) findViewById(R.id.capture);
-    SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    Button miniature = (Button) findViewById(R.id.miniature);
-    ImageView background = (ImageView) findViewById(R.id.background);
-    LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature
-        .getLayoutParams();
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+  public void manageDisplayButtons() {
+    LinearLayout keepPhoto   = (LinearLayout) findViewById(R.id.keepPhoto);
+    Button miniature         = (Button) findViewById(R.id.miniature);
+    ImageButton flash        = (ImageButton) findViewById(R.id.flash);
+    ImageButton photo        = (ImageButton) findViewById(R.id.capture);
+    ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
+    ImageView background     = (ImageView) findViewById(R.id.background);
+    SeekBar zoomLevel        = (SeekBar) findViewById(R.id.zoomLevel);
+    SeekBar switchOpacity    = (SeekBar) findViewById(R.id.switchOpacity);
+    
+    LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature.getLayoutParams();
     Camera.Parameters paramsCamera = customCamera.getParameters();
+    
+    if (!this.getIntent().getBooleanExtra("miniature", true)) {
+      miniature.setVisibility(View.INVISIBLE);
+    }
+    if (!opacity) {
+      switchOpacity.setVisibility(View.INVISIBLE);
+    }
     
     if (photoTaken != null) {
       // Show/hide elements when a photo is taken 
@@ -569,6 +560,7 @@ public class CameraActivity extends Activity {
       photo.setVisibility(View.INVISIBLE);   
       zoomLevel.setVisibility(View.INVISIBLE);
       flash.setVisibility(View.INVISIBLE);
+      switchCamera.setVisibility(View.INVISIBLE);
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -584,8 +576,17 @@ public class CameraActivity extends Activity {
       if (paramsCamera.isZoomSupported()) {
         zoomLevel.setVisibility(View.VISIBLE);
       }
+      
       if (this.getIntent().getBooleanExtra("switchFlash", true)) {
         flash.setVisibility(View.VISIBLE);
+      } else {
+        flash.setVisibility(View.INVISIBLE);
+      }
+      
+      if (this.getIntent().getBooleanExtra("switchCamera", true)) {
+        switchCamera.setVisibility(View.VISIBLE);
+      } else {
+        switchCamera.setVisibility(View.INVISIBLE);
       }
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
@@ -820,7 +821,7 @@ public class CameraActivity extends Activity {
       preview.setVisibility(View.VISIBLE);
     }
 
-    displayAcceptDeclineButtons();
+    manageDisplayButtons();
   }
 
   /**
