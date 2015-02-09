@@ -75,16 +75,20 @@ public class CameraActivity extends Activity {
   /**
    * To get camera resource or stop this activity.
    * 
+   * @param position The position of the camera.
+   * 
    * @return boolean
    */
-  protected boolean initCameraResource() {
-    int defaultCamera;
-    if (this.getIntent().getIntExtra("defaultCamera", CameraActivity.CAMERA_BACK) == CameraActivity.CAMERA_FRONT) {
-      defaultCamera = ManagerCamera.determinePositionFrontCamera();
-    } else {
-      defaultCamera = ManagerCamera.determinePositionBackCamera();
+  protected boolean initCameraResource(Integer position) {
+    if (position == null) {
+      if (this.getIntent().getIntExtra("defaultCamera", CameraActivity.CAMERA_BACK) == CameraActivity.CAMERA_FRONT) {
+        position = ManagerCamera.determinePositionFrontCamera();
+      } else {
+        position = ManagerCamera.determinePositionBackCamera();
+      }
     }
-    customCamera = ManagerCamera.getCameraInstance(defaultCamera);
+    customCamera = ManagerCamera.getCameraInstance(position);
+    ManagerCamera.setCameraDisplayOrientation(this);
 
     if (customCamera == null) {
       this.setResult(2,
@@ -208,33 +212,12 @@ public class CameraActivity extends Activity {
     super.onStart();
 
     // Init camera resource.
-    if (!initCameraResource()) {
+    if (!initCameraResource(null)) {
       return;
     }
     
     stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
-    
     updateStateFlash(stateFlash);
-    
-    int orientation = 0;
-    switch (getCustomRotation()) {
-      case 0:
-        orientation = CameraActivity.DEGREE_90;
-        break;
-      case 1:
-        orientation = CameraActivity.DEGREE_0;
-        break;
-      case 2:
-        orientation = CameraActivity.DEGREE_270;
-        break;
-      case 3:
-        orientation = CameraActivity.DEGREE_180;
-        break;
-      default:
-        break;
-    }
-
-    customCamera.setDisplayOrientation(orientation);
 
     DisplayMetrics dm = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -1028,43 +1011,12 @@ public class CameraActivity extends Activity {
    */
   public void switchCamera(View view) {
     int oppositeCamera = ManagerCamera.determineOppositeCamera();
-    customCamera = ManagerCamera.getCameraInstance(oppositeCamera);
-    setCameraDisplayOrientation(CameraActivity.this, oppositeCamera, customCamera);
+    initCameraResource(oppositeCamera);
     FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
     cameraPreview.removeAllViews();
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
     // To re-display the flash.
     updateStateFlash(stateFlash);
-  }
-  
-  /**
-   * To stabilize the orientation of the camera preview.
-   * @param activity
-   * @param cameraId
-   * @param camera
-   */
-  public static void setCameraDisplayOrientation(Activity activity,
-      int cameraId, android.hardware.Camera camera) {
-    Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-    Camera.getCameraInfo(cameraId, info);
-    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-    int degrees = 0;
-    switch (rotation) {
-      case Surface.ROTATION_0: degrees = 0; break;
-      case Surface.ROTATION_90: degrees = 90; break;
-      case Surface.ROTATION_180: degrees = 180; break;
-      case Surface.ROTATION_270: degrees = 270; break;
-      default : break;
-    }
-
-    int result;
-    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-      result = (info.orientation + degrees) % 360;
-      result = (360 - result) % 360;  // compensate the mirror
-    } else {  // back-facing
-      result = (info.orientation - degrees + 360) % 360;
-    }
-    camera.setDisplayOrientation(result);
   }
 }

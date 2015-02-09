@@ -125,7 +125,7 @@ var updateConfig = function() {
         translationsForApplication = JSON.parse(translationsForApplication);
         for (lang in translationsForApplication) {
             var pathFileTranslate = pathResAndroidCordova+"values-"+lang+"/";
-            if (lang == "0") {
+            if (lang == "default") {
                 pathFileTranslate = pathResAndroidCordova+"values/";
             }
 
