@@ -88,8 +88,7 @@ public class CameraActivity extends Activity {
       }
     }
     customCamera = ManagerCamera.getCameraInstance(position);
-    ManagerCamera.setCameraDisplayOrientation(this);
-
+    
     if (customCamera == null) {
       this.setResult(2,
           new Intent().putExtra("errorMessage", "Camera is unavailable."));
@@ -98,6 +97,47 @@ public class CameraActivity extends Activity {
       return false;
     }
 
+    ManagerCamera.setCameraDisplayOrientation(this);
+    
+    // The zoom bar progress
+    final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+    final Camera.Parameters paramsCamera = customCamera.getParameters();
+    if (paramsCamera.isZoomSupported()) {
+      final int zoom = paramsCamera.getZoom();
+      int maxZoom = paramsCamera.getMaxZoom();
+  
+      // Event on change zoom with the bar.
+      zoomLevel.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        int progress = 0;
+  
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progresValue,
+            boolean fromUser) {
+          progress = progresValue;
+          int newZoom = (int) (zoom + progress);
+          zoomLevel.setProgress(newZoom);
+          paramsCamera.setZoom(newZoom);
+          ManagerCamera.getCurrentCameraResource().setParameters(paramsCamera);
+        }
+  
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+  
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+        }
+      });
+      
+      zoomLevel.setMax(maxZoom);
+      zoomLevel.setProgress(zoom);
+      zoomLevel.setVisibility(View.VISIBLE);
+    } else {
+      zoomLevel.setVisibility(View.INVISIBLE);
+    }
+    
+    updateStateFlash(stateFlash);
+    
     return true;
   }
   
@@ -124,9 +164,10 @@ public class CameraActivity extends Activity {
     }
     
     if (!this.getIntent().getBooleanExtra("switchFlash", true)) {
-      ImageButton flash = (ImageButton)findViewById(R.id.flash);
+      ImageButton flash = (ImageButton) findViewById(R.id.flash);
       flash.setVisibility(View.INVISIBLE);
     }
+    stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
     
     if (!this.getIntent().getBooleanExtra("switchCamera", true)) {
       ImageButton switchCamera = (ImageButton)findViewById(R.id.switchCamera);
@@ -210,14 +251,11 @@ public class CameraActivity extends Activity {
   @Override
   protected void onStart() {
     super.onStart();
-
+    
     // Init camera resource.
     if (!initCameraResource(null)) {
       return;
     }
-    
-    stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
-    updateStateFlash(stateFlash);
 
     DisplayMetrics dm = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -265,39 +303,6 @@ public class CameraActivity extends Activity {
       ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
       switchCamera.setVisibility(View.INVISIBLE);
     }
-
-    // The zoom bar progress
-    final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    final Camera.Parameters paramsCamera = customCamera.getParameters();
-    final int zoom = paramsCamera.getZoom();
-    int maxZoom = paramsCamera.getMaxZoom();
-
-    zoomLevel.setMax(maxZoom);
-    zoomLevel.setProgress(zoom);
-    zoomLevel.setVisibility(View.VISIBLE);
-
-    // Event on change zoom with the bar.
-    zoomLevel.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-      int progress = 0;
-
-      @Override
-      public void onProgressChanged(SeekBar seekBar, int progresValue,
-          boolean fromUser) {
-        progress = progresValue;
-        int newZoom = (int) (zoom + progress);
-        zoomLevel.setProgress(newZoom);
-        paramsCamera.setZoom(newZoom);
-        customCamera.setParameters(paramsCamera);
-      }
-
-      @Override
-      public void onStartTrackingTouch(SeekBar seekBar) {
-      }
-
-      @Override
-      public void onStopTrackingTouch(SeekBar seekBar) {
-      }
-    });
   }
   
   /** Method to pause the activity. */
@@ -529,12 +534,15 @@ public class CameraActivity extends Activity {
     ImageView background = (ImageView) findViewById(R.id.background);
     LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature
         .getLayoutParams();
+    ImageButton flash = (ImageButton)findViewById(R.id.flash);
+    Camera.Parameters paramsCamera = customCamera.getParameters();
     
     if (photoTaken != null) {
       // Show/hide elements when a photo is taken 
       keepPhoto.setVisibility(View.VISIBLE);  
       photo.setVisibility(View.INVISIBLE);   
       zoomLevel.setVisibility(View.INVISIBLE);
+      flash.setVisibility(View.INVISIBLE);
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -547,7 +555,12 @@ public class CameraActivity extends Activity {
       // Show/hide elements when a photo is not taken
       keepPhoto.setVisibility(View.INVISIBLE);
       photo.setVisibility(View.VISIBLE);
-      zoomLevel.setVisibility(View.VISIBLE);  
+      if (paramsCamera.isZoomSupported()) {
+        zoomLevel.setVisibility(View.VISIBLE);
+      }
+      if (this.getIntent().getBooleanExtra("switchFlash", true)) {
+        flash.setVisibility(View.VISIBLE);
+      }
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -602,8 +615,6 @@ public class CameraActivity extends Activity {
    * Method to take picture.
    */
   public void takePhoto() {
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
-    flash.setVisibility(View.INVISIBLE);
     // Handles the moment where picture is taken
     ShutterCallback shutterCallback = new ShutterCallback() {
       public void onShutter() {
@@ -754,14 +765,11 @@ public class CameraActivity extends Activity {
     imgIcon.setEnabled(true);
     
     if (hasFlash()) {
-      ImageButton flash = (ImageButton)findViewById(R.id.flash);
-      flash.setVisibility(View.VISIBLE);
-    }
-    Camera.Parameters params = customCamera.getParameters();
-    if (hasFlash()) {
+      Camera.Parameters params = customCamera.getParameters();
       params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+      customCamera.setParameters(params);
     }
-    customCamera.setParameters(params);
+    
     photoTaken = null;
     displayPicture();
   }
@@ -950,13 +958,10 @@ public class CameraActivity extends Activity {
           imgResource = R.drawable.flash_auto;
           break;
       }
-      
-      flash.setVisibility(View.VISIBLE);
+
       flash.setImageResource(imgResource);
       
       customCamera.setParameters(params);
-    } else {
-      flash.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -978,8 +983,6 @@ public class CameraActivity extends Activity {
       Camera.Parameters params = customCamera.getParameters();
       params.setFlashMode(mode);
       customCamera.setParameters(params);
-    } else {
-      flash.setVisibility(View.INVISIBLE);
     }
   }
   
@@ -1016,7 +1019,5 @@ public class CameraActivity extends Activity {
     cameraPreview.removeAllViews();
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
-    // To re-display the flash.
-    updateStateFlash(stateFlash);
   }
 }

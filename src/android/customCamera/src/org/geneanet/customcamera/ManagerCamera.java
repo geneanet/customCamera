@@ -185,4 +185,13 @@ public class ManagerCamera {
   public static int getCurrentCameraPosition() {
     return ManagerCamera.currentCameraPosition;
   }
+  
+  /**
+   * Get the value of mCamera.
+   * 
+   * @return Camera.
+   */
+  public static Camera getCurrentCameraResource() {
+    return ManagerCamera.mCamera;
+  }
 }
