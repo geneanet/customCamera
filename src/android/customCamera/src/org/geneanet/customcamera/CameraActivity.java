@@ -101,7 +101,7 @@ public class CameraActivity extends Activity {
     
     // The zoom bar progress
     final SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-    final Camera.Parameters paramsCamera = customCamera.getParameters();
+    Camera.Parameters paramsCamera = customCamera.getParameters();
     if (paramsCamera.isZoomSupported()) {
       final int zoom = paramsCamera.getZoom();
       int maxZoom = paramsCamera.getMaxZoom();
@@ -111,9 +111,10 @@ public class CameraActivity extends Activity {
         int progress = 0;
   
         @Override
-        public void onProgressChanged(SeekBar seekBar, int progresValue,
+        public void onProgressChanged(SeekBar seekBar, int progressValue,
             boolean fromUser) {
-          progress = progresValue;
+          Camera.Parameters paramsCamera = ManagerCamera.getCurrentCameraResource().getParameters();
+          progress = progressValue;
           int newZoom = (int) (zoom + progress);
           zoomLevel.setProgress(newZoom);
           paramsCamera.setZoom(newZoom);
@@ -228,35 +229,39 @@ public class CameraActivity extends Activity {
     RelativeLayout.LayoutParams paramsCameraPreview = 
         new RelativeLayout.LayoutParams(cameraPreview.getLayoutParams());
     
-    Size camParameters = customCamera.getParameters().getPictureSize();
+    Size camParametersSize = customCamera.getParameters().getPictureSize();
     
-    int minSize;
-    int maxSize;
-    if (camParameters.width > camParameters.height) {
-      maxSize = camParameters.width;
-      minSize = camParameters.height;
-    } else {
-      maxSize = camParameters.height;
-      minSize = camParameters.width;
-    }
-    
+    int minSize = Math.min(camParametersSize.width, camParametersSize.height);
+    int maxSize = Math.max(camParametersSize.width, camParametersSize.height);   
     int widthScreen = dm.widthPixels;
     int heightScreen = dm.heightPixels;
-    float ratio;
+    int marginLeft = 0;
+    int marginTop = 0;
+    float ratioWidth, ratioHeight, sizeToResize, sizeToResizeMatchParent;
     if (widthScreen > heightScreen) {
-      paramsCameraPreview.height = LayoutParams.FILL_PARENT;
-      ratio = ( (float)minSize / (float)heightScreen );
-      paramsCameraPreview.width = (int)(maxSize / ratio);
-      int marginLeft = (int) (((float)(widthScreen - paramsCameraPreview.width)) / 2);
-      paramsCameraPreview.setMargins(marginLeft, 0, 0, 0);
+      ratioWidth = ((float)maxSize / (float)widthScreen);
+      ratioHeight = ((float)minSize / (float)heightScreen);
+      sizeToResize = ratioWidth > ratioHeight ? minSize : maxSize;
+      sizeToResizeMatchParent = ratioWidth > ratioHeight ? maxSize : minSize;
     } else {
-      paramsCameraPreview.width = LayoutParams.FILL_PARENT;
-      ratio = ( (float)minSize / (float)widthScreen );
-      paramsCameraPreview.height = (int)(maxSize / ratio);
-      int marginTop = (int) (((float)(heightScreen - paramsCameraPreview.height)) / 2);
-      paramsCameraPreview.setMargins(0, marginTop, 0, 0);
+      ratioWidth = ((float)minSize / (float)widthScreen);
+      ratioHeight = ((float)maxSize / (float)heightScreen);
+      sizeToResize = ratioWidth > ratioHeight ? maxSize : minSize;
+      sizeToResizeMatchParent = ratioWidth > ratioHeight ? minSize : maxSize;
     }
+    if (ratioWidth > ratioHeight) {
+      paramsCameraPreview.height = (int)(sizeToResize / ratioWidth);
+      paramsCameraPreview.width = (int)(sizeToResizeMatchParent / ratioWidth);
+      marginTop = (int)(((float)(heightScreen - paramsCameraPreview.height)) / 2);
+    } else {
+      paramsCameraPreview.height = (int)(sizeToResizeMatchParent / ratioHeight);
+      paramsCameraPreview.width = (int)(sizeToResize / ratioHeight);;
+      marginLeft = (int)(((float)(widthScreen - paramsCameraPreview.width)) / 2);
+    }
+    paramsCameraPreview.setMargins(marginLeft, marginTop, 0, 0);
     cameraPreview.setLayoutParams(paramsCameraPreview);
+    
+    setPreviewSize();
     
     // Assign the render camera to the view
     CameraPreview myPreview = new CameraPreview(this, customCamera);
@@ -890,8 +895,7 @@ public class CameraActivity extends Activity {
    * @return the code of the rotation (0, 1, 2, 3)
    */
   protected int getCustomRotation() {
-    WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-    int code = windowManager.getDefaultDisplay().getRotation();
+    int code = this.getWindowManager().getDefaultDisplay().getRotation();
     if (getDeviceDefaultOrientation() == 2) {
       code ++;
     }
@@ -963,7 +967,6 @@ public class CameraActivity extends Activity {
   }
   
   protected void setFlashMode() {
-    ImageButton flash = (ImageButton)findViewById(R.id.flash);
     if (hasFlash()) {
       String mode = Camera.Parameters.FLASH_MODE_OFF;
       switch(stateFlash) {
@@ -1014,7 +1017,26 @@ public class CameraActivity extends Activity {
     initCameraResource(oppositeCamera);
     FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
     cameraPreview.removeAllViews();
+    setPreviewSize();
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
+  }
+  
+  /**
+   * To set the size of the preview.
+   */
+  private void setPreviewSize() {
+    FrameLayout cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
+    RelativeLayout.LayoutParams paramsCameraPreview = 
+        new RelativeLayout.LayoutParams(cameraPreview.getLayoutParams());
+    Size optimalSize;
+    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+      optimalSize = ManagerCamera.getOptimalPreviewSize(paramsCameraPreview.width, paramsCameraPreview.height);
+    } else {
+      optimalSize = ManagerCamera.getOptimalPreviewSize(paramsCameraPreview.height, paramsCameraPreview.width);
+    }
+    Camera.Parameters camParameters = customCamera.getParameters();
+    camParameters.setPreviewSize(optimalSize.width, optimalSize.height);
+    customCamera.setParameters(camParameters);
   }
 }
