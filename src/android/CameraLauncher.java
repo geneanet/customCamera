@@ -74,18 +74,28 @@ public class CameraLauncher extends CordovaPlugin {
         TransferBigData.setImgBackgroundBase64OtherOrientation(imgBackgroundBase64OtherOrientation);
       }
 
-      intent.putExtra("miniature", args.getBoolean(2));
+      // If we don't have a background image, disable miniature and opacity options.
+      if (TransferBigData.getImgBackgroundBase64() == null) {
+        intent.putExtra("miniature", false);
+        intent.putExtra("opacity", false);
+      } else {
+        intent.putExtra("miniature", args.getBoolean(2));
+        intent.putExtra("opacity", args.getBoolean(7));
+      }
+      
       intent.putExtra("saveInGallery", args.getBoolean(3));
       intent.putExtra("cameraBackgroundColor", args.getString(4));
       intent.putExtra("cameraBackgroundColorPressed", args.getString(5));
       if (args.getInt(6) >= 0 && args.getInt(6) <= 100) {
         intent.putExtra("quality", args.getInt(6));
       }
-      intent.putExtra("opacity", args.getBoolean(7));
       intent.putExtra("startOrientation", this.cordova.getActivity().getResources().getConfiguration().orientation);
 
       intent.putExtra("defaultFlash", args.getInt(8));
       intent.putExtra("switchFlash", args.getBoolean(9));
+
+      intent.putExtra("defaultCamera", args.getInt(10));
+      intent.putExtra("switchCamera", args.getBoolean(11));
 
       cordova.startActivityForResult((CordovaPlugin) this, intent,
           CameraLauncher.REQUEST_CODE);
