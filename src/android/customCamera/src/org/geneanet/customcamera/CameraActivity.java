@@ -231,16 +231,8 @@ public class CameraActivity extends Activity {
     
     Size camParameters = customCamera.getParameters().getPictureSize();
     
-    int minSize;
-    int maxSize;
-    if (camParameters.width > camParameters.height) {
-      maxSize = camParameters.width;
-      minSize = camParameters.height;
-    } else {
-      maxSize = camParameters.height;
-      minSize = camParameters.width;
-    }
-    
+    int minSize = Math.min(camParameters.width, camParameters.height);
+    int maxSize = Math.max(camParameters.width, camParameters.height);   
     int widthScreen = dm.widthPixels;
     int heightScreen = dm.heightPixels;
     int marginLeft = 0;
