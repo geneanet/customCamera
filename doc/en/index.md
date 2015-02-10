@@ -69,11 +69,19 @@ An `options` object containing the parameters of the camera.
     - **Type :** `boolean`
     - **Default :** `true`
 
-+ **defaultFlash :** Default mode flash to use.
++ **defaultFlash :** Default mode flash to use. See `CustomCamera.FlashModes` for corrects values.
     - **Type :** `integer`
     - **Default :** `0`
 
-+ **switchFlash :** Activate/deactivate the switch button for modes flash. `true` : Activate option. `false` : Deactivate option.
++ **switchFlash :** Activate/deactivate the button to switch modes flash. `true` : Activate option. `false` : Deactivate option.
+    - **Type :** `boolean`
+    - **Default :** `true`
+
++ **defaultCamera :** Default camera used. See `CustomCamera.CameraFacings` for corrects values.
+    - **Type :** `integer`
+    - **Default :** `0`
+
++ **switchCamera :** Activate/deactivate the button to switch camera. `true` : Activate option. `false` : Deactivate option.
     - **Type :** `boolean`
     - **Default :** `true`
 
@@ -110,6 +118,14 @@ An `options` object containing the parameters of the camera.
 + **CustomCamera.FlashModes.AUTO :**
     - **Type :** `integer`
     - **Value :** `2`
+
++ **CustomCamera.CameraFacings.BACK :**
+    - **Type :** `integer`
+    - **Value :** `0`
++ **CustomCamera.CameraFacings.FRONT :**
+    - **Type :** `integer`
+    - **Value :** `1`
+
 
 ## Implementation
 
