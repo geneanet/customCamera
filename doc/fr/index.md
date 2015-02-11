@@ -31,7 +31,7 @@ L'objet `options` contient les options de configuration de l'appareil photo.
     - **Type :** `string`
     - **Valeur par défaut :** `null`
 
-+ **imgBackgroundBase64OtherOrientation :** Image qui sera présente en surimpression de l'appareil photo lorsque l'on tourne l'appareil dans l'autre sens que celui de démarrage du plugin. Elle doit être en base64. Si à `null`, on utilisera `imgBackgroundBase64` en redimensionnant l'image.
++ **imgBackgroundBase64OtherOrientation :** Image alternative qui sera présente en surimpression de l'appareil photo, pour le mode horizontal (ou vertical) selon l'orientation de démarrage du plugin. Elle doit être en base64. Si à `null`, on utilisera `imgBackgroundBase64` en redimensionnant l'image.
     - **Type :** `string`
     - **Valeur par défaut :** `null`
 
@@ -72,15 +72,15 @@ L'objet `options` contient les options de configuration de l'appareil photo.
     - **Type :** `integer`
     - **Valeur par défaut :** `0`
 
-+ **switchFlash :** Permet d'activer ou non le bouton pour changer le mode du flash. `true` : Active l'option. `false` : Désactive l'option.
++ **switchFlash :** Permet d'afficher ou non le bouton pour changer le mode du flash. `true` : Active l'option. `false` : Désactive l'option.
     - **Type :** `boolean`
     - **Valeur par défaut :** `true`
 
-+ **defaultCamera :** Séléctionne un appareil photo par défaut. Voir `CustomCamera.CameraFacings` pour les valeurs disponibles.
++ **defaultCamera :** Séléctionne un appareil photo (frontale/arrière) par défaut. Voir `CustomCamera.CameraFacings` pour les valeurs disponibles.
     - **Type :** `integer`
     - **Valeur par défaut :** `0`
 
-+ **switchCamera :** Permet d'activer ou non le bouton pour changer d'appareil photo. `true` : Active l'option. `false` : Désactive l'option.
++ **switchCamera :** Permet d'afficher ou non le bouton pour changer d'appareil photo. `true` : Active l'option. `false` : Désactive l'option.
     - **Type :** `boolean`
     - **Valeur par défaut :** `true`
 
