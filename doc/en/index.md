@@ -3,14 +3,14 @@
 This cordova plugin is an alternative to the official cordova plugin (camera). It starts a custom camera: image overlay with an opacity slider, user-defined color of the buttons, activating/deactivating functions.
 
 
-Ce plugin définit une variable globale `navigator.GeneanetCustomCamera`.
+This plugin defines a global variable `navigator.GeneanetCustomCamera`.
 
 ## Installation
 
     cordova plugin add https://github.com/geneanet/customCamera.git
     cordova build `platform`
 
-## Plateformes supportées
+## Supported Platforms
 
 + Android
 
@@ -32,7 +32,7 @@ An `options` object containing the parameters of the camera.
     - **Type :** `string`
     - **Default :** `null`
 
-+ **imgBackgroundBase64OtherOrientation :** Overlay image when the device is on the other orientation that the start camera orientation. Should be in base64 format. If it is `null`, we used `imgBackgroundBase64` and we resized the image.
++ **imgBackgroundBase64OtherOrientation :** Alternative overlay image (when the device is on the other orientation that the start camera orientation). Should be in base64 format. If it is `null`, we used `imgBackgroundBase64` and we resized the image.
     - **Type :** `string`
     - **Default :** `null`
 
@@ -154,13 +154,13 @@ navigator.GeneanetCustomCamera.startCamera(
 );
 ```
 
-### Barcode application
+### Barcode
 
 [See the code](https://github.com/geneanet/customCamera/tree/master/examples/barcode)
 
 ![Barcode](https://raw.githubusercontent.com/geneanet/customCamera/master/examples/barcode/screenshot.png)
 
-### Grid application
+### Grid
 
 [See the code](https://github.com/geneanet/customCamera/tree/master/examples/grid)
 
