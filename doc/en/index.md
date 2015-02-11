@@ -32,7 +32,7 @@ An `options` object containing the parameters of the camera.
     - **Type :** `string`
     - **Default :** `null`
 
-+ **imgBackgroundBase64OtherOrientation :** Alternative overlay image (when the device is on the other orientation that the start camera orientation). Should be in base64 format. If it is `null`, we used `imgBackgroundBase64` and we resized the image.
++ **imgBackgroundBase64OtherOrientation :** Alternate overlay image (if device's orientation has changed since app started). Should be in base64 format. If `null`, use `imgBackgroundBase64` and resize image.
     - **Type :** `string`
     - **Default :** `null`
 
@@ -73,7 +73,7 @@ An `options` object containing the parameters of the camera.
     - **Type :** `integer`
     - **Default :** `0`
 
-+ **switchFlash :** Activate/deactivate the button to switch modes flash. `true` : Activate option. `false` : Deactivate option.
++ **switchFlash :** Activate/deactivate the flash mode button. `true` : Activate button. `false` : Deactivate button.
     - **Type :** `boolean`
     - **Default :** `true`
 
