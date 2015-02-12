@@ -577,7 +577,7 @@ public class CameraActivity extends Activity {
         zoomLevel.setVisibility(View.VISIBLE);
       }
       
-      if (this.getIntent().getBooleanExtra("switchFlash", true)) {
+      if (this.getIntent().getBooleanExtra("switchFlash", true) && hasFlash()) {
         flash.setVisibility(View.VISIBLE);
       } else {
         flash.setVisibility(View.INVISIBLE);
