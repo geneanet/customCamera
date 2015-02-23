@@ -3,12 +3,14 @@
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="org.geneanet.customCamera"
-    version="0.0.1"
+    version="0.0.2"
 >
     <name>GeneanetCustomCamera</name>
-    <description>customCamera by Geneanet</description>
+    <description>This cordova plugin is an alternative to the official cordova plugin (camera). It starts a custom camera: image overlay with an opacity slider, user-defined color of the buttons, activating/deactivating functions.</description>
     <license>BSD</license>
     <keywords>custom,camera,geneanet</keywords>
+    <repo>https://github.com/geneanet/customCamera</repo>
+    <issue>https://github.com/geneanet/customCamera/issues</issue>
     <js-module src="www/customCamera.js" name="GeneanetCustomCamera">
         <clobbers target="navigator.GeneanetCustomCamera" />
     </js-module>
