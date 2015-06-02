@@ -134,7 +134,7 @@ public class CameraActivity extends Activity {
       zoomLevel.setProgress(zoom);
       zoomLevel.setVisibility(View.VISIBLE);
     } else {
-      zoomLevel.setVisibility(View.INVISIBLE);
+      zoomLevel.setVisibility(View.GONE);
     }
     
     updateStateFlash(stateFlash);
@@ -270,7 +270,7 @@ public class CameraActivity extends Activity {
     // Hide the switch camera button if the number of cameras is lower than 2.
     if(Camera.getNumberOfCameras() < 2){
       ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
-      switchCamera.setVisibility(View.INVISIBLE);
+      switchCamera.setVisibility(View.GONE);
     }
   }
   
@@ -480,7 +480,7 @@ public class CameraActivity extends Activity {
     // Set new size for miniature layout.
     setParamsMiniature(background, true);
     // Hide the miniature button.
-    miniature.setVisibility(View.INVISIBLE);
+    miniature.setVisibility(View.GONE);
       
     // Add event on click action for the miniature picture.
     background.setOnClickListener(new View.OnClickListener() {
@@ -548,19 +548,19 @@ public class CameraActivity extends Activity {
     Camera.Parameters paramsCamera = customCamera.getParameters();
     
     if (!this.getIntent().getBooleanExtra("miniature", true)) {
-      miniature.setVisibility(View.INVISIBLE);
+      miniature.setVisibility(View.GONE);
     }
     if (!opacity) {
-      switchOpacity.setVisibility(View.INVISIBLE);
+      switchOpacity.setVisibility(View.GONE);
     }
     
     if (photoTaken != null) {
       // Show/hide elements when a photo is taken 
       keepPhoto.setVisibility(View.VISIBLE);  
-      photo.setVisibility(View.INVISIBLE);   
-      zoomLevel.setVisibility(View.INVISIBLE);
-      flash.setVisibility(View.INVISIBLE);
-      switchCamera.setVisibility(View.INVISIBLE);
+      photo.setVisibility(View.GONE);   
+      zoomLevel.setVisibility(View.GONE);
+      flash.setVisibility(View.GONE);
+      switchCamera.setVisibility(View.GONE);
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -571,7 +571,7 @@ public class CameraActivity extends Activity {
       
     } else {
       // Show/hide elements when a photo is not taken
-      keepPhoto.setVisibility(View.INVISIBLE);
+      keepPhoto.setVisibility(View.GONE);
       photo.setVisibility(View.VISIBLE);
       if (paramsCamera.isZoomSupported()) {
         zoomLevel.setVisibility(View.VISIBLE);
@@ -580,13 +580,13 @@ public class CameraActivity extends Activity {
       if (this.getIntent().getBooleanExtra("switchFlash", true) && hasFlash()) {
         flash.setVisibility(View.VISIBLE);
       } else {
-        flash.setVisibility(View.INVISIBLE);
+        flash.setVisibility(View.GONE);
       }
       
       if (this.getIntent().getBooleanExtra("switchCamera", true)) {
         switchCamera.setVisibility(View.VISIBLE);
       } else {
-        switchCamera.setVisibility(View.INVISIBLE);
+        switchCamera.setVisibility(View.GONE);
       }
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
@@ -814,10 +814,10 @@ public class CameraActivity extends Activity {
       Bitmap newBitmap = resizePictureTaken();
       photoResized.setImageBitmap(newBitmap);
       photoResized.setVisibility(View.VISIBLE);
-      preview.setVisibility(View.INVISIBLE);
+      preview.setVisibility(View.GONE);
     } else {
       customCamera.startPreview();
-      photoResized.setVisibility(View.INVISIBLE);
+      photoResized.setVisibility(View.GONE);
       preview.setVisibility(View.VISIBLE);
     }
 
