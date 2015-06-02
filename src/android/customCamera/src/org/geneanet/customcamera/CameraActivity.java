@@ -536,7 +536,7 @@ public class CameraActivity extends Activity {
    */
   public void manageDisplayButtons() {
     LinearLayout keepPhoto   = (LinearLayout) findViewById(R.id.keepPhoto);
-    Button miniature         = (Button) findViewById(R.id.miniature);
+    ImageButton miniature    = (ImageButton) findViewById(R.id.miniature);
     ImageButton flash        = (ImageButton) findViewById(R.id.flash);
     ImageButton photo        = (ImageButton) findViewById(R.id.capture);
     ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);

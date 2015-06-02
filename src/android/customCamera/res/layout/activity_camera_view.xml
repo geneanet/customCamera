@@ -2,12 +2,60 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-
+    
+    <!-- Always in first position to put the camera below every elements -->
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
     </FrameLayout>
+    
+    <LinearLayout
+        android:id="@+id/actionBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:alpha="0.6"
+        android:background="@color/black"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:src="@drawable/switch_camera" />
+        
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+	    <ImageButton
+	        android:id="@+id/switchCamera"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="right"
+	        android:onClick="switchCamera"
+	        android:src="@drawable/switch_camera" />   
+
+	    <ImageButton
+	        android:id="@+id/miniature"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="right"
+	        android:onClick="buttonMiniature"
+	        android:src="@drawable/switch_camera" />
+	    
+	    <ImageButton
+	        android:id="@+id/flash"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="right"
+	        android:background="@android:color/transparent"
+	        android:onClick="switchFlash"
+	        android:src="@drawable/flash" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/photoResized"
@@ -21,39 +69,13 @@
         android:alpha="0.2"
         android:scaleType="fitXY" />
 
-    <ImageButton
-        android:id="@+id/flash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:background="@android:color/transparent"
-        android:onClick="switchFlash"
-        android:src="@drawable/flash" />
-
-    <ImageButton
-        android:id="@+id/switchCamera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="false"
-        android:layout_marginTop="150dp"
-        android:src="@drawable/switch_camera"
-        android:onClick="switchCamera" />
-
     <LinearLayout
         android:id="@+id/beforePhoto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:gravity="bottom" >
-
-        <Button
-            android:id="@+id/miniature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:onClick="buttonMiniature"
-            android:text="@string/miniature" />
+        android:gravity="bottom">
              
         <ImageButton
             android:id="@+id/capture"
@@ -89,7 +111,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:alpha="0.8"
+            android:alpha="0.6"
             android:background="@color/black"
             android:visibility="invisible" >
 
@@ -119,6 +141,10 @@
         android:id="@+id/zoomLevel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/actionBar"
+        android:layout_marginTop="165dp"
+        android:layout_weight="1"
         android:visibility="visible" />
 
 </RelativeLayout>
