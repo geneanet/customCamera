@@ -13,4 +13,6 @@
 	  <string name="descImage">Il s\'agit de l\'image de fond de l\'appareil photo</string>
 	  <string name="acceptePicture">Accepter Photo</string>
 	  <string name="declinePicture">Refuser Photo</string>
+	  <string name="zoomMin">-</string>
+	  <string name="zoomMax">+</string>
 </resources>

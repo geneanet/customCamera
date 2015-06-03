@@ -3,7 +3,9 @@
         "miniature": "Miniature",
         "capture": "Capture",
         "acceptePicture": "Valid the picture",
-        "declinePicture": "Decline the picture"
+        "declinePicture": "Decline the picture",
+        "zoomMin": "-",
+        "zoomMax": "+"
     },
     "fr": {
         "miniature": "Miniature",
