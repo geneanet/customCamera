@@ -106,7 +106,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.6"
-                android:visibility="visible" />
+                android:visibility="visible"
+                android:progressDrawable="@drawable/custom_seekbar"
+                android:thumb="@drawable/custom_thumb" />
 
             <TextView
                 android:id="@+id/textZoomMax"
@@ -175,6 +177,8 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:max="10"
-        android:progress="5" />
+        android:progress="5"
+        android:progressDrawable="@drawable/custom_seekbar"
+        android:thumb="@drawable/custom_thumb" />
 
 </RelativeLayout>
