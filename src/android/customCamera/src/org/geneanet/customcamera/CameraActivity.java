@@ -927,6 +927,13 @@ public class CameraActivity extends Activity {
   }
   
   /**
+   * When the leave button is pressed.
+   */
+  public void leaveCamera(View v) {
+	  onBackPressed();
+  }
+  
+  /**
    * Allow to enable or disable the flash of the camera.
    * @param view The current view.
    */

@@ -25,11 +25,12 @@
         android:padding="@dimen/default_padding" >
 
         <ImageButton
-            android:id="@+id/back"
+            android:id="@+id/leave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:background="@android:color/transparent"
+            android:onClick="leaveCamera"
             android:src="@drawable/back" />
         
         <View
