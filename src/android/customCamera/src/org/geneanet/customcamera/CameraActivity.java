@@ -475,7 +475,7 @@ public class CameraActivity extends Activity {
    */
   public void buttonMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
-    final Button miniature = (Button) view;
+    final ImageButton miniature = (ImageButton) view;
 
     modeMiniature = true;
     // Set new size for miniature layout.
