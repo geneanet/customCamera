@@ -91,7 +91,7 @@
             android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/textZoomMin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
@@ -108,7 +108,7 @@
                 android:visibility="visible" />
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/textZoomMax"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"

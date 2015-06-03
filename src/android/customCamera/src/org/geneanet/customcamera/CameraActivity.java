@@ -34,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import org.geneanet.customcamera.CameraPreview;
 import org.geneanet.customcamera.ManagerCamera;
@@ -132,9 +133,9 @@ public class CameraActivity extends Activity {
       
       zoomLevel.setMax(maxZoom);
       zoomLevel.setProgress(zoom);
-      zoomLevel.setVisibility(View.VISIBLE);
+      displayZoomLevel(View.VISIBLE);
     } else {
-      zoomLevel.setVisibility(View.GONE);
+      displayZoomLevel(View.GONE);
     }
     
     updateStateFlash(stateFlash);
@@ -406,7 +407,7 @@ public class CameraActivity extends Activity {
     SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
     zoomLevel.setMax(maxZoom);
     zoomLevel.setProgress(zoom * 2);
-    zoomLevel.setVisibility(View.VISIBLE);
+    displayZoomLevel(View.VISIBLE);
   }
 
   /** To set background in the view. */
@@ -496,6 +497,19 @@ public class CameraActivity extends Activity {
   }
   
   /**
+   * To manage the display of the zoom bar.
+   * @param displayStatus
+   */
+  public void displayZoomLevel(int displayStatus) {
+	  TextView textZoomMin = (TextView) findViewById(R.id.textZoomMin);
+	  TextView textZoomMax = (TextView) findViewById(R.id.textZoomMax);
+	  SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+	  textZoomMin.setVisibility(displayStatus);
+	  textZoomMax.setVisibility(displayStatus);
+	  zoomLevel.setVisibility(displayStatus);
+  }
+  
+  /**
    * Set the size and the gravity of the miniature function of photo is taken or not.
    * @param imageView Reference to the background image.
    * @param resize    Should we resize or not ? Only when click on "miniature".
@@ -558,7 +572,7 @@ public class CameraActivity extends Activity {
       // Show/hide elements when a photo is taken 
       keepPhoto.setVisibility(View.VISIBLE);  
       photo.setVisibility(View.GONE);   
-      zoomLevel.setVisibility(View.GONE);
+      displayZoomLevel(View.GONE);
       flash.setVisibility(View.GONE);
       switchCamera.setVisibility(View.GONE);
       
@@ -574,7 +588,7 @@ public class CameraActivity extends Activity {
       keepPhoto.setVisibility(View.GONE);
       photo.setVisibility(View.VISIBLE);
       if (paramsCamera.isZoomSupported()) {
-        zoomLevel.setVisibility(View.VISIBLE);
+        displayZoomLevel(View.VISIBLE);
       }
       
       if (this.getIntent().getBooleanExtra("switchFlash", true) && hasFlash()) {
