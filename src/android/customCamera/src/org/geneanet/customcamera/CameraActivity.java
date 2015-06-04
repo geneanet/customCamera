@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableContainer.DrawableContainerState;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -18,6 +23,8 @@ import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -26,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,6 +45,7 @@ import android.widget.TextView;
 import org.geneanet.customcamera.CameraPreview;
 import org.geneanet.customcamera.ManagerCamera;
 import org.geneanet.customcamera.TransferBigData;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -186,7 +193,10 @@ public class CameraActivity extends Activity {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
     final Activity currentActivity = this;
     
-    this.setCameraBackgroundColor(this.getIntent().getStringExtra("cameraBackgroundColor"));
+    String backgroundColor = this.getIntent().getStringExtra("cameraBackgroundColor");
+    this.setCameraBackgroundColor(backgroundColor);
+    this.setThumbAtSeekBar((SeekBar)findViewById(R.id.zoomLevel), backgroundColor);
+    this.setThumbAtSeekBar((SeekBar)findViewById(R.id.switchOpacity), backgroundColor);
     
     imgIcon.setOnTouchListener(new View.OnTouchListener() { 
       @Override
@@ -353,6 +363,40 @@ public class CameraActivity extends Activity {
     }
   }
 
+  /**
+   * Set thumb at a seekbar.
+   * 
+   * @param color
+   */
+  protected void setThumbAtSeekBar(SeekBar seekBar, String color) {
+    int colorParsed = Color.parseColor(color);
+    String colorAlpha = color.substring(1);
+    colorAlpha = "#88"+colorAlpha;
+    int colorAlphaParsed = Color.parseColor(colorAlpha);
+	
+    StateListDrawable selectorThumb;
+    Resources res = getResources();
+    try {
+      selectorThumb = (StateListDrawable) Drawable.createFromXml(res, res.getXml(R.drawable.custom_thumb));
+      DrawableContainerState thumbState = (DrawableContainerState) selectorThumb.getConstantState();
+      GradientDrawable thumb = (GradientDrawable) thumbState.getChildren()[0];
+      thumb.setColor(colorParsed);
+      Resources r = getResources();
+      int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
+      thumb.setStroke(px, colorAlphaParsed);
+      seekBar.setThumb(thumb);
+    } catch (NotFoundException e) {
+      Log.e("customCamera", "Xml resource is not found.");
+      e.printStackTrace();
+    } catch (XmlPullParserException e) {
+      Log.e("customCamera", "Xml can't be parsed.");
+      e.printStackTrace();
+    } catch (IOException e) {
+      Log.e("customCamera", "Error to create the thumb");
+      e.printStackTrace();
+    }
+  }
+  
   /**
    * Determine the space between the first two fingers.
    * @param MotionEvent event Current event which start this calculation.
@@ -555,7 +599,6 @@ public class CameraActivity extends Activity {
     ImageButton photo        = (ImageButton) findViewById(R.id.capture);
     ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
     ImageView background     = (ImageView) findViewById(R.id.background);
-    SeekBar zoomLevel        = (SeekBar) findViewById(R.id.zoomLevel);
     SeekBar switchOpacity    = (SeekBar) findViewById(R.id.switchOpacity);
     
     LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature.getLayoutParams();

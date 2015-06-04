@@ -5,12 +5,6 @@
             <size
                 android:height="25dp"
                 android:width="25dp" />
-
-            <solid android:color="#33b5e5" />
-            
-            <stroke
-				android:width="10dp"
-				android:color="#8833b5e5" />
         </shape>
     </item>
 </selector>
