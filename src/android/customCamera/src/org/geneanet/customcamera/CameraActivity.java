@@ -11,6 +11,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer.DrawableContainerState;
 import android.graphics.drawable.GradientDrawable;
@@ -570,17 +571,23 @@ public class CameraActivity extends Activity {
    * @param paramsMiniature The parameters of the layout.
    */
   public void positioningMiniature(RelativeLayout.LayoutParams paramsMiniature) {
-    if (photoTaken == null) {
-      // Position at the bottom
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);   
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-    } else {
-      // Position at the top
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-    }
-    // In all cases, position at the left
+    // Position at the bottom
+    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);   
+    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+    // Position at the left
     paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+    
+    if (photoTaken != null) {
+      Resources res = getResources();
+      
+      int defaultPadding = (int)res.getDimension(R.dimen.default_padding);
+      
+      BitmapDrawable image = (BitmapDrawable) res.getDrawable(R.drawable.accept);
+      int marginBottom = image.getBitmap().getHeight() + (defaultPadding * 2);
+      paramsMiniature.setMargins(0, 0, 0, marginBottom);
+    } else {
+      paramsMiniature.setMargins(0, 0, 0, 0);
+    }
   }
   
   /**
