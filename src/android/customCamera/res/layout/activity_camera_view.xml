@@ -15,6 +15,13 @@
         android:layout_width="fill_parent"
         android:layout_height="match_parent" />
     
+    <ImageView
+        android:id="@+id/background"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" 
+        android:alpha="0.2"
+        android:scaleType="fitXY" />
+    
     <LinearLayout
         android:id="@+id/actionBar"
         android:layout_width="fill_parent"
@@ -69,13 +76,6 @@
 	        android:src="@drawable/flash" />
 
     </LinearLayout>
-    
-    <ImageView
-        android:id="@+id/background"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" 
-        android:alpha="0.2"
-        android:scaleType="fitXY" />
 
     <LinearLayout
         android:id="@+id/beforePhoto"

@@ -519,25 +519,19 @@ public class CameraActivity extends Activity {
    */
   public void buttonMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
-    final ImageButton miniature = (ImageButton) view;
+    ImageButton miniature = (ImageButton) view;
 
-    modeMiniature = true;
-    // Set new size for miniature layout.
-    setParamsMiniature(background, true);
-    // Hide the miniature button.
-    miniature.setVisibility(View.GONE);
-      
-    // Add event on click action for the miniature picture.
-    background.setOnClickListener(new View.OnClickListener() {
-      public void onClick(View view) {
-        modeMiniature = false;
-        ImageView background = (ImageView) view;
-        // Resize miniature.
-        background.setClickable(false);
-        setBackground();
-        miniature.setVisibility(View.VISIBLE);
-      }
-    });
+    if (modeMiniature) {
+      modeMiniature = false;
+      miniature.setImageResource(R.drawable.minimise);
+      // Reset the default position and size for the background.
+      setBackground();
+    } else {
+      modeMiniature = true;
+      miniature.setImageResource(R.drawable.maximise);
+      // Set new size for miniature layout.
+      setParamsMiniature(background, true);
+    }
   }
   
   /**
