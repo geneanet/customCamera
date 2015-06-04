@@ -522,17 +522,25 @@ public class CameraActivity extends Activity {
     ImageView background = (ImageView) findViewById(R.id.background);
     ImageButton miniature = (ImageButton) view;
 
-    if (modeMiniature) {
-      modeMiniature = false;
+    if (!modeMiniature) {
       miniature.setImageResource(R.drawable.minimise);
       // Reset the default position and size for the background.
       setBackground();
     } else {
-      modeMiniature = true;
       miniature.setImageResource(R.drawable.maximise);
       // Set new size for miniature layout.
       setParamsMiniature(background, true);
     }
+  }
+  
+  /**
+   * Toggle the miniature function.
+   * 
+   * @param view
+   */
+  public void toggleMiniature(View view) {
+    modeMiniature = !modeMiniature;
+    buttonMiniature(view);
   }
   
   /**

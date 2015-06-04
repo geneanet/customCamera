@@ -62,7 +62,7 @@
 	        android:layout_gravity="right"
 	        android:layout_marginLeft="@dimen/activity_vertical_margin"
 	        android:background="@android:color/transparent"
-	        android:onClick="buttonMiniature"
+	        android:onClick="toggleMiniature"
 	        android:src="@drawable/minimise" />
 	    
 	    <ImageButton
