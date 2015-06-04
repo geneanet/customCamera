@@ -545,12 +545,12 @@ public class CameraActivity extends Activity {
    * @param displayStatus
    */
   public void displayZoomLevel(int displayStatus) {
-	  TextView textZoomMin = (TextView) findViewById(R.id.textZoomMin);
-	  TextView textZoomMax = (TextView) findViewById(R.id.textZoomMax);
-	  SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
-	  textZoomMin.setVisibility(displayStatus);
-	  textZoomMax.setVisibility(displayStatus);
-	  zoomLevel.setVisibility(displayStatus);
+    TextView textZoomMin = (TextView) findViewById(R.id.textZoomMin);
+    TextView textZoomMax = (TextView) findViewById(R.id.textZoomMax);
+    SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+    textZoomMin.setVisibility(displayStatus);
+    textZoomMax.setVisibility(displayStatus);
+    zoomLevel.setVisibility(displayStatus);
   }
   
   /**
