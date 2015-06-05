@@ -4,12 +4,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableContainer.DrawableContainerState;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
@@ -18,6 +24,8 @@ import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -26,7 +34,6 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -34,10 +41,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import org.geneanet.customcamera.CameraPreview;
 import org.geneanet.customcamera.ManagerCamera;
 import org.geneanet.customcamera.TransferBigData;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -132,9 +141,9 @@ public class CameraActivity extends Activity {
       
       zoomLevel.setMax(maxZoom);
       zoomLevel.setProgress(zoom);
-      zoomLevel.setVisibility(View.VISIBLE);
+      displayZoomLevel(View.VISIBLE);
     } else {
-      zoomLevel.setVisibility(View.INVISIBLE);
+      displayZoomLevel(View.GONE);
     }
     
     updateStateFlash(stateFlash);
@@ -185,7 +194,10 @@ public class CameraActivity extends Activity {
     ImageButton imgIcon = (ImageButton)findViewById(R.id.capture);
     final Activity currentActivity = this;
     
-    this.setCameraBackgroundColor(this.getIntent().getStringExtra("cameraBackgroundColor"));
+    String backgroundColor = this.getIntent().getStringExtra("cameraBackgroundColor");
+    this.setCameraBackgroundColor(backgroundColor);
+    this.setThumbAtSeekBar((SeekBar)findViewById(R.id.zoomLevel), backgroundColor);
+    this.setThumbAtSeekBar((SeekBar)findViewById(R.id.switchOpacity), backgroundColor);
     
     imgIcon.setOnTouchListener(new View.OnTouchListener() { 
       @Override
@@ -270,7 +282,7 @@ public class CameraActivity extends Activity {
     // Hide the switch camera button if the number of cameras is lower than 2.
     if(Camera.getNumberOfCameras() < 2){
       ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
-      switchCamera.setVisibility(View.INVISIBLE);
+      switchCamera.setVisibility(View.GONE);
     }
   }
   
@@ -353,6 +365,40 @@ public class CameraActivity extends Activity {
   }
 
   /**
+   * Set thumb at a seekbar.
+   * 
+   * @param color
+   */
+  protected void setThumbAtSeekBar(SeekBar seekBar, String color) {
+    int colorParsed = Color.parseColor(color);
+    String colorAlpha = color.substring(1);
+    colorAlpha = "#88"+colorAlpha;
+    int colorAlphaParsed = Color.parseColor(colorAlpha);
+	
+    StateListDrawable selectorThumb;
+    Resources res = getResources();
+    try {
+      selectorThumb = (StateListDrawable) Drawable.createFromXml(res, res.getXml(R.drawable.custom_thumb));
+      DrawableContainerState thumbState = (DrawableContainerState) selectorThumb.getConstantState();
+      GradientDrawable thumb = (GradientDrawable) thumbState.getChildren()[0];
+      thumb.setColor(colorParsed);
+      Resources r = getResources();
+      int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
+      thumb.setStroke(px, colorAlphaParsed);
+      seekBar.setThumb(thumb);
+    } catch (NotFoundException e) {
+      Log.e("customCamera", "Xml resource is not found.");
+      e.printStackTrace();
+    } catch (XmlPullParserException e) {
+      Log.e("customCamera", "Xml can't be parsed.");
+      e.printStackTrace();
+    } catch (IOException e) {
+      Log.e("customCamera", "Error to create the thumb");
+      e.printStackTrace();
+    }
+  }
+  
+  /**
    * Determine the space between the first two fingers.
    * @param MotionEvent event Current event which start this calculation.
    * 
@@ -406,7 +452,7 @@ public class CameraActivity extends Activity {
     SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
     zoomLevel.setMax(maxZoom);
     zoomLevel.setProgress(zoom * 2);
-    zoomLevel.setVisibility(View.VISIBLE);
+    displayZoomLevel(View.VISIBLE);
   }
 
   /** To set background in the view. */
@@ -474,25 +520,40 @@ public class CameraActivity extends Activity {
    */
   public void buttonMiniature(View view) {
     ImageView background = (ImageView) findViewById(R.id.background);
-    final Button miniature = (Button) view;
+    ImageButton miniature = (ImageButton) view;
 
-    modeMiniature = true;
-    // Set new size for miniature layout.
-    setParamsMiniature(background, true);
-    // Hide the miniature button.
-    miniature.setVisibility(View.INVISIBLE);
-      
-    // Add event on click action for the miniature picture.
-    background.setOnClickListener(new View.OnClickListener() {
-      public void onClick(View view) {
-        modeMiniature = false;
-        ImageView background = (ImageView) view;
-        // Resize miniature.
-        background.setClickable(false);
-        setBackground();
-        miniature.setVisibility(View.VISIBLE);
-      }
-    });
+    if (!modeMiniature) {
+      miniature.setImageResource(R.drawable.minimise);
+      // Reset the default position and size for the background.
+      setBackground();
+    } else {
+      miniature.setImageResource(R.drawable.maximise);
+      // Set new size for miniature layout.
+      setParamsMiniature(background, true);
+    }
+  }
+  
+  /**
+   * Toggle the miniature function.
+   * 
+   * @param view
+   */
+  public void toggleMiniature(View view) {
+    modeMiniature = !modeMiniature;
+    buttonMiniature(view);
+  }
+  
+  /**
+   * To manage the display of the zoom bar.
+   * @param displayStatus
+   */
+  public void displayZoomLevel(int displayStatus) {
+    TextView textZoomMin = (TextView) findViewById(R.id.textZoomMin);
+    TextView textZoomMax = (TextView) findViewById(R.id.textZoomMax);
+    SeekBar zoomLevel = (SeekBar) findViewById(R.id.zoomLevel);
+    textZoomMin.setVisibility(displayStatus);
+    textZoomMax.setVisibility(displayStatus);
+    zoomLevel.setVisibility(displayStatus);
   }
   
   /**
@@ -518,17 +579,23 @@ public class CameraActivity extends Activity {
    * @param paramsMiniature The parameters of the layout.
    */
   public void positioningMiniature(RelativeLayout.LayoutParams paramsMiniature) {
-    if (photoTaken == null) {
-      // Position at the bottom
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);   
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-    } else {
-      // Position at the top
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-      paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-    }
-    // In all cases, position at the left
+    // Position at the bottom
+    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);   
+    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+    // Position at the left
     paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+    
+    if (photoTaken != null) {
+      Resources res = getResources();
+      
+      int defaultPadding = (int)res.getDimension(R.dimen.default_padding);
+      
+      BitmapDrawable image = (BitmapDrawable) res.getDrawable(R.drawable.accept);
+      int marginBottom = image.getBitmap().getHeight() + (defaultPadding * 2);
+      paramsMiniature.setMargins(0, 0, 0, marginBottom);
+    } else {
+      paramsMiniature.setMargins(0, 0, 0, 0);
+    }
   }
   
   /**
@@ -536,31 +603,30 @@ public class CameraActivity extends Activity {
    */
   public void manageDisplayButtons() {
     LinearLayout keepPhoto   = (LinearLayout) findViewById(R.id.keepPhoto);
-    Button miniature         = (Button) findViewById(R.id.miniature);
+    ImageButton miniature    = (ImageButton) findViewById(R.id.miniature);
     ImageButton flash        = (ImageButton) findViewById(R.id.flash);
     ImageButton photo        = (ImageButton) findViewById(R.id.capture);
     ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
     ImageView background     = (ImageView) findViewById(R.id.background);
-    SeekBar zoomLevel        = (SeekBar) findViewById(R.id.zoomLevel);
     SeekBar switchOpacity    = (SeekBar) findViewById(R.id.switchOpacity);
     
     LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature.getLayoutParams();
     Camera.Parameters paramsCamera = customCamera.getParameters();
     
     if (!this.getIntent().getBooleanExtra("miniature", true)) {
-      miniature.setVisibility(View.INVISIBLE);
+      miniature.setVisibility(View.GONE);
     }
     if (!opacity) {
-      switchOpacity.setVisibility(View.INVISIBLE);
+      switchOpacity.setVisibility(View.GONE);
     }
     
     if (photoTaken != null) {
       // Show/hide elements when a photo is taken 
       keepPhoto.setVisibility(View.VISIBLE);  
-      photo.setVisibility(View.INVISIBLE);   
-      zoomLevel.setVisibility(View.INVISIBLE);
-      flash.setVisibility(View.INVISIBLE);
-      switchCamera.setVisibility(View.INVISIBLE);
+      photo.setVisibility(View.GONE);   
+      displayZoomLevel(View.GONE);
+      flash.setVisibility(View.GONE);
+      switchCamera.setVisibility(View.GONE);
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.TOP;
       miniature.setLayoutParams(paramsLayoutMiniature);
@@ -571,22 +637,22 @@ public class CameraActivity extends Activity {
       
     } else {
       // Show/hide elements when a photo is not taken
-      keepPhoto.setVisibility(View.INVISIBLE);
+      keepPhoto.setVisibility(View.GONE);
       photo.setVisibility(View.VISIBLE);
       if (paramsCamera.isZoomSupported()) {
-        zoomLevel.setVisibility(View.VISIBLE);
+        displayZoomLevel(View.VISIBLE);
       }
       
       if (this.getIntent().getBooleanExtra("switchFlash", true) && hasFlash()) {
         flash.setVisibility(View.VISIBLE);
       } else {
-        flash.setVisibility(View.INVISIBLE);
+        flash.setVisibility(View.GONE);
       }
       
       if (this.getIntent().getBooleanExtra("switchCamera", true)) {
         switchCamera.setVisibility(View.VISIBLE);
       } else {
-        switchCamera.setVisibility(View.INVISIBLE);
+        switchCamera.setVisibility(View.GONE);
       }
       
       ((LinearLayout.LayoutParams) paramsLayoutMiniature).gravity = Gravity.BOTTOM;
@@ -814,10 +880,10 @@ public class CameraActivity extends Activity {
       Bitmap newBitmap = resizePictureTaken();
       photoResized.setImageBitmap(newBitmap);
       photoResized.setVisibility(View.VISIBLE);
-      preview.setVisibility(View.INVISIBLE);
+      preview.setVisibility(View.GONE);
     } else {
       customCamera.startPreview();
-      photoResized.setVisibility(View.INVISIBLE);
+      photoResized.setVisibility(View.GONE);
       preview.setVisibility(View.VISIBLE);
     }
 
@@ -910,6 +976,13 @@ public class CameraActivity extends Activity {
   public void onBackPressed() {
     this.setResult(3);
     this.finish();
+  }
+  
+  /**
+   * When the leave button is pressed.
+   */
+  public void leaveCamera(View v) {
+	  onBackPressed();
   }
   
   /**

@@ -2,123 +2,183 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-
+    
+    <!-- Always in first position to put the camera below every elements -->
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
     </FrameLayout>
-
+    
     <ImageView
         android:id="@+id/photoResized"
         android:layout_width="fill_parent"
         android:layout_height="match_parent" />
-
+    
     <ImageView
         android:id="@+id/background"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" 
         android:alpha="0.2"
         android:scaleType="fitXY" />
-
-    <ImageButton
-        android:id="@+id/flash"
-        android:layout_width="wrap_content"
+    
+    <LinearLayout
+        android:id="@+id/actionBar"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:background="@android:color/transparent"
-        android:onClick="switchFlash"
-        android:src="@drawable/flash" />
+        android:layout_gravity="top"
+        android:background="@color/black"
+        android:orientation="horizontal"
+        android:padding="@dimen/default_padding" >
 
-    <ImageButton
-        android:id="@+id/switchCamera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="false"
-        android:layout_marginTop="150dp"
-        android:src="@drawable/switch_camera"
-        android:onClick="switchCamera" />
+        <ImageButton
+            android:id="@+id/leave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:background="@android:color/transparent"
+            android:onClick="leaveCamera"
+            android:src="@drawable/back" />
+        
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+	    <ImageButton
+	        android:id="@+id/switchCamera"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_marginLeft="@dimen/activity_vertical_margin"
+	        android:background="@android:color/transparent"
+	        android:onClick="switchCamera"
+	        android:src="@drawable/switch_camera" />
+
+	    <ImageButton
+	        android:id="@+id/miniature"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_marginLeft="@dimen/activity_vertical_margin"
+	        android:background="@android:color/transparent"
+	        android:onClick="toggleMiniature"
+	        android:src="@drawable/minimise" />
+	    
+	    <ImageButton
+	        android:id="@+id/flash"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_marginLeft="@dimen/activity_vertical_margin"
+	        android:background="@android:color/transparent"
+	        android:onClick="switchFlash"
+	        android:src="@drawable/flash" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/beforePhoto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:gravity="bottom" >
-
-        <Button
-            android:id="@+id/miniature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:onClick="buttonMiniature"
-            android:text="@string/miniature" />
-             
-        <ImageButton
-            android:id="@+id/capture"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_button"
-            android:src="@drawable/capture" />
-
-        <org.geneanet.customcamera.VerticalSeekBar
-            android:id="@+id/switchOpacity"
-            android:layout_width="wrap_content"
-            android:layout_height="300dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0"
-            android:alpha="0.6"
-            android:max="10"
-            android:maxHeight="13dp"
-            android:minHeight="0dp"
-            android:progress="5"
-            android:progressDrawable="@drawable/custom_opacity_bar"
-            android:secondaryProgress="10"
-            android:thumb="@drawable/thumb"
-            android:thumbOffset="-0.9px" />
-    </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/afterPhoto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:orientation="vertical" >
 
         <LinearLayout
-            android:id="@+id/keepPhoto"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:alpha="0.8"
-            android:background="@color/black"
-            android:visibility="invisible" >
+            android:layout_marginBottom="@dimen/default_padding"
+            android:gravity="center"
+            android:orientation="horizontal" >
 
-            <ImageButton
-                android:id="@+id/accept"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/textZoomMin"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="acceptPhoto"
-                android:src="@drawable/accept"
-                android:background="@android:color/transparent" />
-            
-            <ImageButton
-                android:id="@+id/decline"
-                android:layout_width="wrap_content"
+                android:layout_weight="0.2"
+                android:gravity="right"
+                android:text="@string/zoomMin"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/white" />
+
+            <SeekBar
+                android:id="@+id/zoomLevel"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="declinePhoto"
-                android:src="@drawable/delete"
-                android:background="@android:color/transparent" />
+                android:layout_weight="0.6"
+                android:visibility="visible"
+                android:progressDrawable="@drawable/custom_seekbar" />
+
+            <TextView
+                android:id="@+id/textZoomMax"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:text="@string/zoomMax"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
-    </FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical" >
 
-    <SeekBar
-        android:id="@+id/zoomLevel"
-        android:layout_width="match_parent"
+            <ImageButton
+                android:id="@+id/capture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:background="@drawable/round_button"
+                android:src="@drawable/capture" />
+
+        </LinearLayout>
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/keepPhoto"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@color/black"
+        android:visibility="gone" >
+            
+        <ImageButton
+            android:id="@+id/decline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="declinePhoto"
+            android:src="@drawable/delete"
+            android:background="@android:color/transparent"
+            android:padding="@dimen/default_padding" />
+        
+        <ImageButton
+            android:id="@+id/accept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="acceptPhoto"
+            android:src="@drawable/accept"
+            android:background="@android:color/transparent"
+            android:padding="@dimen/default_padding" />
+
+    </LinearLayout>
+
+    <org.geneanet.customcamera.VerticalSeekBar
+        android:id="@+id/switchOpacity"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/default_padding"
+        android:max="10"
+        android:progress="5"
+        android:progressDrawable="@drawable/custom_seekbar" />
 
 </RelativeLayout>
