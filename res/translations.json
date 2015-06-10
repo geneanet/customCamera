@@ -1,22 +1,6 @@
 {
     "default": {
-        "miniature": "Miniature",
-        "capture": "Capture",
-        "acceptePicture": "Valid the picture",
-        "declinePicture": "Decline the picture",
         "zoomMin": "-",
         "zoomMax": "+"
-    },
-    "fr": {
-        "miniature": "Miniature",
-        "capture": "Photo",
-        "acceptePicture": "Accepter la photo",
-        "declinePicture": "Refuser la photo"
-    },
-    "en": {
-        "miniature": "Miniature",
-        "capture": "Capture",
-        "acceptePicture": "Valid the picture",
-        "declinePicture": "Decline the picture"
     }
 }
