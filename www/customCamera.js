@@ -4,6 +4,8 @@
     // Get cordova plugin.
     var exec = require("cordova/exec");
 
+    var cameraIsStarted = false;
+
     // constructor.
     function CustomCameraExport() {}
 
@@ -41,13 +43,20 @@
         }
 
         function successFctCallback(data) {
-            successFct(data);
+            cameraIsStarted = false;
+            if (successFct instanceof Function) {
+                successFct(data);
+            }
         }
 
         function failFctCallback(data) {
-            failFct(data.code, data.message);
+            cameraIsStarted = false;
+            if (failFct instanceof Function) {
+                failFct(data.code, data.message);
+            }
         }
 
+        cameraIsStarted = true;
         exec(
             successFctCallback,
             failFctCallback,
@@ -68,6 +77,15 @@
                 options.switchCamera
             ]
         );
+    };
+
+    /**
+     * Check if the camera is started or not.
+     * 
+     * @return {boolean} True: It's started, else false.
+     */
+    CustomCameraExport.prototype.cameraIsStarted = function() {
+        return cameraIsStarted;
     };
 
     module.exports = new CustomCameraExport();
