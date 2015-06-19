@@ -741,13 +741,6 @@ public class CameraActivity extends Activity {
         int width = size.width;
         float res = (width * height) / 1024000;
 
-        // Return a smaller image for now
-        if (res > 4f) {
-          opt.inSampleSize = 4;
-        } else if (res > 3f) {
-          opt.inSampleSize = 2;
-        }
-
         // Preview from camera
         photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
 
