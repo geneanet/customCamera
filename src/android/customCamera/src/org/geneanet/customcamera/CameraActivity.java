@@ -9,6 +9,7 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
@@ -46,6 +47,7 @@ import android.widget.TextView;
 import org.geneanet.customcamera.CameraPreview;
 import org.geneanet.customcamera.ManagerCamera;
 import org.geneanet.customcamera.TransferBigData;
+import org.geneanet.customcamera.BitmapUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
@@ -469,33 +471,31 @@ public class CameraActivity extends Activity {
       imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64OtherOrientation();
     }
     if (imgBackgroundBase64 != null) {
-      // Get picture.
-      Bitmap imgBackgroundBitmap = BitmapFactory.decodeByteArray(
-          imgBackgroundBase64, 0, imgBackgroundBase64.length);
-
       // Get sizes screen.
       Display defaultDisplay = getWindowManager().getDefaultDisplay();
       DisplayMetrics displayMetrics = new DisplayMetrics();
       defaultDisplay.getMetrics(displayMetrics);
       int displayWidthPx = (int) displayMetrics.widthPixels;
       int displayHeightPx = (int) displayMetrics.heightPixels;
-
-      // Get sizes picture.
-      int widthBackground = (int) (imgBackgroundBitmap.getWidth() * displayMetrics.density);
-      int heightBackground = (int) (imgBackgroundBitmap.getHeight() * displayMetrics.density);
-
-      // Change size ImageView.
-      RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(
-          widthBackground, heightBackground);
+      
+      // Get picture.
+      Options options = BitmapUtils.determineOriginalSizePicture(imgBackgroundBase64);
+      int widthResize = 0;
+      int heightResize = 0;
+      int widthBackground = options.outWidth;
+      int heightBackground= options.outHeight;
       float ratioX = (float) displayWidthPx / (float) widthBackground;
       float ratioY = (float) displayHeightPx / (float) heightBackground;
       if (ratioX < ratioY && ratioX < 1) {
-        paramsMiniature.width = (int) displayWidthPx;
-        paramsMiniature.height = (int) (ratioX * heightBackground);
+        widthResize = (int) displayWidthPx;
+        heightResize = (int) (ratioX * heightBackground);
       } else if (ratioX >= ratioY && ratioY < 1) {
-        paramsMiniature.width = (int) (ratioY * widthBackground);
-        paramsMiniature.height = (int) displayHeightPx;
+        widthResize = (int) (ratioY * widthBackground);
+        heightResize = (int) displayHeightPx;
       }
+      
+      BitmapUtils.determineInSampleSize(options, displayWidthPx, displayHeightPx);
+      Bitmap imgBackgroundBitmap = BitmapUtils.decodeOptimalPictureFromByteArray(imgBackgroundBase64, options);
       
       // set image at the view.
       ImageView background = (ImageView) findViewById(R.id.background);
@@ -507,6 +507,7 @@ public class CameraActivity extends Activity {
         background.setAlpha((float)1);
       }
 
+      RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(widthResize, heightResize);
       paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
           RelativeLayout.TRUE);
       
@@ -734,12 +735,6 @@ public class CameraActivity extends Activity {
 
         // Temporarily storage to use for decoding
         opt.inTempStorage = new byte[16 * 1024];
-        Camera.Parameters paramsCamera = customCamera.getParameters();
-        Size size = paramsCamera.getPictureSize();
-
-        int height = size.height;
-        int width = size.width;
-        float res = (width * height) / 1024000;
 
         // Preview from camera
         photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
