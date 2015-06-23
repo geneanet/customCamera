@@ -729,15 +729,9 @@ public class CameraActivity extends Activity {
        * @param byte[] data Picture with byte format.
        * @param Camera camera Current resource camera.
        */
-      public void onPictureTaken(final byte[] data, Camera camera) {
-        BitmapFactory.Options opt;
-        opt = new BitmapFactory.Options();
-
-        // Temporarily storage to use for decoding
-        opt.inTempStorage = new byte[16 * 1024];
-
+      public void onPictureTaken(byte[] data, Camera camera) {
         // Preview from camera
-        photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
+        photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
 
         // Matrix to perform rotation
         Matrix mat = new Matrix();
@@ -802,6 +796,8 @@ public class CameraActivity extends Activity {
       photoTaken.compress(
           CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
       
+      TransferBigData.setImgTaken(stream.toByteArray());
+      
       if (this.getIntent().getBooleanExtra("saveInGallery", false)) {
         // Get path picture to storage.
         String pathPicture = Environment.getExternalStorageDirectory()
@@ -811,11 +807,9 @@ public class CameraActivity extends Activity {
 
         // Write data in file.
         FileOutputStream outStream = new FileOutputStream(pathPicture);
-        outStream.write(stream.toByteArray());
+        outStream.write(TransferBigData.getImgTaken());
         outStream.close();
       }
-
-      TransferBigData.setImgTaken(stream.toByteArray());
 
       // Return to success & finish current activity.
       cameraActivityCurrent.setResult(1,new Intent());
