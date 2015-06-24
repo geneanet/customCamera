@@ -2,7 +2,6 @@ package org.geneanet.customcamera;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -861,38 +860,6 @@ public class CameraActivity extends Activity {
     }
 
     manageDisplayButtons();
-  }
-  
-  /**
-   * Allow to lock the screen or not.
-   * 
-   * @param lock Do we have to lock or not ?
-   */
-  protected void lockScreen(boolean lock) {
-    if (lock == false) {
-      this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-    } else {
-      int newOrientation = 0;
-     
-      switch (getCustomRotation()) {
-        case 0:
-          newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-          break;
-        case 1:
-          newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-          break;
-        case 2:
-          newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-          break;
-        case 3:
-          newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-          break;
-        default:
-          break;
-      }
-     
-      this.setRequestedOrientation(newOrientation);
-    }
   }
   
   /**
