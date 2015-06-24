@@ -9,7 +9,6 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
@@ -19,15 +18,14 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -46,11 +44,14 @@ import android.widget.TextView;
 
 import org.geneanet.customcamera.CameraPreview;
 import org.geneanet.customcamera.ManagerCamera;
-import org.geneanet.customcamera.TransferBigData;
 import org.geneanet.customcamera.BitmapUtils;
+import org.geneanet.customcamera.TmpFileUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -65,7 +66,7 @@ public class CameraActivity extends Activity {
   // Enable miniature mode.
   private boolean modeMiniature = false;
   // The image in Bitmap format of the preview photo.
-  private Bitmap photoTaken = null;
+  private Boolean photoTaken = false;
   // Flag to active or disable opacity function.
   private Boolean opacity = true;
   // Flag to save state of flash -> 0 : off, 1 : on, 2 : auto. 
@@ -82,6 +83,10 @@ public class CameraActivity extends Activity {
   
   public static final int CAMERA_BACK = 0;
   public static final int CAMERA_FRONT = 1;
+  
+  public static final String NAME_FILE_BACKGROUND = "background";
+  public static final String NAME_FILE_BACKGROUND_OTHER = "background-other";
+  public static final String NAME_FILE_PICTURE_TAKEN = "picture-taken";
 
   /**
    * To get camera resource or stop this activity.
@@ -292,7 +297,7 @@ public class CameraActivity extends Activity {
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     outState.putBoolean("modeMiniature", modeMiniature);
-    outState.putParcelable("photoTaken", photoTaken);
+    outState.putBoolean("photoTaken", photoTaken);
     outState.putInt("stateFlash", stateFlash);
     super.onSaveInstanceState(outState);
   }
@@ -301,7 +306,7 @@ public class CameraActivity extends Activity {
   @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     modeMiniature = savedInstanceState.getBoolean("modeMiniature");
-    photoTaken = savedInstanceState.getParcelable("photoTaken");
+    photoTaken = savedInstanceState.getBoolean("photoTaken");
     stateFlash = savedInstanceState.getInt("stateFlash");
     
     if (modeMiniature) {
@@ -328,7 +333,7 @@ public class CameraActivity extends Activity {
    */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    if (photoTaken == null) {
+    if (!photoTaken) {
       Camera.Parameters paramsCamera = customCamera.getParameters();
       int action = event.getAction();
 
@@ -460,46 +465,25 @@ public class CameraActivity extends Activity {
   /** To set background in the view. */
   protected void setBackground() {
     // Get the base64 picture for the background only if it's exist.
-    byte[] imgBackgroundBase64;
+    byte[] imgBackgroundBase64 = null;
+    File fileBackgroundOther = getFileStreamPath(NAME_FILE_BACKGROUND_OTHER);
     if (
-      TransferBigData.getImgBackgroundBase64OtherOrientation() == null ||
+      !fileBackgroundOther.exists() ||
       this.getIntent().getIntExtra("startOrientation", 1)
           == this.getResources().getConfiguration().orientation
     ) {
-      imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64();
+      imgBackgroundBase64 = TmpFileUtils.getTmpFileContent(this, NAME_FILE_BACKGROUND);
     } else {
-      imgBackgroundBase64 = TransferBigData.getImgBackgroundBase64OtherOrientation();
+      imgBackgroundBase64 = TmpFileUtils.getTmpFileContent(this, NAME_FILE_BACKGROUND_OTHER);
     }
     if (imgBackgroundBase64 != null) {
-      // Get sizes screen.
-      Display defaultDisplay = getWindowManager().getDefaultDisplay();
-      DisplayMetrics displayMetrics = new DisplayMetrics();
-      defaultDisplay.getMetrics(displayMetrics);
-      int displayWidthPx = (int) displayMetrics.widthPixels;
-      int displayHeightPx = (int) displayMetrics.heightPixels;
-      
-      // Get picture.
-      Options options = BitmapUtils.determineOriginalSizePicture(imgBackgroundBase64);
-      int widthResize = 0;
-      int heightResize = 0;
-      int widthBackground = options.outWidth;
-      int heightBackground= options.outHeight;
-      float ratioX = (float) displayWidthPx / (float) widthBackground;
-      float ratioY = (float) displayHeightPx / (float) heightBackground;
-      if (ratioX < ratioY && ratioX < 1) {
-        widthResize = (int) displayWidthPx;
-        heightResize = (int) (ratioX * heightBackground);
-      } else if (ratioX >= ratioY && ratioY < 1) {
-        widthResize = (int) (ratioY * widthBackground);
-        heightResize = (int) displayHeightPx;
-      }
-      
-      BitmapUtils.determineInSampleSize(options, displayWidthPx, displayHeightPx);
-      Bitmap imgBackgroundBitmap = BitmapUtils.decodeOptimalPictureFromByteArray(imgBackgroundBase64, options);
+      Bitmap imgBackgroundBitmap = BitmapUtils.generateOptimizeBitmap(this, imgBackgroundBase64);
+      imgBackgroundBase64 = null;
       
       // set image at the view.
       ImageView background = (ImageView) findViewById(R.id.background);
       background.setImageBitmap(imgBackgroundBitmap);
+      imgBackgroundBitmap = null;
       // Opacity at the beginning
       if (opacity) {
         background.setAlpha((float)0.5);
@@ -507,16 +491,15 @@ public class CameraActivity extends Activity {
         background.setAlpha((float)1);
       }
 
-      RelativeLayout.LayoutParams paramsMiniature = new RelativeLayout.LayoutParams(widthResize, heightResize);
+      RelativeLayout.LayoutParams paramsMiniature = (RelativeLayout.LayoutParams) background.getLayoutParams();
       paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
           RelativeLayout.TRUE);
-      
       background.setLayoutParams(paramsMiniature);
     }
   }
   
   /**
-   * Resize and mask the miniature button.
+   * Resize the picture and change the icon of button.
    * @param view
    */
   public void buttonMiniature(View view) {
@@ -586,7 +569,7 @@ public class CameraActivity extends Activity {
     // Position at the left
     paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
     
-    if (photoTaken != null) {
+    if (photoTaken) {
       Resources res = getResources();
       
       int defaultPadding = (int)res.getDimension(R.dimen.default_padding);
@@ -621,7 +604,7 @@ public class CameraActivity extends Activity {
       switchOpacity.setVisibility(View.GONE);
     }
     
-    if (photoTaken != null) {
+    if (photoTaken) {
       // Show/hide elements when a photo is taken 
       keepPhoto.setVisibility(View.VISIBLE);  
       photo.setVisibility(View.GONE);   
@@ -674,7 +657,7 @@ public class CameraActivity extends Activity {
     WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
     Configuration config = getResources().getConfiguration();
     int rotation = windowManager.getDefaultDisplay().getRotation();
-
+    
     if (
         (
             config.orientation == Configuration.ORIENTATION_LANDSCAPE 
@@ -708,22 +691,12 @@ public class CameraActivity extends Activity {
   /**
    * Method to take picture.
    */
-  public void takePhoto() {
-    // Handles the moment where picture is taken
-    ShutterCallback shutterCallback = new ShutterCallback() {
-      public void onShutter() {
-      }
-    };
-
-    // Handles data for raw picture
-    PictureCallback rawCallback = new PictureCallback() {
-      public void onPictureTaken(byte[] data, Camera camera) {
-      }
-    };
-
+  public void takePhoto() {    
+    setRotationPictureTaken();
+    final CameraActivity cameraActivityCurrent = this;
+    
     // Handles data for jpeg picture
     PictureCallback jpegCallback = new PictureCallback() {
-
       /**
        * Event when picture is taken.
        * @param byte[] data Picture with byte format.
@@ -731,57 +704,55 @@ public class CameraActivity extends Activity {
        */
       public void onPictureTaken(byte[] data, Camera camera) {
         // Preview from camera
-        photoTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
-
-        // Matrix to perform rotation
-        Matrix mat = new Matrix();
-        int defaultOrientation = getDeviceDefaultOrientation();
-        int orientationCamera = getOrientationOfCamera();
-        int redirect = CameraActivity.DEGREE_0;
-
-        switch (getCustomRotation()) {
-          case 0:
-            redirect = CameraActivity.DEGREE_90;
-            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
-              redirect = CameraActivity.DEGREE_270;
+        photoTaken = true;
+        
+        TmpFileUtils.createTmpFile(cameraActivityCurrent, NAME_FILE_PICTURE_TAKEN, data);
+        
+        // Determine if the picture need to be rotated.
+        File filePictureTaken = getFileStreamPath(NAME_FILE_PICTURE_TAKEN);
+        int rotate = TmpFileUtils.determineRotateBasedOnExifFromFilePath(filePictureTaken.getAbsolutePath());
+        if (rotate != 0) {// the picture need to be rotated.
+          // Temporarily storage to use for decoding
+          BitmapFactory.Options opt = new BitmapFactory.Options();
+          opt.inTempStorage = new byte[16 * 1024];
+          FileInputStream fis;
+          Bitmap photoTakenBitmap;
+          try {
+            fis = openFileInput(NAME_FILE_PICTURE_TAKEN);
+            photoTakenBitmap = BitmapFactory.decodeStream(fis, null, opt);
+            fis.close();
+            
+            Matrix mat = new Matrix();
+            mat.postRotate(rotate);
+            try {
+              photoTakenBitmap = Bitmap.createBitmap(photoTakenBitmap, 0, 0, photoTakenBitmap.getWidth(), photoTakenBitmap.getHeight(), mat, true);
+              
+              ByteArrayOutputStream stream = new ByteArrayOutputStream();
+              photoTakenBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+              byte[] byteArray = stream.toByteArray();
+              stream.close();
+              
+              TmpFileUtils.createTmpFile(cameraActivityCurrent, NAME_FILE_PICTURE_TAKEN, byteArray);
+              byteArray = null;
+            } catch (OutOfMemoryError oom) {
+              Log.e("customCamera", "Can't rotate the picture (out of memory).");
             }
-            break;
-          case 1:
-            redirect = CameraActivity.DEGREE_0;
-            break;
-          case 2:
-            // Only on device with landscape mode by default.
-            if (defaultOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-              redirect = CameraActivity.DEGREE_270;
-            }
-            if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
-              redirect = CameraActivity.DEGREE_90;
-            }
-            break;
-          case 3:
-            redirect = CameraActivity.DEGREE_180;
-            break;
-          default:
-            break;
-        }
-        mat.postRotate(redirect);
-        // We execute a mirror to the matrix in case of front camera.
-        if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1 ) {
-          if (getCustomRotation() == 0 || getCustomRotation() == 2) {
-            mat.preScale(1.0f, -1.0f);
-          } else if (getCustomRotation() == 1 || getCustomRotation() == 3) {
-            mat.preScale(-1.0f, 1.0f);
+          } catch (FileNotFoundException e) {
+            Log.e("customCamera", "Can't load the picture to rotate it.");
+          } catch (IOException e) {
+            Log.e("customCamera", "Can't close the file picture. Error message: "+e.getMessage());
+          } catch (OutOfMemoryError oom) {
+            Log.e("customCamera", "Can't laod the picture.");
           }
+          
+          photoTakenBitmap = null;
         }
-
-        // Creation of the bitmap
-        photoTaken = Bitmap.createBitmap(photoTaken, 0, 0,
-            photoTaken.getWidth(), photoTaken.getHeight(), mat, true);
+        
         displayPicture();
       }
     };
     // Start capture picture.
-    customCamera.takePicture(shutterCallback, rawCallback, jpegCallback);
+    customCamera.takePicture(null, null, jpegCallback);
   }
   
   /**
@@ -790,13 +761,26 @@ public class CameraActivity extends Activity {
    */
   public void acceptPhoto(View view) {
     final CameraActivity cameraActivityCurrent = this;
-
     try {
-      ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      photoTaken.compress(
-          CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
+      BitmapFactory.Options opt = new BitmapFactory.Options();
+      // Temporarily storage to use for decoding
+      opt.inTempStorage = new byte[16 * 1024];
+      byte[] data = TmpFileUtils.getTmpFileContent(this, NAME_FILE_PICTURE_TAKEN);
       
-      TransferBigData.setImgTaken(stream.toByteArray());
+      ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      Bitmap photoTakenBitmap;
+      try {
+        photoTakenBitmap = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
+        photoTakenBitmap.compress(
+            CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
+        data = stream.toByteArray();
+        // rewrite the file with the compression.
+        TmpFileUtils.createTmpFile(cameraActivityCurrent, NAME_FILE_PICTURE_TAKEN, data);
+      } catch (OutOfMemoryError oom) {
+        Log.e("customCamera", "Can't compress the picture taken (out of memory).");
+      }
+      photoTakenBitmap = null;
+      stream.close();
       
       if (this.getIntent().getBooleanExtra("saveInGallery", false)) {
         // Get path picture to storage.
@@ -807,14 +791,16 @@ public class CameraActivity extends Activity {
 
         // Write data in file.
         FileOutputStream outStream = new FileOutputStream(pathPicture);
-        outStream.write(TransferBigData.getImgTaken());
+        outStream.write(data);
+        data = null;
         outStream.close();
       }
-
+      
       // Return to success & finish current activity.
       cameraActivityCurrent.setResult(1,new Intent());
       cameraActivityCurrent.finish();
     } catch (IOException e) {
+      Log.e("customCamera", "Error to write in file: "+e.getMessage());
     }
   }
   
@@ -845,7 +831,7 @@ public class CameraActivity extends Activity {
       customCamera.setParameters(params);
     }
     
-    photoTaken = null;
+    photoTaken = false;
     displayPicture();
   }
 
@@ -854,13 +840,28 @@ public class CameraActivity extends Activity {
     FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
     ImageView photoResized = (ImageView) findViewById(R.id.photoResized);
 
-    if (photoTaken != null) {
+    if (photoTaken) {
       // Stop link between view and camera to start the preview
-      // picture.
       customCamera.stopPreview();
 
-      Bitmap newBitmap = resizePictureTaken();
+      byte[] data = TmpFileUtils.getTmpFileContent(this, NAME_FILE_PICTURE_TAKEN);
+      Bitmap newBitmap = BitmapUtils.generateOptimizeBitmap(this, data);
+      
+      // rotate the picture of need.
+      File filePictureTaken = getFileStreamPath(NAME_FILE_PICTURE_TAKEN);
+      int rotate = TmpFileUtils.determineRotateBasedOnExifFromFilePath(filePictureTaken.getAbsolutePath());
+      if (rotate != 0) {
+        Matrix mat = new Matrix();
+        mat.postRotate(rotate);
+        try {
+          newBitmap = Bitmap.createBitmap(newBitmap, 0, 0, newBitmap.getWidth(), newBitmap.getHeight(), mat, true);
+        } catch (OutOfMemoryError oom) {
+          Log.e("customCamera", "Can't rotate the picture taken (out of memory).");
+        }
+      }
+      
       photoResized.setImageBitmap(newBitmap);
+      newBitmap = null;
       photoResized.setVisibility(View.VISIBLE);
       preview.setVisibility(View.GONE);
     } else {
@@ -870,40 +871,6 @@ public class CameraActivity extends Activity {
     }
 
     manageDisplayButtons();
-  }
-
-  /**
-   * Resize the bitmap saved when you rotate the device.
-   * 
-   * @return the new bitmap.
-   */
-  protected Bitmap resizePictureTaken() {
-    // Initialize the new bitmap resized
-    Bitmap newBitmap = null;
-  
-    // Get sizes screen.
-    Display defaultDisplay = getWindowManager().getDefaultDisplay();
-    DisplayMetrics displayMetrics = new DisplayMetrics();
-    defaultDisplay.getMetrics(displayMetrics);
-    int displayWidthPx = (int) displayMetrics.widthPixels;
-    int displayHeightPx = (int) displayMetrics.heightPixels;
-  
-    // Get sizes picture.
-    int widthBackground = (int) (photoTaken.getWidth() * displayMetrics.density);
-    int heightBackground = (int) (photoTaken.getHeight() * displayMetrics.density);
-   
-    // Change size ImageView.
-    float ratioX = (float) displayWidthPx / (float) widthBackground;
-    float ratioY = (float) displayHeightPx / (float) heightBackground;
-    if (ratioX < ratioY) {
-      newBitmap = Bitmap.createScaledBitmap(photoTaken, (int) displayWidthPx,
-         (int) (ratioX * heightBackground), false);
-    } else if (ratioX >= ratioY) {
-      newBitmap = Bitmap.createScaledBitmap(photoTaken,
-         (int) (ratioY * widthBackground), (int) displayHeightPx, false);
-    }
-    
-    return newBitmap;
   }
   
   /**
@@ -944,7 +911,7 @@ public class CameraActivity extends Activity {
    */
   protected int getCustomRotation() {
     int code = this.getWindowManager().getDefaultDisplay().getRotation();
-    if (getDeviceDefaultOrientation() == 2) {
+    if (getDeviceDefaultOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
       code ++;
     }
 
@@ -1093,5 +1060,43 @@ public class CameraActivity extends Activity {
     Camera.Parameters camParameters = customCamera.getParameters();
     camParameters.setPreviewSize(optimalSize.width, optimalSize.height);
     customCamera.setParameters(camParameters);
+  }
+  
+  /**
+   * To set the orientation of the picture taken.
+   */
+  private void setRotationPictureTaken() {
+    int defaultOrientation = getDeviceDefaultOrientation();
+    int orientationCamera = getOrientationOfCamera();
+    int redirect = CameraActivity.DEGREE_0;
+
+    switch (getCustomRotation()) {
+      case 0:
+        redirect = CameraActivity.DEGREE_90;
+        if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
+          redirect = CameraActivity.DEGREE_270;
+        }
+        break;
+      case 1:
+        redirect = CameraActivity.DEGREE_0;
+        break;
+      case 2:
+        // Only on device with landscape mode by default.
+        if (defaultOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+          redirect = CameraActivity.DEGREE_270;
+        }
+        if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
+          redirect = CameraActivity.DEGREE_90;
+        }
+        break;
+      case 3:
+        redirect = CameraActivity.DEGREE_180;
+        break;
+      default:
+        break;
+    }
+    Parameters params = customCamera.getParameters();
+    params.setRotation(redirect);
+    customCamera.setParameters(params);
   }
 }

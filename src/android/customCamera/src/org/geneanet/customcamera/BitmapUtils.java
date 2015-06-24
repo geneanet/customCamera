@@ -1,8 +1,11 @@
 package org.geneanet.customcamera;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.util.DisplayMetrics;
+import android.view.Display;
 
 public class BitmapUtils {
   /**
@@ -19,48 +22,49 @@ public class BitmapUtils {
     
     return options;
   }
-
-  /**
-   * Determine the best value of inSampleSize in the option object to adapt the picture at the screen size.
-   * 
-   * @param Options options Option object to set inSampleSize.
-   * @param int destWidth Width destination.
-   * @param int destHeight Height destination.
-   */
-  public static void determineInSampleSize(Options options, int destWidth, int destHeight) {
-    // Raw height and width of image
-    final int height = options.outHeight;
-    final int width = options.outWidth;
-    int inSampleSize = 1;
-
-    if (height > destHeight || width > destWidth) {
-
-        final int halfHeight = height / 2;
-        final int halfWidth = width / 2;
-
-        // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-        // height and width larger than the requested height and width.
-        // More informations: http://developer.android.com/training/displaying-bitmaps/load-bitmap.html#load-bitmap
-        while ((halfHeight / inSampleSize) > destHeight
-                && (halfWidth / inSampleSize) > destWidth) {
-            inSampleSize *= 2;
-        }
-    }
-    
-    options.inSampleSize = inSampleSize;
-  }
   
   /**
-   * Decode a byte array to generate a base64 adapted at the destination's size.
+   * Generate a bitmap optimized from the screen sizes.
    * 
-   * @param bytes[] imgBackgroundBase64
-   * @param Options options
+   * @param activity Current activity.
+   * @param data Bytes represent the picture. 
    * 
    * @return Bitmap
    */
-  public static Bitmap decodeOptimalPictureFromByteArray(byte[] imgBackgroundBase64, Options options) {
+  public static Bitmap generateOptimizeBitmap(Activity activity, byte[] data) {
+    // Get sizes screen.
+    Display defaultDisplay = activity.getWindowManager().getDefaultDisplay();
+    DisplayMetrics displayMetrics = new DisplayMetrics();
+    defaultDisplay.getMetrics(displayMetrics);
+    int displayWidthPx = (int) displayMetrics.widthPixels;
+    int displayHeightPx = (int) displayMetrics.heightPixels;
+    // Get picture.
+    Options options = BitmapUtils.determineOriginalSizePicture(data);
+    int widthResize = 0;
+    int heightResize = 0;
+    int widthBackground = options.outWidth;
+    int heightBackground= options.outHeight;
+    float ratioX = (float) widthBackground / (float) displayWidthPx;
+    float ratioY = (float) heightBackground / (float) displayHeightPx;
+    int inSampleSize = 1;
+    if (ratioX > ratioY && ratioX > 1) {
+      widthResize = (int) displayWidthPx;
+      heightResize = (int) (heightBackground / ratioX);
+      inSampleSize = (int) ratioX;
+    } else if (ratioX <= ratioY && ratioY > 1) {
+      widthResize = (int) (widthBackground / ratioY);
+      heightResize = (int) displayHeightPx;
+      inSampleSize = (int) ratioY;
+    }
+    options.inSampleSize = inSampleSize;
     options.inJustDecodeBounds = false;
     
-    return BitmapFactory.decodeByteArray(imgBackgroundBase64, 0, imgBackgroundBase64.length, options);
+    Bitmap picture = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+    data = null;
+    if (widthResize > 0 && heightResize > 0) {
+      picture = Bitmap.createScaledBitmap(picture, widthResize, heightResize, true);
+    }
+    
+    return picture;
   }
 }

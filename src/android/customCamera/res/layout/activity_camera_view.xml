@@ -17,8 +17,8 @@
     
     <ImageView
         android:id="@+id/background"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
         android:alpha="0.2"
         android:scaleType="fitXY" />
     

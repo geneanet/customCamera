@@ -7,17 +7,9 @@ import android.util.Base64;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
 
 public class CameraLauncher extends CordovaPlugin {
 
@@ -57,7 +49,8 @@ public class CameraLauncher extends CordovaPlugin {
 
           return false;
         }
-        TransferBigData.setImgBackgroundBase64(imgBackgroundBase64);
+        TmpFileUtils.createTmpFile(this.cordova.getActivity(), CameraActivity.NAME_FILE_BACKGROUND, imgBackgroundBase64);
+        imgBackgroundBase64 = null;
       }
 
       if (args.getString(1) != "null") {
@@ -71,11 +64,12 @@ public class CameraLauncher extends CordovaPlugin {
 
           return false;
         }
-        TransferBigData.setImgBackgroundBase64OtherOrientation(imgBackgroundBase64OtherOrientation);
+        TmpFileUtils.createTmpFile(this.cordova.getActivity(), CameraActivity.NAME_FILE_BACKGROUND_OTHER, imgBackgroundBase64OtherOrientation);
+        imgBackgroundBase64OtherOrientation = null;
       }
 
       // If we don't have a background image, disable miniature and opacity options.
-      if (TransferBigData.getImgBackgroundBase64() == null) {
+      if (args.getString(0) == "null") {
         intent.putExtra("miniature", false);
         intent.putExtra("opacity", false);
       } else {
@@ -113,6 +107,9 @@ public class CameraLauncher extends CordovaPlugin {
    * @param intent Contains parameters of the activity.
    */
   public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    // remove temporary files.
+    this.cordova.getActivity().deleteFile(CameraActivity.NAME_FILE_BACKGROUND);
+    this.cordova.getActivity().deleteFile(CameraActivity.NAME_FILE_BACKGROUND_OTHER);
     if (requestCode == CameraLauncher.REQUEST_CODE) {
       switch (resultCode) {
         case CameraLauncher.RESULT_ERROR:
@@ -125,9 +122,11 @@ public class CameraLauncher extends CordovaPlugin {
           break;
         case CameraLauncher.RESULT_SUCCESS:
           try {
-            byte[] output = Base64.encode(TransferBigData.getImgTaken(),
+            byte[] output = Base64.encode(TmpFileUtils.getTmpFileContent(this.cordova.getActivity(), CameraActivity.NAME_FILE_PICTURE_TAKEN),
               Base64.NO_WRAP);
+            this.cordova.getActivity().deleteFile(CameraActivity.NAME_FILE_PICTURE_TAKEN);
             String jsOut = new String(output);
+            output = null;
 
             this.callbackContext.success(jsOut);
           } catch (Exception e) {

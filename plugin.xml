@@ -29,11 +29,11 @@
         </config-file>
 
         <source-file src="src/android/CameraLauncher.java" target-dir="src/org/geneanet/customcamera" />
-        <source-file src="src/android/customCamera/src/org/geneanet/customcamera/TransferBigData.java" target-dir="src/org/geneanet/customcamera" />
         <source-file src="src/android/customCamera/src/org/geneanet/customcamera/ManagerCamera.java" target-dir="src/org/geneanet/customcamera" />
         <source-file src="src/android/customCamera/src/org/geneanet/customcamera/CameraPreview.java" target-dir="src/org/geneanet/customcamera" />
         <source-file src="src/android/customCamera/src/org/geneanet/customcamera/VerticalSeekBar.java" target-dir="src/org/geneanet/customcamera" />
         <source-file src="src/android/customCamera/src/org/geneanet/customcamera/BitmapUtils.java" target-dir="src/org/geneanet/customcamera" />
+        <source-file src="src/android/customCamera/src/org/geneanet/customcamera/TmpFileUtils.java" target-dir="src/org/geneanet/customcamera" />
 
         <hook type="before_compile" src="hooks/before_compile/generateActivity.js" />
     </platform>
