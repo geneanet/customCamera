@@ -477,11 +477,16 @@ public class CameraActivity extends Activity {
       imgBackgroundBase64 = TmpFileUtils.getTmpFileContent(this, NAME_FILE_BACKGROUND_OTHER);
     }
     if (imgBackgroundBase64 != null) {
+      ImageView background = (ImageView) findViewById(R.id.background);
+      background.setImageBitmap(null);
+      
       Bitmap imgBackgroundBitmap = BitmapUtils.generateOptimizeBitmap(this, imgBackgroundBase64);
+      if (modeMiniature) {
+        imgBackgroundBitmap = Bitmap.createScaledBitmap(imgBackgroundBitmap, imgBackgroundBitmap.getWidth() / 4, imgBackgroundBitmap.getHeight() / 4, true);
+      }
       imgBackgroundBase64 = null;
       
       // set image at the view.
-      ImageView background = (ImageView) findViewById(R.id.background);
       background.setImageBitmap(imgBackgroundBitmap);
       imgBackgroundBitmap = null;
       // Opacity at the beginning
@@ -490,11 +495,8 @@ public class CameraActivity extends Activity {
       } else {
         background.setAlpha((float)1);
       }
-
-      RelativeLayout.LayoutParams paramsMiniature = (RelativeLayout.LayoutParams) background.getLayoutParams();
-      paramsMiniature.addRule(RelativeLayout.CENTER_IN_PARENT,
-          RelativeLayout.TRUE);
-      background.setLayoutParams(paramsMiniature);
+      
+      positioningBackground();
     }
   }
   
@@ -503,17 +505,13 @@ public class CameraActivity extends Activity {
    * @param view
    */
   public void buttonMiniature(View view) {
-    ImageView background = (ImageView) findViewById(R.id.background);
     ImageButton miniature = (ImageButton) view;
 
+    setBackground();
     if (!modeMiniature) {
       miniature.setImageResource(R.drawable.minimise);
-      // Reset the default position and size for the background.
-      setBackground();
     } else {
       miniature.setImageResource(R.drawable.maximise);
-      // Set new size for miniature layout.
-      setParamsMiniature(background, true);
     }
   }
   
@@ -541,45 +539,37 @@ public class CameraActivity extends Activity {
   }
   
   /**
-   * Set the size and the gravity of the miniature function of photo is taken or not.
-   * @param imageView Reference to the background image.
-   * @param resize    Should we resize or not ? Only when click on "miniature".
+   * Handle the position of the background
    */
-  public void setParamsMiniature(ImageView imageView, boolean resize) {
-    RelativeLayout.LayoutParams paramsMiniature = 
-        (RelativeLayout.LayoutParams) imageView.getLayoutParams();
-    if (resize == true) {
-      paramsMiniature.width = paramsMiniature.width / 4;
-      paramsMiniature.height = paramsMiniature.height / 4;
-    }
+  public void positioningBackground() {
+    ImageView background = (ImageView) findViewById(R.id.background);
+    RelativeLayout.LayoutParams paramsBackground = (RelativeLayout.LayoutParams) background.getLayoutParams();
     
-    // Call the method to handle the position of the miniature.
-    positioningMiniature(paramsMiniature);
-    imageView.setLayoutParams(paramsMiniature);
-  }
-  
-  /**
-   * Handle the position of the miniature button
-   * @param paramsMiniature The parameters of the layout.
-   */
-  public void positioningMiniature(RelativeLayout.LayoutParams paramsMiniature) {
-    // Position at the bottom
-    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);   
-    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-    // Position at the left
-    paramsMiniature.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-    
-    if (photoTaken) {
-      Resources res = getResources();
-      
-      int defaultPadding = (int)res.getDimension(R.dimen.default_padding);
-      
-      BitmapDrawable image = (BitmapDrawable) res.getDrawable(R.drawable.accept);
-      int marginBottom = image.getBitmap().getHeight() + (defaultPadding * 2);
-      paramsMiniature.setMargins(0, 0, 0, marginBottom);
+    if (!modeMiniature) {
+      paramsBackground.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+      paramsBackground.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+      paramsBackground.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+      paramsBackground.setMargins(0, 0, 0, 0);
     } else {
-      paramsMiniature.setMargins(0, 0, 0, 0);
+      // Position at the bottom
+      paramsBackground.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+      // Position at the left
+      paramsBackground.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+      
+      if (photoTaken) {
+        Resources res = getResources();
+        
+        int defaultPadding = (int)res.getDimension(R.dimen.default_padding);
+        
+        BitmapDrawable image = (BitmapDrawable) res.getDrawable(R.drawable.accept);
+        int marginBottom = image.getBitmap().getHeight() + (defaultPadding * 2);
+        paramsBackground.setMargins(0, 0, 0, marginBottom);
+      } else {
+        paramsBackground.setMargins(0, 0, 0, 0);
+      }
     }
+    
+    background.setLayoutParams(paramsBackground);
   }
   
   /**
@@ -591,7 +581,6 @@ public class CameraActivity extends Activity {
     ImageButton flash        = (ImageButton) findViewById(R.id.flash);
     ImageButton photo        = (ImageButton) findViewById(R.id.capture);
     ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
-    ImageView background     = (ImageView) findViewById(R.id.background);
     SeekBar switchOpacity    = (SeekBar) findViewById(R.id.switchOpacity);
     
     LayoutParams paramsLayoutMiniature = (LinearLayout.LayoutParams) miniature.getLayoutParams();
@@ -616,7 +605,7 @@ public class CameraActivity extends Activity {
       miniature.setLayoutParams(paramsLayoutMiniature);
       
       if (modeMiniature) {
-        setParamsMiniature(background, false);
+        positioningBackground();
       }
       
     } else {
@@ -643,7 +632,7 @@ public class CameraActivity extends Activity {
       miniature.setLayoutParams(paramsLayoutMiniature);
       
       if (modeMiniature) {
-        setParamsMiniature(background, false);
+        positioningBackground();
       }
     }
   }
@@ -867,6 +856,7 @@ public class CameraActivity extends Activity {
     } else {
       customCamera.startPreview();
       photoResized.setVisibility(View.GONE);
+      photoResized.setImageBitmap(null);
       preview.setVisibility(View.VISIBLE);
     }
 
