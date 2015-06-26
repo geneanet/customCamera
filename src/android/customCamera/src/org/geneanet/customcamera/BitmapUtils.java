@@ -42,8 +42,8 @@ public class BitmapUtils {
     Options options = BitmapUtils.determineOriginalSizePicture(data);
     int widthResize = 0;
     int heightResize = 0;
-    int widthBackground = options.outWidth;
-    int heightBackground= options.outHeight;
+    int widthBackground = (int) (options.outWidth * displayMetrics.density);
+    int heightBackground= (int) (options.outHeight * displayMetrics.density);
     float ratioX = (float) widthBackground / (float) displayWidthPx;
     float ratioY = (float) heightBackground / (float) displayHeightPx;
     int inSampleSize = 1;
