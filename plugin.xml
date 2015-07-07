@@ -37,4 +37,48 @@
 
         <hook type="before_compile" src="hooks/before_compile/generateActivity.js" />
     </platform>
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="CustomCamera">
+                <param name="ios-package" value="CustomCamera" />
+            </feature>
+        </config-file>
+        <config-file target="config.xml" parent="/*">
+            <feature name="LocalStorage">
+                <param name="ios-package" value="CDVLocalStorage" />
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/classes/CustomCamera.h" /> 
+        <source-file src="src/ios/classes/CustomCamera.m" /> 
+        
+        <header-file src="src/ios/classes/AVCamPreviewView.h" />
+        <source-file src="src/ios/classes/AVCamPreviewView.m" />
+          
+        <header-file src="src/ios/classes/AVCamViewController.h" />
+        <source-file src="src/ios/classes/AVCamViewController.m" />
+        
+        <resource-file src="src/ios/classes/AVCamViewController_iPhone.xib" />
+        <resource-file src="src/ios/classes/AVCamViewController_iPad.xib" />
+
+        <resource-file src="src/ios/image/icon_back.png" />
+        <resource-file src="src/ios/image/icon_capture_pressed.png" />
+        <resource-file src="src/ios/image/icon_capture.png" />
+        <resource-file src="src/ios/image/icon_delete.png" />
+        <resource-file src="src/ios/image/icon_flash_auto.png" />
+        <resource-file src="src/ios/image/icon_flash_off.png" />
+        <resource-file src="src/ios/image/icon_flash.png" />
+        <resource-file src="src/ios/image/icon_flip.png" />
+        <resource-file src="src/ios/image/icon_max.png" />
+        <resource-file src="src/ios/image/icon_min.png" />
+        <resource-file src="src/ios/image/icon_submit.png" />
+        <resource-file src="src/ios/image/sample.png" />
+        
+        <framework src="CoreGraphics.framework" weak="true" />
+        <framework src="AssetsLibrary.framework" weak="true" />
+        <framework src="AVFoundation.framework" weak="true" />
+        <framework src="CoreAudio.framework" weak="true" />
+        <framework src="CoreLocation.framework" weak="true" />
+        <framework src="MobileCoreServices.framework" weak="true" />
+    </platform>
 </plugin>
