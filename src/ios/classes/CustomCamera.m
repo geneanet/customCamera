@@ -1,23 +1,26 @@
 #import "CustomCamera.h"
 #import "AVCamViewController.h"
+#import "CameraParameter.h"
 
 @implementation CustomCamera
 
 - (void)startCamera:(CDVInvokedUrlCommand*)command {
+    
     lastCommand = command;
     
     NSString *guid = [[NSUUID new] UUIDString];
     NSString *uniqueFileName = [NSString stringWithFormat:@"%@.jpg", guid];
 
-    filename = uniqueFileName; //[command argumentAtIndex:0];
-    quality = [[command argumentAtIndex:1] floatValue];
-    targetWidth = [[command argumentAtIndex:2] floatValue];
-    targetHeight = [[command argumentAtIndex:3] floatValue];
-    nDestType = [[command argumentAtIndex:4] intValue];
-    nSourceType = [[command argumentAtIndex:5] intValue];
+    filename = uniqueFileName;
+    nSourceType = 1;
+    nDestType = 0;
     
-    strPhotoName = [command argumentAtIndex:0];
+    CameraParameter *param = [[CameraParameter alloc] initWithCommand:lastCommand];
     
+    
+    
+    
+//    NSString * strPhotoName = @"sample.png";
     if(nSourceType == 0)
     {
         UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
@@ -32,13 +35,12 @@
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Camera is not accessible"];
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } else {
-            AVCamViewController *cameraViewController = [[AVCamViewController alloc] initWithPhoto:strPhotoName WithCallback:^(UIImage *image)   {
+            AVCamViewController *cameraViewController = [[AVCamViewController alloc] initWithParams:param WithCallback:^(UIImage *image)   {
                 @autoreleasepool {
                 if(nDestType == 0)
                 {
-                        UIImage *scaledImage = [self scaleImage:image toSize:CGSizeMake(targetWidth, targetHeight)];
-                        NSData *scaledImageData = UIImageJPEGRepresentation(scaledImage, quality / 100);
-                        NSString* strEncodeData = [scaledImageData base64EncodedStringWithOptions:0];
+                        NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
+                        NSString* strEncodeData = [imageData base64EncodedStringWithOptions:0];
                         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                                     messageAsString:strEncodeData];
                         [self.viewController dismissViewControllerAnimated:YES completion:nil];
@@ -46,10 +48,9 @@
                 } else {
                     NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
                     NSString *imagePath = [documentsDirectory stringByAppendingPathComponent:filename];
-                    UIImage *scaledImage = [self scaleImage:image toSize:CGSizeMake(targetWidth, targetHeight)];
-                    NSData *scaledImageData = UIImageJPEGRepresentation(scaledImage, quality / 100);
+                    NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
                     //[self deleteFileWithName:imagePath];
-                    [scaledImageData writeToFile:imagePath atomically:YES];
+                    [imageData writeToFile:imagePath atomically:YES];
                     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                                 messageAsString:[[NSURL fileURLWithPath:imagePath] absoluteString]];
                     [self.viewController dismissViewControllerAnimated:YES completion:nil];
@@ -76,10 +77,9 @@
         @autoreleasepool {
         if(nDestType == 0)
         {
-            UIImage *scaledImage = [self scaleImage:image toSize:CGSizeMake(targetWidth, targetHeight)];
-            NSData *scaledImageData = UIImageJPEGRepresentation(scaledImage, quality / 100);
+            NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
             
-            NSString* strEncodeData = [scaledImageData base64EncodedStringWithOptions:0];
+            NSString* strEncodeData = [imageData base64EncodedStringWithOptions:0];
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                         messageAsString:strEncodeData];
             [self.commandDelegate sendPluginResult:result callbackId:lastCommand.callbackId];
@@ -87,10 +87,9 @@
         } else {
             NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *imagePath = [documentsDirectory stringByAppendingPathComponent:filename];
-            UIImage *scaledImage = [self scaleImage:image toSize:CGSizeMake(targetWidth, targetHeight)];
-            NSData *scaledImageData = UIImageJPEGRepresentation(scaledImage, quality / 100);
+            NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
             //[self deleteFileWithName:imagePath];
-            [scaledImageData writeToFile:imagePath atomically:YES];
+            [imageData writeToFile:imagePath atomically:YES];
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                         messageAsString:[[NSURL fileURLWithPath:imagePath] absoluteString]];
             [self.commandDelegate sendPluginResult:result callbackId:lastCommand.callbackId];

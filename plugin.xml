@@ -57,6 +57,9 @@
           
         <header-file src="src/ios/classes/AVCamViewController.h" />
         <source-file src="src/ios/classes/AVCamViewController.m" />
+
+        <header-file src="src/ios/classes/CameraParameter.h" />
+        <source-file src="src/ios/classes/CameraParameter.m" />
         
         <resource-file src="src/ios/classes/AVCamViewController_iPhone.xib" />
         <resource-file src="src/ios/classes/AVCamViewController_iPad.xib" />

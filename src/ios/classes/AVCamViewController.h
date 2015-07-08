@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import "CameraParameter.h"
 
 @interface AVCamViewController : UIViewController
 {
@@ -9,8 +10,12 @@
     
         CGRect frameBtnThumb;
 
-    UIImage *capturedImage;
-    NSData *capturedImageData;
+        UIImage *capturedImage;
+        NSData *capturedImageData;
+    
+        BOOL isRotated;
+    
+    CGFloat fDist;
     
 }
 
@@ -23,9 +28,13 @@
 @property (weak, nonatomic) IBOutlet UISlider *opacitySlider;
 
 
+@property (nonatomic, retain) CameraParameter *params;
 
 
-- (id) initWithPhoto:(NSString *)sttPhoto WithCallback:(void(^)(UIImage*))callback;
+
+
+
+- (id) initWithParams:(CameraParameter *)parameter  WithCallback:(void(^)(UIImage*))callback;
 
 
 

@@ -26,7 +26,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 @property (nonatomic, weak) IBOutlet UIImageView *imgSmallThumbNail;
 @property (nonatomic, weak) IBOutlet UIImageView *imgBigThumbNail;
-@property (nonatomic, retain) NSString *strPhotoName;
+
 
 - (IBAction)onTapThumb:(id)sender;
 - (IBAction)onTapCameraFlash:(id)sender;
@@ -54,6 +54,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 @end
 
 @implementation AVCamViewController
+@synthesize params;
 
 - (BOOL)isSessionRunningAndDeviceAuthorized
 {
@@ -69,10 +70,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 
 
-- (id) initWithPhoto:(NSString *)sttPhoto WithCallback:(void(^)(UIImage*))callback {
+- (id) initWithParams:(CameraParameter *)parameter  WithCallback:(void(^)(UIImage*))callback {
     self = [super initWithNibName:nil bundle:nil];
-    
-    self.strPhotoName = sttPhoto;
+    self.params = parameter;
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
        self = [super initWithNibName:@"AVCamViewController_iPad" bundle:nil];
@@ -92,12 +92,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
 	[super viewDidLoad];
     
-    UIImage* defaultImage = [UIImage imageNamed:self.strPhotoName];
-    
-//    defaultImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:self.strPhotoName]]];
-    
-    self.imgBigThumbNail.image = defaultImage;
-    self.imgSmallThumbNail.image = defaultImage;
     
 	
 	// Create the AVCaptureSession
@@ -121,18 +115,24 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[self setBackgroundRecordingID:UIBackgroundTaskInvalid];
 		
 		NSError *error = nil;
-		
-		AVCaptureDevice *videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionBack];
-		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
         
+		AVCaptureDevice *videoDevice;
+        if(params.nDefaultCamera == 0)
+        {
+            videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionBack];
+        }
+        else{
+            videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:AVCaptureDevicePositionFront];
+        }
+        AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
         
         
         dispatch_async(dispatch_get_main_queue(), ^{
             if(![videoDevice hasTorch])
             {
                 self.btnFlash.hidden = YES;
-                self.cameraButton.center = self.btnThumb.center;
-                self.btnThumb.center = self.btnFlash.center;
+//                self.cameraButton.center = self.btnThumb.center;
+//                self.btnThumb.center = self.btnFlash.center;
             }
         });
 
@@ -195,6 +195,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     
     
+    
+    
 }
 
 
@@ -242,10 +244,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	return YES;
 }
 
+
 - (BOOL)shouldAutorotate
 {
 	// Disable autorotation of the interface when recording is in progress.
-	return ![self lockInterfaceRotation];
+    return ![self lockInterfaceRotation];
 }
 
 - (NSUInteger)supportedInterfaceOrientations
@@ -374,6 +377,38 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		
 		AVCaptureDevice *videoDevice = [AVCamViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:preferredPosition];
 		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:nil];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.btnFlash setImage:[UIImage imageNamed:@"icon_flash_auto.png"] forState:UIControlStateNormal];
+            self.btnFlash.tag = 0;
+            
+            if ([videoDevice hasTorch] && [videoDevice hasFlash]){
+                [videoDevice lockForConfiguration:nil];
+                [videoDevice setTorchMode:NO];
+                [videoDevice setFlashMode:AVCaptureFlashModeOn];
+                [videoDevice unlockForConfiguration];
+                
+                
+                [self.btnFlash setImage:[UIImage imageNamed:@"icon_flash_auto.png"] forState:UIControlStateNormal];
+                self.btnFlash.tag = 0;
+                self.btnFlash.hidden = NO;
+                return;
+            }
+            if(![videoDevice hasTorch])
+            {
+                self.btnFlash.hidden = YES;
+//                self.cameraButton.center = self.btnThumb.center;
+//                self.btnThumb.center = self.btnFlash.center;
+            }
+            else if([videoDevice hasTorch] && params.bSwitchFlash)
+            {
+                self.btnFlash.hidden = NO;
+//                self.btnThumb.center = self.cameraButton.center;
+//                self.cameraButton.center = CGPointMake(self.cameraButton.center.x - fDist, self.cameraButton.center.y);
+                
+            }
+        });
+        
 		
 		[[self session] beginConfiguration];
 		
@@ -622,21 +657,14 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     self.opacitySlider.transform = trans;
     [self.opacitySlider addTarget:self action:@selector(onChangeOpacitySlider) forControlEvents:UIControlEventValueChanged];
     
-    
-//    CGRect bounds = [[UIScreen mainScreen] bounds];
-//    float fX = bounds.size.width - opacitySlider.frame.size.width;
-//    float fHeight = bounds.size.width * 2 / 3;
-//    float fY = (bounds.size.height - fHeight) / 2;
-//    float fWidth = opacitySlider.frame.size.width;
-//    
-//    
-//    
-//    opacitySlider.frame = CGRectMake(fX, fY, fWidth, fHeight);
     self.opacitySlider.value  = 1;
 }
 
 -(void) initialize
 {
+    
+    fDist = self.btnThumb.center.x - self.cameraButton.center.x;
+    
     capturedImage = [[UIImage alloc] init];
     capturedImageData = [[NSData alloc] init];
     [self addOpacitySlider];
@@ -646,7 +674,79 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     self.saveBgPanel.hidden = YES;
     self.btnDeletePicture.hidden = YES;
     self.btnSaveImage.hidden = YES;
+    
+    
+    self.imgBigThumbNail.image = [UIImage imageWithData:self.params.bgImageData];
+    self.imgSmallThumbNail.image = [UIImage imageWithData:self.params.bgImageData];
+    
+    self.btnThumb.hidden = !params.bMiniature;
+    self.btnFlash.hidden = !params.bSwitchFlash;
+    self.cameraButton.hidden = !params.bSwitchCamera;
+    self.opacitySlider.hidden = !params.bOpacity;
+    
+    if (!params.bgImageData) {
+        self.imgBigThumbNail.hidden = YES;
+        self.imgSmallThumbNail.hidden = YES;
+    }
+    
+    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    if(params.nDefaultFlash == 1)
+    {
+        [self.btnFlash setImage:[UIImage imageNamed:@"icon_flash.png"] forState:UIControlStateNormal];
+        self.btnFlash.tag = 1;
+        
+        if ([device hasTorch] && [device hasFlash]){
+            [device lockForConfiguration:nil];
+            [device setTorchMode:YES];
+            [device setFlashMode:AVCaptureFlashModeOn];
+            [device unlockForConfiguration];
+        }
+    }
+    else{
+        [self.btnFlash setImage:[UIImage imageNamed:@"icon_flash_auto.png"] forState:UIControlStateNormal];
+        self.btnFlash.tag = 0;
+        
+        if ([device hasTorch] && [device hasFlash]){
+            [device lockForConfiguration:nil];
+            [device setTorchMode:NO];
+            [device setFlashMode:AVCaptureFlashModeOn];
+            [device unlockForConfiguration];
+        }
+    }
+    
+//    if(!params.bSwitchFlash)
+//    {
+//        self.cameraButton.center = self.btnThumb.center;
+//        self.btnThumb.center = self.btnFlash.center;
+//    }
+//    if(!params.bMiniature)
+//    {
+//        self.cameraButton.center = self.btnThumb.center;
+//    }
+    
+    
 }
+
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    if(params.bgImageData1)
+    {
+        isRotated = !isRotated;
+        if(isRotated)
+        {
+            self.imgBigThumbNail.image = [UIImage imageWithData:params.bgImageData1];
+            self.imgSmallThumbNail.image = [UIImage imageWithData:params.bgImageData1];
+        }
+        else{
+            self.imgBigThumbNail.image = [UIImage imageWithData:params.bgImageData];
+            self.imgSmallThumbNail.image = [UIImage imageWithData:params.bgImageData];
+        }
+    }
+    
+}
+
+
 
 
 - (void) takePicture
@@ -694,7 +794,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view addSubview:activityIndicator];
     [activityIndicator startAnimating];
     
-    [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[capturedImage CGImage] orientation:(ALAssetOrientation)[capturedImage imageOrientation] completionBlock:nil];
+    if(params.bSaveInGallery)
+    {
+        [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:[capturedImage CGImage] orientation:(ALAssetOrientation)[capturedImage imageOrientation] completionBlock:nil];
+    }
+    
     
     [self.view setUserInteractionEnabled:NO];
     _callback([UIImage imageWithData:capturedImageData]);
@@ -714,7 +818,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     {
         return;
     }
-    
     
         AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
         CGFloat fMaxZoomFactor =  device.activeFormat.videoMaxZoomFactor;
