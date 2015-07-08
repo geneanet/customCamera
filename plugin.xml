@@ -47,9 +47,6 @@
             <feature name="LocalStorage">
                 <param name="ios-package" value="CDVLocalStorage" />
             </feature>
-            <feature name="Camera">
-                <param name="ios-package" value="CDVCamera" />
-            </feature>
         </config-file>
 
         <header-file src="src/ios/classes/CustomCamera.h" /> 
