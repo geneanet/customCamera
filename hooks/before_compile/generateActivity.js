@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+"use strict";
+
 // Define required.
 var fs = require("fs");
-var xml2js = require('xml2js');
+var xml2js = require("xml2js");
 var parseString = xml2js.parseString;
 var builder = new xml2js.Builder();
 
@@ -23,7 +25,7 @@ var pathResPlugin = __dirname+"/../../res/";
  */
 var generatePathFrompackageName = function(packageName) {
     return packageName.split(".").join("/");
-}
+};
 
 /**
  * Create different java classes.
@@ -51,14 +53,12 @@ var createClasses = function(packageName) {
         console.error("File CameraActivity.java or/and CameraLauncher.java not found.");
         process.exit(1);
     }
-}
+};
 
 /**
  * Update AndroidManifest.xml of the current application.
- * 
- * @param {string} packageName Package name of the current application.
  */
-var updateAndroidManifest = function(packageName) {
+var updateAndroidManifest = function() {
     var pathAndroidManifestCordova = pathAndroidCordova+"AndroidManifest.xml";
     if (fs.existsSync(pathAndroidManifestCordova)) {
         // get content AndroidManifest.
@@ -69,19 +69,19 @@ var updateAndroidManifest = function(packageName) {
 
         // add activity if needed.
         var needAddActivity = true;
-        var currentActivities = contentAndroidManifest["manifest"]["application"][0]["activity"];
+        var currentActivities = contentAndroidManifest.manifest.application[0].activity;
         for (var i = currentActivities.length - 1; i >= 0; i--) {
-            if (currentActivities[i]["$"]["android:name"] == "CameraActivity") {
+            if (currentActivities[i].$["android:name"] == "CameraActivity") {
                 needAddActivity = false;
             }
-        };
+        }
         if (needAddActivity) {
-            contentAndroidManifest["manifest"]["application"][0]["activity"].push({
+            contentAndroidManifest.manifest.application[0].activity.push({
                 $: {
                     "android:name": "CameraActivity",
                     "android:label": "CameraActivity",
                 }
-            })
+            });
             var newXmlAndroidManifest = builder.buildObject(contentAndroidManifest);
             fs.writeFileSync(
                 pathAndroidManifestCordova,
@@ -92,7 +92,7 @@ var updateAndroidManifest = function(packageName) {
         console.error("File AndroidManifest.xml for cordova not found.");
         process.exit(1);
     }
-}
+};
 
 /**
  * Update differents config file (translate, res/layout, etc).
@@ -123,19 +123,20 @@ var updateConfig = function() {
         // get translations.
         var translationsForApplication = fs.readFileSync(pathTranslations, {encoding: "utf8"});
         translationsForApplication = JSON.parse(translationsForApplication);
-        for (lang in translationsForApplication) {
+        var objToXml;
+        var parseStringCallback = function (err, result) {
+            objToXml = result;
+        };
+        for (var lang in translationsForApplication) {
             var pathFileTranslate = pathResAndroidCordova+"values-"+lang+"/";
             if (lang == "default") {
                 pathFileTranslate = pathResAndroidCordova+"values/";
             }
 
-            var objToXml;
             // already exist, get data.
             if (fs.existsSync(pathFileTranslate+"strings.xml")) {
-                var objToXml = fs.readFileSync(pathFileTranslate+"strings.xml", {encoding: "utf8"});
-                parseString(objToXml, function (err, result) {
-                    objToXml = result;
-                });
+                objToXml = fs.readFileSync(pathFileTranslate+"strings.xml", {encoding: "utf8"});
+                parseString(objToXml, parseStringCallback);
             } else {
                 // generate minimal object.
                 objToXml = {
@@ -146,8 +147,8 @@ var updateConfig = function() {
             }
 
             // add message.
-            for (tag in translationsForApplication[lang]) {
-                objToXml["resources"]["string"].push({
+            for (var tag in translationsForApplication[lang]) {
+                objToXml.resources.string.push({
                     _: translationsForApplication[lang][tag],
                     $: {
                         name: tag
@@ -182,10 +183,10 @@ var updateConfig = function() {
                     fs.mkdirSync(pathResAndroidCordova+nameDirDrawable);
                 }
                 fs.writeFileSync(pathResAndroidCordova+nameDirDrawable+"/"+nameFileInDrawable, contentFileDrawable);
-            };
+            }
         }
-    };
-}
+    }
+};
 
 // Check if files required exist.
 if (fs.existsSync(pathConfigXml)) {
@@ -194,7 +195,7 @@ if (fs.existsSync(pathConfigXml)) {
     parseString(configContent, function (err, result) {
         configContent = result;
     });
-    var packageName = configContent["widget"]["$"]["id"];
+    var packageName = configContent.widget.$.id;
 
     createClasses(packageName);
     updateAndroidManifest(packageName);
