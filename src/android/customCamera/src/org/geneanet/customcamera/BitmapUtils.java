@@ -40,20 +40,18 @@ public class BitmapUtils {
     int displayHeightPx = (int) displayMetrics.heightPixels;
     // Get picture.
     Options options = BitmapUtils.determineOriginalSizePicture(data);
-    int widthResize = 0;
-    int heightResize = 0;
     int widthBackground = (int) (options.outWidth * displayMetrics.density);
     int heightBackground= (int) (options.outHeight * displayMetrics.density);
     float ratioX = (float) widthBackground / (float) displayWidthPx;
     float ratioY = (float) heightBackground / (float) displayHeightPx;
     int inSampleSize = 1;
     if (ratioX > ratioY && ratioX > 1) {
-      widthResize = (int) displayWidthPx;
-      heightResize = (int) (heightBackground / ratioX);
+      widthBackground = (int) displayWidthPx;
+      heightBackground = (int) (heightBackground / ratioX);
       inSampleSize = (int) ratioX;
     } else if (ratioX <= ratioY && ratioY > 1) {
-      widthResize = (int) (widthBackground / ratioY);
-      heightResize = (int) displayHeightPx;
+      widthBackground = (int) (widthBackground / ratioY);
+      heightBackground = (int) displayHeightPx;
       inSampleSize = (int) ratioY;
     }
     options.inSampleSize = inSampleSize;
@@ -61,9 +59,7 @@ public class BitmapUtils {
     
     Bitmap picture = BitmapFactory.decodeByteArray(data, 0, data.length, options);
     data = null;
-    if (widthResize > 0 && heightResize > 0) {
-      picture = Bitmap.createScaledBitmap(picture, widthResize, heightResize, true);
-    }
+    picture = Bitmap.createScaledBitmap(picture, widthBackground, heightBackground, true);
     
     return picture;
   }
