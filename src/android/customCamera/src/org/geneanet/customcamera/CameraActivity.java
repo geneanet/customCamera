@@ -1017,6 +1017,20 @@ public class CameraActivity extends Activity {
     Camera.Parameters camParameters = customCamera.getParameters();
     camParameters.setPreviewSize(optimalSize.width, optimalSize.height);
     customCamera.setParameters(camParameters);
+    setPictureSizeFromPreviewSize(optimalSize);
+  }
+  
+  /**
+   * To set the picture size optimized on the preview size.
+   * @param Size previewSize
+   */
+  private void setPictureSizeFromPreviewSize(Size previewSize) {
+    Size optimalPictureSize = ManagerCamera.getOptimalPictureSize(previewSize.width, previewSize.height);
+    if (optimalPictureSize != null) {
+      Camera.Parameters camParameters = customCamera.getParameters();
+      camParameters.setPictureSize(optimalPictureSize.width, optimalPictureSize.height);
+      customCamera.setParameters(camParameters);
+    }    
   }
   
   /**
