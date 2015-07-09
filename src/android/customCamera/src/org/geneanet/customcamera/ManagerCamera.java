@@ -240,6 +240,38 @@ public class ManagerCamera {
             }
         }
     }
+
     return optimalSize;
+  }
+  
+  /**
+   * Get the optimal picture size. 
+   * 
+   * @param int w Width of the wanted picture.
+   * @param int h Height of the wanted picture.
+   * 
+   * @return Camera.Size Optimal resolution.
+   */
+  public static Camera.Size getOptimalPictureSize(int w, int h) {
+    List<Camera.Size> pictureSizes = ManagerCamera.mCamera.getParameters().getSupportedPictureSizes();
+    
+    if (pictureSizes == null) {
+      return null;
+    }
+
+    Camera.Size optimalSizePicture = null;
+    for (Camera.Size size : pictureSizes) {
+        if (
+            ((float)size.width / (float)size.height) == ((float)w / (float)h) &&
+            (
+                optimalSizePicture == null ||
+                optimalSizePicture.width < size.width
+            )
+        ) {
+          optimalSizePicture = size;
+        }
+    }
+    
+    return optimalSizePicture;
   }
 }
