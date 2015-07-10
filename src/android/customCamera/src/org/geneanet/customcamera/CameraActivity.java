@@ -797,7 +797,7 @@ public class CameraActivity extends Activity {
           Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
           File pictureFile = new File(pathPicture);
           Uri pictureFileUri = Uri.fromFile(pictureFile);
-          mediaScanIntent.setData(pictureFile.getAbsolutePath());
+          mediaScanIntent.setData(pictureFileUri);
           this.sendBroadcast(mediaScanIntent);
         } else {
           Log.e("customCamera", "The directory for storage the picture in the gallery doesn't exist and his creation is failed.");
