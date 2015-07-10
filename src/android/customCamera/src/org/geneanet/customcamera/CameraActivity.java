@@ -20,6 +20,7 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
@@ -791,6 +792,13 @@ public class CameraActivity extends Activity {
           outStream.write(data);
           data = null;
           outStream.close();
+          
+          // Notify the gallery to display the new picture.
+          Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+          File pictureFile = new File(pathPicture);
+          Uri pictureFileUri = Uri.fromFile(pictureFile);
+          mediaScanIntent.setData(pictureFile.getAbsolutePath());
+          this.sendBroadcast(mediaScanIntent);
         } else {
           Log.e("customCamera", "The directory for storage the picture in the gallery doesn't exist and his creation is failed.");
         }
