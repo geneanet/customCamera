@@ -774,14 +774,26 @@ public class CameraActivity extends Activity {
         // Get path picture to storage.
         String pathPicture = Environment.getExternalStorageDirectory()
             .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera/";
-        pathPicture = pathPicture
-            + String.format("%d.jpeg", System.currentTimeMillis());
+        
+        // Create the directory if it doesn't exist.
+        File galleryDirectory = new File(pathPicture);
+        boolean directoryExist = galleryDirectory.exists();
+        if (!directoryExist) {
+          directoryExist = galleryDirectory.mkdirs();
+        }
+        
+        if (directoryExist) {
+          pathPicture = pathPicture
+              + String.format("%d.jpeg", System.currentTimeMillis());
 
-        // Write data in file.
-        FileOutputStream outStream = new FileOutputStream(pathPicture);
-        outStream.write(data);
-        data = null;
-        outStream.close();
+          // Write data in file.
+          FileOutputStream outStream = new FileOutputStream(pathPicture);
+          outStream.write(data);
+          data = null;
+          outStream.close();
+        } else {
+          Log.e("customCamera", "The directory for storage the picture in the gallery doesn't exist and his creation is failed.");
+        }
       }
       
       // Return to success & finish current activity.
