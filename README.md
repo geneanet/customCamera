@@ -10,7 +10,7 @@ Plugin documentation (english): [doc/en/index.md](doc/en/index.md)
 
 A list of platforms where the plugin has been tested by an user.
 
-| | **Last version (0.1.2)**|
+| | **0.1.2 (Last version)**|
 | ------------- | ----------- |
 | **Cordova** ||
 | → v4.1.2 | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
