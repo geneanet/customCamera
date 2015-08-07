@@ -2,6 +2,8 @@
 
 "use strict";
 
+/* jshint loopfunc:true */
+
 // Define required.
 var fs = require("fs");
 var xml2js = require("xml2js");
@@ -18,9 +20,9 @@ var pathResPlugin = __dirname+"/../../res/";
 
 /**
  * Generate a path based on a package name.
- * 
+ *
  * @param {string} packageName Package name, eg: com.example.
- * 
+ *
  * @return {string} Return path generate.
  */
 var generatePathFrompackageName = function(packageName) {
@@ -29,7 +31,7 @@ var generatePathFrompackageName = function(packageName) {
 
 /**
  * Create different java classes.
- * 
+ *
  * @param {string} packageName Package name of the current application.
  */
 var createClasses = function(packageName) {
@@ -137,6 +139,12 @@ var updateConfig = function() {
             if (fs.existsSync(pathFileTranslate+"strings.xml")) {
                 objToXml = fs.readFileSync(pathFileTranslate+"strings.xml", {encoding: "utf8"});
                 parseString(objToXml, parseStringCallback);
+                // Delete in resources strings which will be added in the strings.xml file if they exist already.
+                objToXml.resources.string.forEach(function (currentStringResource) {
+                    if (translationsForApplication[lang].hasOwnProperty(currentStringResource.$.name)) {
+                        delete translationsForApplication[lang][currentStringResource.$.name];
+                    }
+                });
             } else {
                 // generate minimal object.
                 objToXml = {
