@@ -5,3 +5,22 @@
 Plugin documentation (french): [doc/fr/index.md](doc/fr/index.md)
 
 Plugin documentation (english): [doc/en/index.md](doc/en/index.md)
+
+## Tested Platforms
+
+A list of platforms where the plugin has been tested by an user.
+
+| | **Last version (0.1.2)**|
+| ------------- | ----------- |
+| **Cordova** ||
+| → v4.1.2 | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| **Ionic** ||
+| → v1.6.4 | ✓ _by [@dazziola](https://github.com/dazziola)_ |
+| **Android** ||
+| → v4.1.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| → v4.2.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| → v4.4.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| → v5.0.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| → v5.1.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| **iOS** ||
+| → vx.x.x | ✗ |
