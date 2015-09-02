@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.iPad.XIB" version="3.0" toolsVersion="5056" systemVersion="12F45" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.iPad.XIB" version="3.0" toolsVersion="6254" systemVersion="14A389" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none">
     <dependencies>
-        <deployment defaultVersion="1536" identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AVCamViewController">
             <connections>
+                <outlet property="btnBigDeletePicture" destination="IqJ-oc-995" id="T1H-10-ESB"/>
+                <outlet property="btnBigSaveImage" destination="EFe-fE-P8a" id="P0Z-Xm-thh"/>
                 <outlet property="btnDeletePicture" destination="S1N-v6-cZw" id="1TW-yQ-2Ul"/>
                 <outlet property="btnFlash" destination="KMs-9J-eHV" id="pdI-VZ-buj"/>
                 <outlet property="btnSaveImage" destination="JJc-KF-LjK" id="att-go-Xq7"/>
@@ -37,7 +39,7 @@
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         </imageView>
                         <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sample.png" id="hb3-4z-EqI">
-                            <rect key="frame" x="0.0" y="90" width="768" height="844"/>
+                            <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         </imageView>
                         <button opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="cxS-Qn-d9p">
@@ -56,29 +58,51 @@
                         </imageView>
                         <view alpha="0.5" contentMode="scaleToFill" id="xaA-dP-8ce">
                             <rect key="frame" x="0.0" y="934" width="768" height="90"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                            <subviews>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="IqJ-oc-995">
+                                    <rect key="frame" x="0.0" y="0.0" width="376" height="90"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES"/>
+                                    <state key="normal">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <connections>
+                                        <action selector="onDeletePicture:" destination="-1" eventType="touchUpInside" id="XkX-0N-K4g"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="EFe-fE-P8a">
+                                    <rect key="frame" x="384" y="0.0" width="384" height="90"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" heightSizable="YES"/>
+                                    <state key="normal">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <connections>
+                                        <action selector="onSaveImage:" destination="-1" eventType="touchUpInside" id="pMu-f6-poC"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="S1N-v6-cZw">
+                                    <rect key="frame" x="147" y="20" width="50" height="50"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <state key="normal" image="icon_delete.png">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <connections>
+                                        <action selector="onDeletePicture:" destination="-1" eventType="touchUpInside" id="7ty-gh-NHC"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="JJc-KF-LjK">
+                                    <rect key="frame" x="566" y="20" width="50" height="50"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                    <state key="normal" image="icon_submit.png">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <connections>
+                                        <action selector="onSaveImage:" destination="-1" eventType="touchUpInside" id="mry-0F-fqI"/>
+                                    </connections>
+                                </button>
+                            </subviews>
                             <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         </view>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="S1N-v6-cZw">
-                            <rect key="frame" x="147" y="950" width="50" height="50"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <state key="normal" image="icon_delete.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="onDeletePicture:" destination="-1" eventType="touchUpInside" id="7ty-gh-NHC"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="JJc-KF-LjK">
-                            <rect key="frame" x="566" y="954" width="50" height="50"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                            <state key="normal" image="icon_submit.png">
-                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                            </state>
-                            <connections>
-                                <action selector="onSaveImage:" destination="-1" eventType="touchUpInside" id="mry-0F-fqI"/>
-                            </connections>
-                        </button>
                         <view alpha="0.5" contentMode="scaleToFill" id="kso-6k-eTa">
                             <rect key="frame" x="0.0" y="0.0" width="768" height="90"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -94,7 +118,7 @@
                                 <action selector="onBack:" destination="-1" eventType="touchUpInside" id="zpX-8h-Pcs"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="br3-lo-te3">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="br3-lo-te3">
                             <rect key="frame" x="480" y="20" width="50" height="50"/>
                             <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                             <state key="normal" image="icon_flip.png">
@@ -135,7 +159,6 @@
                 </view>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
         </view>
     </objects>
     <resources>
@@ -150,4 +173,9 @@
         <image name="icon_submit.png" width="60" height="60"/>
         <image name="sample.png" width="483" height="263"/>
     </resources>
+    <simulatedMetricsContainer key="defaultSimulatedMetrics">
+        <simulatedStatusBarMetrics key="statusBar"/>
+        <simulatedOrientationMetrics key="orientation"/>
+        <simulatedScreenMetrics key="destination"/>
+    </simulatedMetricsContainer>
 </document>

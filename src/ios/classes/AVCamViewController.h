@@ -3,28 +3,29 @@
 
 @interface AVCamViewController : UIViewController
 {
-        NSData *_imageData;
-        void(^_callback)(UIImage*);
+    NSData *_imageData;
+    void (^_callback)(UIImage *, NSString *, NSString *);
     
-        UIPinchGestureRecognizer *twoFingerPinch;
+    UIPinchGestureRecognizer *twoFingerPinch;
     
-        CGRect frameBtnThumb;
-
-        UIImage *capturedImage;
-        NSData *capturedImageData;
+    CGRect frameBtnThumb;
     
-        BOOL isRotated;
+    UIImage *capturedImage;
+    NSData *capturedImageData;
+    
+    BOOL isRotated;
     
     CGFloat fDist;
-    
 }
 
 @property (weak, nonatomic) IBOutlet UIView *saveBgPanel;
 @property (weak, nonatomic) IBOutlet UIView *topBgPanel;
 @property (weak, nonatomic) IBOutlet UIImageView *capturedImageView;
 
+@property (weak, nonatomic) IBOutlet UIButton *btnBigDeletePicture;
 @property (weak, nonatomic) IBOutlet UIButton *btnDeletePicture;
 @property (weak, nonatomic) IBOutlet UIButton *btnSaveImage;
+@property (weak, nonatomic) IBOutlet UIButton *btnBigSaveImage;
 @property (weak, nonatomic) IBOutlet UISlider *opacitySlider;
 
 
@@ -33,8 +34,7 @@
 
 
 
-
-- (id) initWithParams:(CameraParameter *)parameter  WithCallback:(void(^)(UIImage*))callback;
+- (id)initWithParams:(CameraParameter *)parameter WithCallback:(void (^)(UIImage *, NSString *, NSString *))callback;
 
 
 
