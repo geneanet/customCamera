@@ -23,4 +23,5 @@ A list of platforms where the plugin has been tested by an user.
 | → v5.0.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
 | → v5.1.x | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
 | **iOS** ||
-| → vx.x.x | ✗ |
+| → v7.1 | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
+| → v8.1 | ✓ _by [@ChristopheBoucaut](https://github.com/ChristopheBoucaut)_ |
