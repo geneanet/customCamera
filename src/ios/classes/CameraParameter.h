@@ -3,7 +3,7 @@
 
 @interface CameraParameter : NSObject
 {
-    
+
 }
 
 @property(nonatomic, retain) NSData *bgImageData;
@@ -25,7 +25,5 @@
 @property(nonatomic, assign) BOOL bSwitchCamera;
 
 -(id) initWithCommand :(CDVInvokedUrlCommand *)command;
-
-
 
 @end

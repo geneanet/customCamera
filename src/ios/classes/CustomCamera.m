@@ -6,20 +6,16 @@
 
 - (void)startCamera:(CDVInvokedUrlCommand *)command {
     lastCommand = command;
-    
+
     NSString *guid = [[NSUUID new] UUIDString];
     NSString *uniqueFileName = [NSString stringWithFormat:@"%@.jpg", guid];
-    
+
     filename = uniqueFileName;
     nSourceType = 1;
     nDestType = 0;
-    
+
     CameraParameter *param = [[CameraParameter alloc] initWithCommand:lastCommand];
-    
-    
-    
-    
-    //    NSString * strPhotoName = @"sample.png";
+
     if (nSourceType == 0) {
         UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -41,7 +37,7 @@
                     if (image) {
                         if (nDestType == 0) {
                             NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
-                            
+
                             NSString *strEncodeData = [imageData base64EncodedStringWithOptions:0];
                             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                                         messageAsString:strEncodeData];
@@ -52,7 +48,6 @@
                             NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
                             NSString *imagePath = [documentsDirectory stringByAppendingPathComponent:filename];
                             NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
-                            //[self deleteFileWithName:imagePath];
                             [imageData writeToFile:imagePath atomically:YES];
                             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                                         messageAsString:[[NSURL fileURLWithPath:imagePath] absoluteString]];
@@ -80,12 +75,12 @@
     UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
     //Or you can get the image url from AssetsLibrary
     //    NSURL *path = [info valueForKey:UIImagePickerControllerReferenceURL];
-    
+
     [picker dismissViewControllerAnimated:YES completion: ^{
         @autoreleasepool {
             if (nDestType == 0) {
                 NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
-                
+
                 NSString *strEncodeData = [imageData base64EncodedStringWithOptions:0];
                 CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                             messageAsString:strEncodeData];
@@ -121,28 +116,5 @@
         NSLog(@"File %@ doesn't exists", fileName);
     }
 }
-
-//- (UIImage*)scaleImage:(UIImage*)image toSize:(CGSize)targetSize {
-//    if (targetSize.width <= 0 && targetSize.height <= 0) {
-//        return image;
-//    }
-//
-//    CGFloat aspectRatio = image.size.height / image.size.width;
-//    CGSize scaledSize;
-//    if (targetSize.width > 0 && targetSize.height <= 0) {
-//        scaledSize = CGSizeMake(targetSize.width, targetSize.width * aspectRatio);
-//    } else if (targetSize.width <= 0 && targetSize.height > 0) {
-//        scaledSize = CGSizeMake(targetSize.height / aspectRatio, targetSize.height);
-//    } else {
-//        scaledSize = CGSizeMake(targetSize.width, targetSize.height);
-//    }
-//
-//    UIGraphicsBeginImageContext(scaledSize);
-//    [image drawInRect:CGRectMake(0, 0, scaledSize.width, scaledSize.height)];
-//    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-//    UIGraphicsEndImageContext();
-//    return scaledImage;
-//}
-
 
 @end
