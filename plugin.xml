@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin 
+<plugin
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="org.geneanet.customCamera"
-    version="0.1.2"
+    version="0.2.0"
 >
     <name>GeneanetCustomCamera</name>
     <description>This cordova plugin is an alternative to the official cordova plugin (camera). It starts a custom camera: image overlay with an opacity slider, user-defined color of the buttons, activating/deactivating functions.</description>
@@ -49,18 +49,18 @@
             </feature>
         </config-file>
 
-        <header-file src="src/ios/classes/CustomCamera.h" /> 
-        <source-file src="src/ios/classes/CustomCamera.m" /> 
-        
+        <header-file src="src/ios/classes/CustomCamera.h" />
+        <source-file src="src/ios/classes/CustomCamera.m" />
+
         <header-file src="src/ios/classes/AVCamPreviewView.h" />
         <source-file src="src/ios/classes/AVCamPreviewView.m" />
-          
+
         <header-file src="src/ios/classes/AVCamViewController.h" />
         <source-file src="src/ios/classes/AVCamViewController.m" />
 
         <header-file src="src/ios/classes/CameraParameter.h" />
         <source-file src="src/ios/classes/CameraParameter.m" />
-        
+
         <resource-file src="src/ios/classes/AVCamViewController_iPhone.xib" />
         <resource-file src="src/ios/classes/AVCamViewController_iPad.xib" />
 
@@ -76,7 +76,7 @@
         <resource-file src="src/ios/image/icon_min.png" />
         <resource-file src="src/ios/image/icon_submit.png" />
         <resource-file src="src/ios/image/sample.png" />
-        
+
         <framework src="CoreGraphics.framework" weak="true" />
         <framework src="AssetsLibrary.framework" weak="true" />
         <framework src="AVFoundation.framework" weak="true" />
