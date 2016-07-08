@@ -33,7 +33,11 @@
             defaultFlash: this.FlashModes.DISABLE, // default state for flash. See CustomCamera.FlashModes for corrects values.
             switchFlash: true, // active or disable the switch flash button.
             defaultCamera: this.CameraFacings.BACK, // default camera used. See CustomCamera.CameraFacings for corrects values.
-            switchCamera: true // active or disable the switch camera button.
+            switchCamera: true, // active or disable the switch camera button.
+
+            //9zai
+            targetWeight:0,
+            targetHeight:0
         };
 
         for (var nameOption in defaultOptions) {
@@ -74,7 +78,9 @@
                 options.defaultFlash,
                 options.switchFlash,
                 options.defaultCamera,
-                options.switchCamera
+                options.switchCamera,
+                options.targetWeight,
+                options.targetHeight
             ]
         );
     };

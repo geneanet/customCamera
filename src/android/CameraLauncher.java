@@ -11,6 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
+
 public class CameraLauncher extends CordovaPlugin {
 
   protected CallbackContext callbackContext;
@@ -32,6 +35,7 @@ public class CameraLauncher extends CordovaPlugin {
    */
   public boolean execute(String action, JSONArray args,
       CallbackContext callbackContext) throws JSONException {
+        Log.i("9zai_Launcher","in the execute");
     if (action.equals("startCamera")) {
       this.callbackContext = callbackContext;
 
@@ -90,6 +94,10 @@ public class CameraLauncher extends CordovaPlugin {
 
       intent.putExtra("defaultCamera", args.getInt(10));
       intent.putExtra("switchCamera", args.getBoolean(11));
+
+            //9zai
+      intent.putExtra("targetWeight",args.getInt(12));
+      intent.putExtra("targetHeight",args.getInt(13));
 
       cordova.startActivityForResult((CordovaPlugin) this, intent,
           CameraLauncher.REQUEST_CODE);

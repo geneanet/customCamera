@@ -30,7 +30,7 @@
         <activity
             android:name="org.geneanet.customcamera.CameraActivity"
             android:label="@string/title_activity_camera_activity"
-            android:screenOrientation="fullSensor">
+            android:screenOrientation="landscape">
         </activity>
         
     </application>

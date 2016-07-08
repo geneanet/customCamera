@@ -63,4 +63,5 @@ public class BitmapUtils {
     
     return picture;
   }
+  
 }

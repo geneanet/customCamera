@@ -7,7 +7,7 @@ COLOR_YELLOW="\\033[1;33m";
 COLOR_RED="\\033[1;31m";
 
 # Get the platform to test and check if it's existed.
-PLATFORM=$1;
+PLATFORM="android";
 if [[ $PLATFORM != "android" && $PLATFORM != "ios" ]];
 then
     echo -e $COLOR_RED"$PLATFORM is an unknown platform."$COLOR_NORMAL;

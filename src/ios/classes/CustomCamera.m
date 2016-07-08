@@ -1,6 +1,8 @@
 #import "CustomCamera.h"
 #import "AVCamViewController.h"
 #import "CameraParameter.h"
+#import "UIImage+CropScaleOrientation.h"
+
 
 @implementation CustomCamera
 
@@ -9,14 +11,22 @@
 
     NSString *guid = [[NSUUID new] UUIDString];
     NSString *uniqueFileName = [NSString stringWithFormat:@"%@.jpg", guid];
+    NSLog(@"test logging");
+    NSLog(@"may be this will work");
+    
 
     filename = uniqueFileName;
-    nSourceType = 1;
+    nSourceType = 1;//0 for choosing picture 1 for taking one
     nDestType = 0;
 
     CameraParameter *param = [[CameraParameter alloc] initWithCommand:lastCommand];
+    quality = param.fQuality;
+    targetSize = param.targetSize;
+    
 
+    
     if (nSourceType == 0) {
+        NSLog(@"In the if");
         UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         imagePickerController.delegate = self;
@@ -35,6 +45,10 @@
             AVCamViewController *cameraViewController = [[AVCamViewController alloc] initWithParams:param WithCallback: ^(UIImage *image, NSString *errorCode, NSString *message) {
                 @autoreleasepool {
                     if (image) {
+                        NSLog(@"9zai in the image if");
+                         if((targetSize.width > 0) && (targetSize.height > 0)){
+                           image = [image imageByScalingNotCroppingForSize:targetSize];
+                        }
                         if (nDestType == 0) {
                             NSData *imageData = UIImageJPEGRepresentation(image, quality / 100);
 
@@ -73,6 +87,10 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     //You can retrieve the actual UIImage
     UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
+    if((targetSize.width > 0) && (targetSize.height > 0)){
+        image = [image imageByScalingNotCroppingForSize:targetSize];
+    }
+    NSLog(@"9zai scale data here");
     //Or you can get the image url from AssetsLibrary
     //    NSURL *path = [info valueForKey:UIImagePickerControllerReferenceURL];
 
