@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.KeyEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -71,6 +72,9 @@ public class CameraActivity extends Activity {
   private Boolean opacity = true;
   // Flag to save state of flash -> 0 : off, 1 : on, 2 : auto. 
   private int stateFlash = 0;
+
+  private int targetWeight = 0;// not resize if both 0
+  private int targetHeight = 0;
 
   public static final int DEGREE_0 = 0;
   public static final int DEGREE_90 = 90;
@@ -163,6 +167,7 @@ public class CameraActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Log.i("9zai","6.23");
 
     /* Remove title bar */
     this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -174,6 +179,8 @@ public class CameraActivity extends Activity {
 
     opacity = this.getIntent().getBooleanExtra("opacity", true);
     stateFlash = this.getIntent().getIntExtra("defaultFlash", CameraActivity.FLASH_DISABLE);
+    targetHeight = this.getIntent().getIntExtra("targetHeight",0);
+    targetWeight = this.getIntent().getIntExtra("targetWeight",0);
 
     if (opacity) {
       // Event on change opacity.
@@ -286,6 +293,7 @@ public class CameraActivity extends Activity {
     CameraPreview myPreview = new CameraPreview(this, customCamera);
     cameraPreview.addView(myPreview);
     
+    Log.i("9zai","lalala,on start");
     // Hide the switch camera button if the number of cameras is lower than 2.
     if(Camera.getNumberOfCameras() < 2){
       ImageButton switchCamera = (ImageButton) findViewById(R.id.switchCamera);
@@ -350,6 +358,18 @@ public class CameraActivity extends Activity {
     }
     
     return true;
+  }
+  
+  /**-------------------9zai
+  * Handle volumn button event
+  */
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event){
+    if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN|| keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+      startTakePhoto();
+      return true;
+    }
+    return super.onKeyDown(keyCode,event);
   }
   
   /**
@@ -749,17 +769,24 @@ public class CameraActivity extends Activity {
    * @param view The curretnView.
    */
   public void acceptPhoto(View view) {
+    Log.i("9zai","Photo accepted");
     final CameraActivity cameraActivityCurrent = this;
     try {
       BitmapFactory.Options opt = new BitmapFactory.Options();
       // Temporarily storage to use for decoding
       opt.inTempStorage = new byte[16 * 1024];
       byte[] data = TmpFileUtils.getTmpFileContent(this, NAME_FILE_PICTURE_TAKEN);
-      
+      Log.i("9zai phone location",NAME_FILE_PICTURE_TAKEN);
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       Bitmap photoTakenBitmap;
       try {
         photoTakenBitmap = BitmapFactory.decodeByteArray(data, 0, data.length, opt);
+        Log.i("9zai","accepted and start to qualify");
+        //-----9zai     resize
+        if(targetHeight!=0 && targetWeight!=0){
+          photoTakenBitmap = Bitmap.createScaledBitmap(photoTakenBitmap, targetWeight, targetHeight, true);
+        }
+
         photoTakenBitmap.compress(
             CompressFormat.JPEG, this.getIntent().getIntExtra("quality", 100), stream);
         data = stream.toByteArray();
@@ -891,6 +918,7 @@ public class CameraActivity extends Activity {
     if (getDeviceDefaultOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
       code ++;
     }
+    Log.i("9zai:Rotation",""+code);
 
     return code == 4 ? 0 : code;
   }
@@ -1063,10 +1091,10 @@ public class CameraActivity extends Activity {
 
     switch (getCustomRotation()) {
       case 0:
-        redirect = CameraActivity.DEGREE_90;
+/*        redirect = CameraActivity.DEGREE_90;
         if (ManagerCamera.currentCameraIsFacingFront() || orientationCamera == 1) {
           redirect = CameraActivity.DEGREE_270;
-        }
+        }   --- This is the situation with protrait   9zai   */
         break;
       case 1:
         redirect = CameraActivity.DEGREE_0;

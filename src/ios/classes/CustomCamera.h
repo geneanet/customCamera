@@ -25,6 +25,9 @@
     BOOL switchCamera;
 
     NSString *filename;
+
+    CGSize targetSize;
+
 }
 - (void)startCamera:(CDVInvokedUrlCommand*)command;
 

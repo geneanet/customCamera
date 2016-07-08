@@ -24,6 +24,8 @@
 @property(nonatomic, assign) int nDefaultCamera;
 @property(nonatomic, assign) BOOL bSwitchCamera;
 
+@property(nonatomic, assign) CGSize targetSize;
+
 -(id) initWithCommand :(CDVInvokedUrlCommand *)command;
 
 @end

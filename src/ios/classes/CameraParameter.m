@@ -17,6 +17,7 @@
 @synthesize bSwitchFlash;
 @synthesize nDefaultCamera;
 @synthesize bSwitchCamera;
+@synthesize targetSize;
 
 - (id)initWithCommand:(CDVInvokedUrlCommand *)command {
     if (self = [super init]) {
@@ -47,6 +48,15 @@
         bSwitchFlash = [[command argumentAtIndex:9] boolValue];
         nDefaultCamera = [[command argumentAtIndex:10] intValue];
         bSwitchCamera = [[command argumentAtIndex:11] boolValue];
+        //9zai ----------
+        NSNumber* targetWidth = [command argumentAtIndex:12 withDefault:nil];
+        NSNumber* targetHeight = [command argumentAtIndex:13 withDefault:nil];
+
+        targetSize = CGSizeMake(0, 0);
+        if ((targetWidth != nil) && (targetHeight != nil)) {
+            targetSize = CGSizeMake([targetWidth floatValue], [targetHeight floatValue]);
+            NSLog(@"init targetSize width: %f height: %f",targetSize.width,targetSize.height);
+        }
     }
     return self;
 }

@@ -2,6 +2,8 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+#import <MediaPlayer/MediaPlayer.h>
+
 
 #import "AVCamPreviewView.h"
 
@@ -84,9 +86,7 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-
-
+ 
     // Create the AVCaptureSession
     AVCaptureSession *session = [[AVCaptureSession alloc] init];
     [self setSession:session];
@@ -176,6 +176,23 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
         }
     });
     [self initialize];
+    
+    //9zai to hide the volume button---------
+    // these 4 lines of code tell the system that "this app needs to play sound/music"
+    AVAudioPlayer* temp = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"photoshutter.wav"]] error:NULL];
+    [temp prepareToPlay];
+    [temp stop];
+    
+    //make MPVolumeView Offscreen
+    CGRect frame = CGRectMake(-1000, -1000, 100, 100);
+    MPVolumeView *volumeView = [[MPVolumeView alloc] initWithFrame:frame];
+    [volumeView sizeToFit];
+    [self.view addSubview:volumeView];
+    //-----------------------
+    
+}
+//9zai volumeChange--------------------------------------
+- (void)volumeChange:(NSNotification *)notification{
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -195,6 +212,14 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
             });
         }]];
         [[self session] startRunning];
+        
+        //9zai volume button handler-----
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(snapStillImage:)
+         name:@"AVSystemController_SystemVolumeDidChangeNotification"
+         object:nil];
+        //--------
     });
 }
 
@@ -209,6 +234,13 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
         [self removeObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" context:CapturingStillImageContext];
         [self removeObserver:self forKeyPath:@"movieFileOutput.recording" context:RecordingContext];
     });
+    
+    //9zai close volume listner
+    [[NSNotificationCenter defaultCenter]
+     removeObserver:self
+     name:@"AVSystemController_SystemVolumeDidChangeNotification"
+     object:nil];
+
 }
 
 - (BOOL)prefersStatusBarHidden {
@@ -221,7 +253,7 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
 }
 
 - (NSUInteger)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskLandscape;
     // return UIInterfaceOrientationMaskPortrait;
 }
 
@@ -383,6 +415,7 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
 }
 
 - (IBAction)snapStillImage:(id)sender {
+    NSLog(@"snaping Still Image");
     dispatch_async([self sessionQueue], ^{
         // Update the orientation on the still image output video connection before capturing.
         [[[self stillImageOutput] connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:[[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] videoOrientation]];
@@ -631,6 +664,7 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    NSLog(@"test logging on rotation");
     if (params.bgImageData1) {
         isRotated = !isRotated;
         CGRect screenBounds = [[UIScreen mainScreen] bounds];
@@ -776,11 +810,12 @@ static void *SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevice
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-    return UIInterfaceOrientationPortrait;
+    return UIInterfaceOrientationLandscapeLeft;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation {
-    return orientation == UIDeviceOrientationPortrait;
+//    return orientation == UIDeviceOrientationPortrait;
+    return (orientation == UIInterfaceOrientationLandscapeLeft) || (orientation == UIInterfaceOrientationLandscapeRight);
 }
 
 #pragma mark -Scale image
