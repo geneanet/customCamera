@@ -3,10 +3,13 @@ package org.geneanet.customcamera;
 import XXX_NAME_CURRENT_PACKAGE_XXX.CameraActivity;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.Manifest;
 import android.util.Base64;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PermissionHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,16 +17,20 @@ import org.json.JSONObject;
 public class CameraLauncher extends CordovaPlugin {
 
   protected CallbackContext callbackContext;
+  protected Intent intent;
 
   protected static final int RESULT_SUCCESS = 1;
   protected static final int RESULT_ERROR = 2;
   protected static final int RESULT_BACK = 3;
+  protected static final int PERMISSION_DENIED_ERROR = 4;
 
   protected static final int REQUEST_CODE = 88224646;
+  protected static final int ALL_PERMISSIONS = 0;
+  protected final static String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE };
 
   /**
    * Execute the plugin.
-   * 
+   *
    * @param action Action executed.
    * @param args Parameters for the plugin.
    * @param callbackContext Context of callback.
@@ -35,8 +42,7 @@ public class CameraLauncher extends CordovaPlugin {
     if (action.equals("startCamera")) {
       this.callbackContext = callbackContext;
 
-      Intent intent = new Intent(this.cordova.getActivity(),
-          CameraActivity.class);
+      this.intent = new Intent(this.cordova.getActivity(), CameraActivity.class);
 
       if (args.getString(0) != "null") {
         byte[] imgBackgroundBase64;
@@ -70,29 +76,36 @@ public class CameraLauncher extends CordovaPlugin {
 
       // If we don't have a background image, disable miniature and opacity options.
       if (args.getString(0) == "null") {
-        intent.putExtra("miniature", false);
-        intent.putExtra("opacity", false);
+        this.intent.putExtra("miniature", false);
+        this.intent.putExtra("opacity", false);
       } else {
-        intent.putExtra("miniature", args.getBoolean(2));
-        intent.putExtra("opacity", args.getBoolean(7));
+        this.intent.putExtra("miniature", args.getBoolean(2));
+        this.intent.putExtra("opacity", args.getBoolean(7));
       }
-      
-      intent.putExtra("saveInGallery", args.getBoolean(3));
-      intent.putExtra("cameraBackgroundColor", args.getString(4));
-      intent.putExtra("cameraBackgroundColorPressed", args.getString(5));
+
+      this.intent.putExtra("saveInGallery", args.getBoolean(3));
+      this.intent.putExtra("cameraBackgroundColor", args.getString(4));
+      this.intent.putExtra("cameraBackgroundColorPressed", args.getString(5));
       if (args.getInt(6) >= 0 && args.getInt(6) <= 100) {
-        intent.putExtra("quality", args.getInt(6));
+        this.intent.putExtra("quality", args.getInt(6));
       }
-      intent.putExtra("startOrientation", this.cordova.getActivity().getResources().getConfiguration().orientation);
+      this.intent.putExtra("startOrientation", this.cordova.getActivity().getResources().getConfiguration().orientation);
 
-      intent.putExtra("defaultFlash", args.getInt(8));
-      intent.putExtra("switchFlash", args.getBoolean(9));
+      this.intent.putExtra("defaultFlash", args.getInt(8));
+      this.intent.putExtra("switchFlash", args.getBoolean(9));
 
-      intent.putExtra("defaultCamera", args.getInt(10));
-      intent.putExtra("switchCamera", args.getBoolean(11));
+      this.intent.putExtra("defaultCamera", args.getInt(10));
+      this.intent.putExtra("switchCamera", args.getBoolean(11));
 
-      cordova.startActivityForResult((CordovaPlugin) this, intent,
-          CameraLauncher.REQUEST_CODE);
+      boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
+      boolean saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+      if (!takePicturePermission || !saveAlbumPermission) {
+        // Request permissions if we don't have already.
+        PermissionHelper.requestPermissions(this, ALL_PERMISSIONS, permissions);
+      } else {
+        // Else, start the capture.
+        this.startCapture();
+      }
 
       return true;
     }
@@ -140,11 +153,11 @@ public class CameraLauncher extends CordovaPlugin {
   }
 
   /**
-   * Generate error in the plugin. 
-   * 
+   * Generate error in the plugin.
+   *
    * @param code Error code.
    * @param message Error message.
-   * 
+   *
    * @return a JSON Object.
    */
   protected JSONObject generateError(int code, String message) {
@@ -157,5 +170,38 @@ public class CameraLauncher extends CordovaPlugin {
     }
 
     return resultForPlugin;
+  }
+
+  /**
+   * Just start the capture.
+   */
+  protected void startCapture() {
+    cordova.startActivityForResult((CordovaPlugin) this, this.intent, CameraLauncher.REQUEST_CODE);
+  }
+
+  /**
+   * Callback to request a permission.
+   *
+   * @param int requestCode
+   * @param String[] permissions
+   * @param int[] grantResults
+   *
+   * @throws JSONException
+   */
+  public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+    for (int r : grantResults) {
+      if (r == PackageManager.PERMISSION_DENIED) {
+          // Permissions denied ? We stop the capture.
+          this.callbackContext.error(generateError(CameraLauncher.PERMISSION_DENIED_ERROR, intent.getStringExtra("Permissions refused")));
+          return;
+        }
+    }
+
+    switch (requestCode) {
+      case ALL_PERMISSIONS:
+        // All permissions granted, start the capture.
+        this.startCapture();
+        break;
+    }
   }
 }
