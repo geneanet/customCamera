@@ -103,6 +103,7 @@ An `options` object containing the parameters of the camera.
         + **Note :** Contains the error code.
             - **Code "2" :** Error while taking a picture.
             - **Code "3" :** Camera closed before takin a picture.
+            - **Code "4" :** Permissions denied.
     - **message :**
         + **Type :** `string`
         + **Note :** A error message.

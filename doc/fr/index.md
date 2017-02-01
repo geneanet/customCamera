@@ -102,6 +102,7 @@ La fonction `onFail` est appelée lorsque la prise de vue a échouée.
         + **Note :** Contient le code d'erreur.
             - **Code "2" :** Erreur lors de l'exécution de l'appareil photo.
             - **Code "3" :** L'utilisateur a fermé l'appareil photo sans prendre de photo.
+            - **Code "4" :** L'utilisateur a refusé une permission.
     - **message :**
         + **Type :** `string`
         + **Note :** Contient un message détaillant l'erreur.
