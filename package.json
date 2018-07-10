@@ -1,0 +1,23 @@
+{
+  "name": "cordovacustomcamera",
+  "version": "0.2.1",
+  "description": "Cordova plugin to start a customizable camera",
+  "main": "www/customCamera.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geneanet/customCamera"
+  },
+  "keywords": [
+    "cordova",
+    "camera"
+  ],
+  "author": "Christophe Boucaut",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/geneanet/customCamera/issues"
+  },
+  "homepage": "https://github.com/geneanet/customCamera#readme"
+}
