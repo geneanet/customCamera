@@ -15,8 +15,6 @@
         <clobbers target="navigator.GeneanetCustomCamera" />
     </js-module>
 
-    <dependency id="cordova-plugin-compat" version="^1.1.0" />
-
     <hook type="after_plugin_install" src="hooks/after_plugin_install/npminstall.js" />
 
     <platform name="android">
