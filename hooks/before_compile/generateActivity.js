@@ -12,8 +12,8 @@ var builder = new xml2js.Builder();
 
 // Define differents paths.
 var pathConfigXml = "config.xml";
-var pathAndroidCordova = "platforms/android/";
-var pathResAndroidCordova = "platforms/android/res/";
+var pathAndroidCordova = "platforms/android/app/src/main/";
+var pathResAndroidCordova = pathAndroidCordova+"res/";
 var pathAndroidPlugin = __dirname+"/../../src/android/";
 var pathResAndroidPlugin = pathAndroidPlugin+"customCamera/res/";
 var pathResPlugin = __dirname+"/../../res/";
@@ -42,13 +42,13 @@ var createClasses = function(packageName) {
         // Rewrite package of CameraActivity class.
         var contentCameraActivity = fs.readFileSync(pathCameraActivity, {encoding: "utf8"});
         contentCameraActivity = contentCameraActivity.replace(/^package\s[^;]*/,"package "+packageName);
-        fs.writeFileSync(pathAndroidCordova+"src/"+generatePathFrompackageName(packageName)+"/CameraActivity.java", contentCameraActivity);
+        fs.writeFileSync(pathAndroidCordova+"java/"+generatePathFrompackageName(packageName)+"/CameraActivity.java", contentCameraActivity);
 
         // Rewrite import of CameraLauncher class.
         var contentCameraLauncher = fs.readFileSync(pathCameraLauncher, {encoding: "utf8"});
         contentCameraLauncher = contentCameraLauncher.replace("XXX_NAME_CURRENT_PACKAGE_XXX", packageName);
         fs.writeFileSync(
-            pathAndroidCordova+"src/"+generatePathFrompackageName(contentCameraLauncher.match(/package\s([^;]*)/)[1])+"/CameraLauncher.java",
+            pathAndroidCordova+"java/"+generatePathFrompackageName(contentCameraLauncher.match(/package\s([^;]*)/)[1])+"/CameraLauncher.java",
             contentCameraLauncher
         );
     } else {
