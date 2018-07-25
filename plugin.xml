@@ -83,5 +83,18 @@
         <framework src="CoreAudio.framework" weak="true" />
         <framework src="CoreLocation.framework" weak="true" />
         <framework src="MobileCoreServices.framework" weak="true" />
+
+        <preference name="CAMERA_USAGE_DESCRIPTION" default="This app requires access to your camera to take pictures" />
+        <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+            <string>$CAMERA_USAGE_DESCRIPTION</string>
+        </config-file>
+        <preference name="MICROPHONE_USAGE_DESCRIPTION" default="This app requires access to your microphone to take pictures" />
+        <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
+            <string>$MICROPHONE_USAGE_DESCRIPTION</string>
+        </config-file>
+        <preference name="PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION" default="This app requires access to your photo library to save your pictures" />
+        <config-file target="*-Info.plist" parent="NSPhotoLibraryAddUsageDescription">
+            <string>$PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION</string>
+        </config-file>
     </platform>
 </plugin>
