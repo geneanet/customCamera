@@ -2,4 +2,5 @@
 <resources>
     <color name="black">#22000000</color>
     <color name="white">#ffffff</color>
+    <color name="cdv_splashscreen_background">#FFFFFF</color>
 </resources>
