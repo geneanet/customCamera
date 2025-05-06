@@ -5,6 +5,7 @@ import XXX_NAME_CURRENT_PACKAGE_XXX.CameraActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.Manifest;
+import android.os.Build;
 import android.util.Base64;
 
 import org.apache.cordova.CallbackContext;
@@ -26,7 +27,6 @@ public class CameraLauncher extends CordovaPlugin {
 
   protected static final int REQUEST_CODE = 88224646;
   protected static final int ALL_PERMISSIONS = 0;
-  protected final static String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE };
 
   /**
    * Execute the plugin.
@@ -98,7 +98,18 @@ public class CameraLauncher extends CordovaPlugin {
       this.intent.putExtra("switchCamera", args.getBoolean(11));
 
       boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
-      boolean saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+      boolean saveAlbumPermission;
+      String[] permissions;
+
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        // READ_EXTERNAL_STORAGE only asked if Android version < 11
+        saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        permissions = new String[] { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE };
+      } else {
+        saveAlbumPermission = false;
+        permissions = new String[] { Manifest.permission.CAMERA };
+      }
+
       if (!takePicturePermission || !saveAlbumPermission) {
         // Request permissions if we don't have already.
         PermissionHelper.requestPermissions(this, ALL_PERMISSIONS, permissions);
